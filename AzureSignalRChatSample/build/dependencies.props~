@@ -1,0 +1,13 @@
+﻿<Project>
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+  <PropertyGroup Label="Package Versions">
+    <MicrosoftAspNetCorePackageVersion>2.1.0-rc1-30677</MicrosoftAspNetCorePackageVersion>
+    <MicrosoftAspNetCoreSignalRCorePackageVersion>1.0.0-rc1-30677</MicrosoftAspNetCoreSignalRCorePackageVersion>
+    <MicrosoftAzureSignalRPackageVersion>1.0.0-preview-10004</MicrosoftAzureSignalRPackageVersion>
+    <MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion>2.1.0-preview2-final</MicrosoftVisualStudioWebCodeGenerationDesignPackageVersion>
+    <NewtonsoftJsonPackageVersion>11.0.2</NewtonsoftJsonPackageVersion>
+  </PropertyGroup>
+  <Import Project="$(DotNetPackageVersionPropsPath)" Condition=" '$(DotNetPackageVersionPropsPath)' != '' " />
+</Project>
