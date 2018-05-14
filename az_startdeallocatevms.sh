@@ -6,7 +6,9 @@
 
 function start_vms() {
   local res_grp=$1
+  local vm_list="$2"
   local stats
+  local starting="0"
   for i in $vm_list
   do
      stats=`az vm get-instance-view --name ${i} -g ${res_grp} --query instanceView.statuses[1].displayStatus`
@@ -15,12 +17,18 @@ function start_vms() {
      then
         echo "VM is stopped, and it will be started"
         az vm start -g ${res_grp} -n "${i}"
+        starting="1"
      fi
   done
+  if [ "$starting" == "1" ]
+  then
+     sleep 120
+  fi
 }
 
 function deallocate_vms() {
   local res_grp=$1
+  local vm_list="$2"
   local stats
   for i in $vm_list
   do
