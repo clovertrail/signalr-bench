@@ -306,10 +306,10 @@ cat << _EOF > $remote_run
 #!/bin/bash
 #automatic generated script
 echo "0" > $status_file # flag indicates not finish
-ssh -p $port ${user}@${server} "cd $sigbench_home; sh $script_name"
+ssh -p $port ${user}@${server} "cd $sigbench_home; sh $script_name" 2>&1|tee -a ${result_dir}/${script_name}.log
 echo "1" > $status_file # flag indicates finished
 _EOF
-	nohup sh $remote_run |tee ${result_dir}/${script_name}.log  &
+	nohup sh $remote_run &
 }
 
 function check_single_agent() {
