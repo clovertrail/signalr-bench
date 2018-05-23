@@ -1,0 +1,656 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MdmConfigUtility</name>
+    </assembly>
+    <members>
+        <member name="T:MdmConfigUtility.AccountCertManager">
+            <summary>
+            The class for managing certificates of a monitoring account.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.AccountCertManager.ManageAuthorizedCerts(MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Manages the authorized certs for a monitoring account.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>0 on success; 1 otherwise.</returns>
+        </member>
+        <member name="T:MdmConfigUtility.CommandLineArguments">
+            <summary>
+            Command line options for MdmConfigUtility.exe.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Download">
+            <summary>
+            Gets a value indicating whether to download configurations.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Upload">
+            <summary>
+            Gets a value indicating whether to upload configurations.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.ApplyTemplateFile">
+            <summary>
+            Gets a value indicating whether to apply a configuration template to all metrics or a given metric under an account or a namespace.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.ModifyConfigFiles">
+            <summary>
+            Gets a value indicating whether [modify configuration files].
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.ReplaceAuthorizedCerts">
+            <summary>
+            Gets a value indicating whether [replace authorized certs].
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.AddOrRemoveAuthorizedCert">
+            <summary>
+            Gets a value indicating whether to add/remove an authorized cert to an account.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.RunWithParameterFile">
+            <summary>
+            Gets a value indicating whether [run with parameter file].
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.IncrementVersion">
+            <summary>
+            Gets a value indicating whether [increment version by 1] for local configuration files.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.ReplaceAccountNameWith">
+            <summary>
+            Gets the account name to replace with for local configuration files.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.ReplaceNamespaceWith">
+            <summary>
+            Gets the metric namespace to replace with for local configuration files.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Metrics">
+            <summary>
+            Gets a value indicating whether this <see cref="T:MdmConfigUtility.CommandLineArguments"/> is metrics config.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Monitors">
+            <summary>
+            Gets a value indicating whether this <see cref="T:MdmConfigUtility.CommandLineArguments"/> is monitors config.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Topology">
+            <summary>
+            Gets a value indicating whether this <see cref="T:MdmConfigUtility.CommandLineArguments"/> is topology config.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.ResourceType">
+            <summary>
+            Gets a value indicating whether this <see cref="T:MdmConfigUtility.CommandLineArguments"/> is resource types config.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Account">
+            <summary>
+            Gets the monitoring account.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Namespace">
+            <summary>
+            Gets the metric namespace.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.MetricName">
+            <summary>
+            Gets the name of the metric.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.ResourceTypeName">
+            <summary>
+            Gets the name of the resource type. Currently used only in /Download
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.MetricNameRegexFilter">
+            <summary>
+            Gets the metric name regex filter.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Folder">
+            <summary>
+            Gets the folder path, either relative to this assembly or absolute.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.File">
+            <summary>
+            Gets the file path, either relative to this assembly or absolute.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Endpoint">
+            <summary>
+            Gets the MDM endpoint.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.MdmEnvironment">
+            <summary>
+            Gets the MDM environment.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.CertThumbprint">
+            <summary>
+            Gets the cert thumbprint for the certificate used to talk to MDM endpoint.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.CertThumbprintToAdd">
+            <summary>
+            Gets the cert thumbprint for the certificate to add to an account.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.CertThumbprintToRemove">
+            <summary>
+            Gets the cert thumbprint for the certificate to remove from an account.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.CertStore">
+            <summary>
+            Gets the cert store for the certificate used to talk to MDM endpoint.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Force">
+            <summary>
+            Gets a value indicating whether to forcefully apply the configuration, overwriting the existing configuration if exists.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.AllowMinMaxSamplingTypeInTemplate">
+            <summary>
+            Gets a value indicating whether to allow min/max sampling types in templates.
+            </summary>
+            <remarks>We don't want to allow min/max in templates by default - customers have to ask and we then tell them to use this flag.</remarks>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.DownloadEmptyMetricConfig">
+            <summary>
+            Gets a value indicating whether to download empty metric configurations which are generated on the fly by the metrics server.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.WhatIf">
+            <summary>
+            Gets a value indicating whether to show the projected changes without making the changes.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.Role">
+            <summary>
+            Get the role name for the cert to be added or updated.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.CommandLineArguments.MaxFileNameProducedLength">
+            <summary>
+            Gets the maximum size of the file name that will be created locally when downloading configurations.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.CommandLineArguments.Validate">
+            <summary>
+            Validates the set of command line options once they have all been read.
+            </summary>
+            <exception cref="T:System.ApplicationException">If the options are invalid.</exception>
+        </member>
+        <member name="T:MdmConfigUtility.ConfigTemplateManager">
+            <summary>
+            The class for applying a configuration template file to many metrics. 
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.ConfigTemplateManager.ApplyTemplate(MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Applies the configuration template to many metrics.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>0 on success; 1 otherwise.</returns>
+        </member>
+        <member name="T:MdmConfigUtility.ConfigFileMutator">
+            <summary>
+            The class for modifyinig local configuration files.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.ConfigFileMutator.ModifyConfigFiles(MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Modifies the local configuration files.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>0 on success; 1 otherwise.</returns>
+        </member>
+        <member name="M:MdmConfigUtility.ConfigFileMutator.ModifyEventConfiguration(MdmConfigUtility.CommandLineArguments,System.String,System.String,System.Int32@)">
+            <summary>
+            Modify the metrics and monitor configuration in <see cref="T:Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration"/>.
+            </summary>
+            <param name="commandLineArgs"> The commandline arguments.</param>
+            <param name="content"> The contents of the file.</param>
+            <param name="file"> The path to the file.</param>
+            <param name="exitCode"> The exit code of the operation.</param>
+        </member>
+        <member name="M:MdmConfigUtility.ConfigFileMutator.ModifyTopologyConfiguration(MdmConfigUtility.CommandLineArguments,System.String,System.String,System.Int32@)">
+            <summary>
+            Modify the topology configuration.
+            </summary>
+            <param name="commandLineArgs"> The commandline arguments.</param>
+            <param name="content"> The contents of the file.</param>
+            <param name="file"> The path to the file.</param>
+            <param name="exitCode"> The exit code of the operation.</param>
+        </member>
+        <member name="M:MdmConfigUtility.ConfigFileMutator.ModifyResourceTypeConfiguration(MdmConfigUtility.CommandLineArguments,System.String,System.String,System.Int32@)">
+            <summary>
+            Modify the resource type configuration.
+            </summary>
+            <param name="commandLineArgs"> The commandline arguments.</param>
+            <param name="content"> The contents of the file.</param>
+            <param name="file"> The path to the file.</param>
+            <param name="exitCode"> The exit code of the operation.</param>
+        </member>
+        <member name="T:MdmConfigUtility.Helpers.ConfigHelper">
+            <summary>
+            The helper class for configuration files.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.GetConfig``1(System.Net.Http.HttpClient,System.String,System.String,``0@,System.Boolean@)">
+            <summary>
+            Gets a value indicating if the configuration of <typeparamref name="T"/> was downloaded.
+            </summary>
+            <typeparam name="T">The type of the configuration to expect.</typeparam>
+            <param name="httpClient">The <see cref="T:System.Net.Http.HttpClient"/> instance.</param>
+            <param name="url">The url to download the configuration from.</param>
+            <param name="configType">The type of the configuration.</param>
+            <param name="configuration">The configuration that was downloaded.</param>
+            <param name="notFound">A value indicating if the server returned <see cref="F:System.Net.HttpStatusCode.NotFound"/>.</param>
+            <returns>
+            A value indicating if the configuration of <typeparamref name="T"/> was downloaded.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.PostConfig(System.Net.Http.HttpClient,System.String,System.Object,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}},System.String,System.Boolean)">
+            <summary>
+            Gets a value indicating if the configuration of <paramref name="configType" /> was uploaded.
+            </summary>
+            <param name="httpClient">The <see cref="T:System.Net.Http.HttpClient" /> instance.</param>
+            <param name="url">The URL to upload configuration.</param>
+            <param name="httpContent">The configuration object used as HTTP content.</param>
+            <param name="httpHeaders">Additional HTTP headers.</param>
+            <param name="configType">The type of the configuration.</param>
+            <param name="whatIf">A value indicating if this is a WhatIf execution.</param>
+            <returns>
+            A value indicating if the configuration of <paramref name="configType" /> was uploaded.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.ConstructDownloadUrl(MdmConfigUtility.CommandLineArguments,Microsoft.Cloud.Metrics.Client.ConnectionInfo,System.String,System.String,System.String,System.String)">
+            <summary>
+            Constructs the metrics or monitors or topology download URL.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <param name="connectionInfo">The connection information.</param>
+            <param name="monitoringAccount">The monitoring account.</param>
+            <param name="metricNamespace">The metric namespace.</param>
+            <param name="metric">The metric.</param>
+            <returns>
+            The metrics or monitors or topology download URL.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.ConstructUploadUrl(MdmConfigUtility.CommandLineArguments,Microsoft.Cloud.Metrics.Client.ConnectionInfo,System.String,System.String,System.String,System.String)">
+            <summary>
+            Constructs the metrics or monitors or topology upload URL.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <param name="connectionInfo">The connection information.</param>
+            <param name="monitoringAccount">The monitoring account.</param>
+            <param name="metricNamespace">The metric namespace.</param>
+            <param name="metric">The metric.</param>
+            <returns>
+            The metrics or monitors or topology upload URL.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.GetConfigType(MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Gets the config type being processed.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>
+            The config type being processed.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.GetProperty``1(System.String,Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            Get the deserialized property value for <paramref name="propertyName"></paramref>.
+            </summary>
+            <typeparam name="T">
+            The type to be deserialized.
+            </typeparam>
+            <param name="propertyName">
+            The name of the property to search for.
+            </param>
+            <param name="jObject">
+            The <see cref="T:Newtonsoft.Json.Linq.JObject"/> instance.
+            </param>
+            <returns>
+            The deserialized property value for <paramref name="propertyName"></paramref>.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.CreateConnectionInfoInstance(MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Creates the connection information instance.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>An instance of <see cref="T:Microsoft.Cloud.Metrics.Client.ConnectionInfo"/></returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.DownloadSingleConfig(System.Net.Http.HttpClient,System.String,System.String@)">
+            <summary>
+            Downloads a single configuration.
+            </summary>
+            <param name="httpClient">The HTTP client.</param>
+            <param name="url">The url to download from.</param>
+            <param name="config">The downloaded configuration.</param>
+            <returns>The HTTP status code.</returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigHelper.UploadSingleConfig(System.Net.Http.HttpClient,System.String,System.Object,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}},System.String,System.Boolean)">
+            <summary>
+            Uploads a single configuration.
+            </summary>
+            <param name="httpClient">The HTTP client.</param>
+            <param name="url">The URL to upload configuration.</param>
+            <param name="httpContent">The configuration object used as HTTP content.</param>
+            <param name="httpHeaders">Additional HTTP headers.</param>
+            <param name="configType">The type of config.</param>
+            <param name="whatIf">A value indicating if this is a WhatIf.</param>
+            <returns>
+            The HTTP status code.
+            </returns>
+        </member>
+        <member name="T:MdmConfigUtility.Helpers.ConfigFileValidator">
+            <summary>
+            The validator class for configuration files.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigFileValidator.ValidateConfigFromFile(MdmConfigUtility.CommandLineArguments,Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration)">
+            <summary>
+            Validates the configuration from file to see if they contain the expected configuration for the command in question.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <param name="metricConfigFromFile">The metric configuration from file.</param>
+            <returns>True if passing validation; false otherwise.</returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigFileValidator.ValidateTopologyConfigFromFile(MdmConfigUtility.CommandLineArguments,Microsoft.Online.RecoveryService.Contract.Models.TopologyConfiguration)">
+            <summary>
+            Validates the configuration from file to see if they contain the expected configuration for the command in question.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <param name="topologyConfigurationFromFile">The topology configuration from file.</param>
+            <returns>True if passing validation; false otherwise.</returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.ConfigFileValidator.ValidateResourceTypeConfigFromFile(MdmConfigUtility.CommandLineArguments,Microsoft.Online.RecoveryService.Contract.Models.ResourceTypeConfiguration)">
+            <summary>
+            Validates the configuration from file to see if they contain the expected configuration for the command in question.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <param name="configurationFromFile">The resource type configuration from file.</param>
+            <returns>True if passing validation; false otherwise.</returns>
+        </member>
+        <member name="T:MdmConfigUtility.Helpers.FileNamePathHelper">
+            <summary>
+            The helper class for file names and paths.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Helpers.FileNamePathHelper.JsonFileExtension">
+            <summary>
+            The json file extension.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Helpers.FileNamePathHelper.JsFileExtension">
+            <summary>
+            The javascript file extension.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Helpers.FileNamePathHelper.MaximumFileNameAllowed">
+            <summary>
+            The default maximum file name allowed.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Helpers.FileNamePathHelper.SortedInvalidFileChars">
+            <summary>
+            The sorted invalid file chars.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.FileNamePathHelper.#cctor">
+            <summary>
+            Initializes the <see cref="T:MdmConfigUtility.Helpers.FileNamePathHelper"/> class.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.FileNamePathHelper.ConstructValidFileName(System.String,System.String,System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Constructs the name of the valid file by joining the provided parameters with "_" while replacing invalid chars with "^".
+            </summary>
+            <param name="monitoringAccount">The monitoring account.</param>
+            <param name="metricNamespace">The metric namespace.</param>
+            <param name="metric">The metric.</param>
+            <param name="monitorId">The monitor identifier.</param>
+            <param name="fileExtension">The file extension.</param>
+            <param name="maximumFileNameAllowed">The maximum length of the file name that will be returned.</param>
+            <returns>
+            A valid file name.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.FileNamePathHelper.ConstructValidFileName(System.String,System.Int32)">
+            <summary>
+            Constructs the name of the valid file by joining the provided parameters with "_" while replacing invalid chars with "^".
+            </summary>
+            <param name="monitoringAccount">The monitoring account.</param>
+            <param name="maximumFileNameAllowed">The maximum length of the file name that will be returned.</param>
+            <returns>
+            A valid file name.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.FileNamePathHelper.ConstructCustomMonitorJsFileName(Microsoft.Online.Metrics.Common.EventConfiguration.EventIdentifier,System.String,System.Int32)">
+            <summary>
+            Constructs the name of javascript file name for a customer monitor.
+            </summary>
+            <param name="metricId">The metric identifier.</param>
+            <param name="monitorId">The monitor identifier.</param>
+            <param name="maximumFileNameAllowed">The maximum length of the file name that will be returned.</param>
+            <returns>
+            A valid javascript file name.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.FileNamePathHelper.AppendShortedFilePart(System.Text.StringBuilder,System.String,System.Int32,System.Int32@)">
+            <summary>
+            Appends the shorted file part to the final string.
+            </summary>
+            <param name="builder">The builder containing the final string.</param>
+            <param name="value">The value to add to the string.</param>
+            <param name="totalAllowedLength">Total length of the final string allowed.</param>
+            <param name="partsRemaining">The parts remaining that will be added to the final string.</param>
+        </member>
+        <member name="T:MdmConfigUtility.Helpers.TransformOptions">
+            <summary>
+            Options to transform between custom monitor snippet in configuration and separate javascript files.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Helpers.TransformOptions.GenerateJsFile">
+            <summary>
+            Option to generate javascript file.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Helpers.TransformOptions.LoadFromJsFile">
+            <summary>
+            option to load from javascript file.
+            </summary>
+        </member>
+        <member name="T:MdmConfigUtility.Helpers.JScriptSnippetHelper">
+            <summary>
+            Helper functions to transform the javascript snippet.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Helpers.JScriptSnippetHelper.JScriptSnippetFileRef">
+            <summary>
+            The javascript snippet file reference.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.JScriptSnippetHelper.TransformJScriptSnippet(Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration,MdmConfigUtility.Helpers.TransformOptions,System.String,System.Int32)">
+            <summary>
+            Transforms the javascript snippet from single-lined to multi-lined and vice versa.
+            </summary>
+            <param name="metricConfig">The monitor configurations.</param>
+            <param name="transformOptions">The transform options.</param>
+            <param name="folder">The folder for the javascript file.</param>
+            <param name="fileNameLength">The max file name length to produce.</param>
+        </member>
+        <member name="T:MdmConfigUtility.Helpers.VersionComparer">
+            <summary>
+            The comparer class for configuration versions. 
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.VersionComparer.CompareVersionWithServer(MdmConfigUtility.CommandLineArguments,Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration,Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration)">
+            <summary>
+            Compares the configuration versions from the file with those on the server.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <param name="metricConfigFromFile">The metric configuration from file.</param>
+            <param name="eventConfigurationOnServer">The event configuration on server.</param>
+            <returns>
+            1 if configuration from file has a higher version number, -1 if lower, and 0 if identical.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.VersionComparer.CompareMetricsVersionWithServer(Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration,Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration)">
+            <summary>
+            Compares the metrics version with server.
+            </summary>
+            <param name="metricConfigFromFile">The metric configuration from file.</param>
+            <param name="eventConfigurationOnServer">The event configuration on server.</param>
+            1 if configuration from file has a higher version number, -1 if lower, and 0 if identical.
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.VersionComparer.CompareMonitorsVersionWithServer(Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration,Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration)">
+            <summary>
+            Compares the monitors versions with those from server.
+            </summary>
+            <param name="metricConfigFromFile">The metric configuration from file.</param>
+            <param name="eventConfigurationOnServer">The event configuration on server.</param>
+            <returns>
+            1 if at least one monitor configurations from file have a higher version number and no monitor has a lower version number,
+            -1 if any monitor from file has a lower version number,
+            and 0 if all monitors have identical version numbers as those on server.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.VersionComparer.CompareTopologyVersionWithServer(Microsoft.Online.RecoveryService.Contract.Models.TopologyConfiguration,Microsoft.Online.RecoveryService.Contract.Models.TopologyConfiguration)">
+            <summary>
+            Compares the version with server.
+            </summary>
+            <param name="configFromFile">The configuration from file.</param>
+            <param name="configurationOnServer">The configuration on server.</param>
+            1 if configuration from file has a higher version number, -1 if lower, and 0 if identical.
+        </member>
+        <member name="M:MdmConfigUtility.Helpers.VersionComparer.CompareResourceTypeVersionWithServer(Microsoft.Online.RecoveryService.Contract.Models.ResourceTypeConfiguration,Microsoft.Online.RecoveryService.Contract.Models.ResourceTypeConfiguration)">
+            <summary>
+            Compares the version with server.
+            </summary>
+            <param name="configFromFile">The configuration from file.</param>
+            <param name="configurationOnServer">The configuration on server.</param>
+            1 if configuration from file has a higher version number, -1 if lower, and 0 if identical.
+        </member>
+        <member name="T:MdmConfigUtility.Logger">
+            <summary>
+            The Logger class. 
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.Logger.loggingCallback">
+            <summary>
+            The default logging callback.
+            </summary>
+        </member>
+        <member name="P:MdmConfigUtility.Logger.LoggingCallback">
+            <summary>
+            Gets or sets the logging callback for customers to consume the utility directly from C# code.
+            The first parameter is the message to log, and the second indicates if it is an error message,
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Logger.LogError(System.String)">
+            <summary>
+            Logs the error message.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:MdmConfigUtility.Logger.LogInfo(System.String)">
+            <summary>
+            Logs the informational message.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="T:MdmConfigUtility.MdmConfigDownloader">
+            <summary>
+            The class for downloading configurations. 
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.MdmConfigDownloader.jsonCamelCasingSerializerSettings">
+            <summary>
+            The json serializer settings with camel casing.
+            </summary>
+        </member>
+        <member name="F:MdmConfigUtility.MdmConfigDownloader.DefaultMd5Hash">
+            <summary>
+            The default MD5 hash.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.MdmConfigDownloader.DownloadConfig(MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Downloads the metrics or monitors configurations.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>0 on success; 1 otherwise.</returns>
+        </member>
+        <member name="T:MdmConfigUtility.MdmConfigUploader">
+            <summary>
+            The class for uploading configurations.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.MdmConfigUploader.UploadConfig(MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Uploads the metrics or monitors configuration.
+            </summary>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>0 on success; 1 otherwise.</returns>
+        </member>
+        <member name="M:MdmConfigUtility.MdmConfigUploader.GetEventConfiguration(Microsoft.Online.Metrics.Common.EventConfiguration.EventIdentifier,System.String,System.Net.Http.HttpClient,Microsoft.Online.Metrics.Common.EventConfiguration.EventConfiguration@)">
+            <summary>
+            Get event configuration.
+            </summary>
+            <param name="eventIdentifier">An instance of <see cref="T:Microsoft.Online.Metrics.Common.EventConfiguration.EventIdentifier" /></param>
+            <param name="endpoint">The endpoint.</param>
+            <param name="httpClient">The HTTP client.</param>
+            <returns>
+            null on failure; otherwise the event configuration.
+            </returns>
+        </member>
+        <member name="M:MdmConfigUtility.MdmConfigUploader.GetAcisTokensAsHeaders(System.Collections.Generic.List{Microsoft.Online.RecoveryService.Contract.Models.ResourceTypeConfiguration},Microsoft.Cloud.Metrics.Client.ConnectionInfo)">
+            <summary>
+            Checks the ActionConfigurations for type AcisOperation, gets the Acis environments and
+            authenticates against each of them to pass the authentication token to the front-end.
+            </summary>
+            <param name="resourceTypeConfigurations">resourcetype configurations</param>
+            <param name="connectionInfo">The connection info for cert-based auth scenarios.</param>
+            <returns>The ACIS tokens as headers.</returns>
+            <remarks>This is needed because the front end will then validate that the user has access to use the
+            extension and operations in health system.</remarks>
+        </member>
+        <member name="T:MdmConfigUtility.Program">
+            <summary>
+            The class for this utility.
+            </summary>
+        </member>
+        <member name="M:MdmConfigUtility.Program.Main(System.String[])">
+            <summary>
+            The entry point of the utility.
+            </summary>
+            <param name="args">The arguments.</param>
+            <returns>0 on success; 1 otherwise.</returns>
+        </member>
+        <member name="M:MdmConfigUtility.Program.ParseArguments(System.String[],MdmConfigUtility.CommandLineArguments)">
+            <summary>
+            Parses the arguments.
+            </summary>
+            <param name="args">The arguments.</param>
+            <param name="commandLineArgs">The command line arguments.</param>
+            <returns>null on success; non-null otherwise.</returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AlertEnrichment.Contracts</name>
+    </assembly>
+    <members>
+        <!-- Badly formed XML comment ignored for member "T:AlertEnrichment.Contracts.DGrepQueryProcessorSettings" -->
+        <member name="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.ReferenceTime">
+            <summary>The end time for the data to be queried</summary>
+            <example>2017-07-11 14:52:00Z</example>
+            <remarks>target type: DateTimeOffset</remarks>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.Stepback" -->
+        <member name="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.Lookback">
+            <summary>Lookback from actual endTime for the data to be queried.</summary>
+            <remarks>startTime=<see cref="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.ReferenceTime"/> - <see cref="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.Stepback"/> - <see cref="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.Lookback"/></remarks>
+            <example>00:05:00</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.ServerQuery">
+            <summary>Dgrep server query</summary>
+            <example>where Level == 2</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.MaxRowCount">
+            <summary>DGrep max row count to query from server</summary>
+            <example>15</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.ClientQuery">
+            <summary>DGrep client (cache) query</summary>
+            <example>groupby Category let count=count()</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.Metadata">
+            <summary>Custom Metadata to be passed to result ({Output.Metadata})</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.DGrepQueryProcessorSettings.Output">
+            <summary>The target property name for the results</summary>
+            <example>Output: {Name: MyDGrepQueryResults}</example>
+            <remarks>Output is of type <see cref="!:DataQueryProcessorResult"/></remarks>
+        </member>
+        <member name="F:AlertEnrichment.Contracts.EnrichmentSettings.DateTimeFormat">
+            <summary>
+            Format for LastUpdateTime DateTime
+            </summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.EnrichmentSettings.LastUpdateTime">
+            <summary>
+            Gets or sets the last update time in UTC.
+            </summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.EnrichmentSettings.LastUpdatedBy">
+            <summary>
+            Gets or sets the user who made the last update.
+            </summary>
+        </member>
+        <member name="T:AlertEnrichment.Contracts.FormatterProcessorSettings">
+            <summary>Formatter processor settings. Formatter processor will output FormattedMessage.</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.FormatterProcessorSettings.Text">
+            <summary>The text to be formatted</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.FormatterProcessorSettings.Output">
+            <summary>The target property name for the results</summary>
+            <example>Output: {Name: MyFormattedResult}</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.IfElseProcessorSettings.Expression">
+            <summary>The expression to evaluate</summary>
+            <example>{ConnectorRequest.Properties.Monitor.Metrics} == null</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.IfElseProcessorSettings.IfTrueProcessors">
+            <summary>
+            The block of processors to execute if the condition was evaluated to true
+            </summary>
+            <example>[ {MDMQueryProcessor} </example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.IfElseProcessorSettings.ElseProcessors">
+            <summary>
+            The block of processors to execute if the condition was evaluated to false
+            </summary>
+            <example>[ {MDMQueryProcessor} </example>
+        </member>
+        <member name="T:AlertEnrichment.Contracts.IncludeTemplateSettings">
+            <summary>The template which allows to include other templates</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.IncludeTemplateSettings.SourceTemplateName">
+            <summary>The name of the template to be included</summary>
+        </member>
+        <member name="T:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings">
+            <summary>Jarvis dashboard query processor settings</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.JarvisEndpoint">
+            <summary>The jarvis hosting endpoint</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.AccountName">
+            <summary>Gets or sets the account where the dashboard is saved</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Namespace">
+            <summary>Gets or sets the namespace where the dashboard is saved</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Name">
+            <summary>Gets or sets the name where the dashboard is saved</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.DimensionOverridesJson">
+            <summary>Dimensions to be overridden with values</summary>
+            <example>{{"Dim1": "Val1"}}</example>
+            <example>{customLink.DimensionOverridesJson}</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.ReferenceTime">
+            <summary>The end time for the data to be queried</summary>
+            <example>2017-07-11 14:52:00Z</example>
+            <remarks>target type: DateTimeOffset</remarks>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Stepback" -->
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Lookback">
+            <summary>Lookback from actual endTime for the data to be queried.</summary>
+            <remarks>startTime=<see cref="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.ReferenceTime"/> - <see cref="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Stepback"/> - <see cref="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Lookback"/></remarks>
+            <example>00:05:00</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.RendererCanvasWidthInPixels">
+            <summary>The renderer canvas width in pixels</summary>
+            <example>"1024"</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Metadata">
+            <summary>Custom Metadata to be passed to result ({Output.Metadata})</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.JarvisDashboardQueryProcessorSettings.Output">
+            <summary>The target property name for the results</summary>
+            <example>Output: {Name: MyDashboardQueryResults}</example>
+        </member>
+        <member name="T:AlertEnrichment.Contracts.KustoQueryProcessorSettings">
+            <summary>Kusto query processor settings</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.KustoEndpoint">
+            <summary>Kusto endpoint (cluster)</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Database">
+            <summary>Kusto Database</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.ReferenceTime">
+            <summary>The end time for the data to be queried</summary>
+            <example>2017-07-11 14:52:00Z</example>
+            <remarks>target type: DateTimeOffset</remarks>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Stepback" -->
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Lookback">
+            <summary>Lookback from actual endTime for the data to be queried.</summary>
+            <remarks>startTime=<see cref="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.ReferenceTime"/> - <see cref="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Stepback"/> - <see cref="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Lookback"/></remarks>
+            <example>00:05:00</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Query">
+            <summary>Kusto server query</summary>
+            <example>where Level == 2</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.MaxRowCount">
+            <summary>Max row count to query from server</summary>
+            <example>15</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Metadata">
+            <summary>Custom Metadata to be passed to result ({Output.Metadata})</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.KustoQueryProcessorSettings.Output">
+            <summary>The target property name for the results</summary>
+            <example>Output: {Name: MyKustoQueryResults}</example>
+            <remarks>Output is of type <see cref="!:DataQueryProcessorResult"/></remarks>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MqlProcessorSettings.Output">
+            <summary>The target property name for the results</summary>
+            <example>Output: {Name: MyMqlQueryResults}</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.ParallelForEachProcessorSettings.CollectionSource">
+            <summary>The collection to be enumerated</summary>
+            <example>{ConnectorRequest.Properties.Monitor.Metrics}</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.ParallelForEachProcessorSettings.ItemName">
+            <summary>The variable name to be set for each element and used in each cycle</summary>
+            <example>metric</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.ParallelForEachProcessorSettings.Processors">
+            <summary>
+            The block of processors to execute
+            </summary>
+            <example>[ {MDMQueryProcessor, } </example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.ParallelForEachProcessorSettings.OutputItemName">
+            <summary>
+            The each processor's output name to be collected into ParallelForEach output
+            </summary>
+            <example>MdmResult</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.ParallelForEachProcessorSettings.Output">
+            <summary>The target property name for the results</summary>
+            <example>Output: {Name: MyMqlQueryResults}</example>
+        </member>
+        <member name="T:AlertEnrichment.Contracts.ProcessorOutput">
+            <summary>Processor outupt details</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.ProcessorOutput.Name">
+            <summary>The name used in the property bag for the processor output</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.MdmEndpoint">
+            <summary>MdmEndpoint uri. The <see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.MdmEndpoint"/> takes precedence over <see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.MdmEnvironment"/></summary>
+            <example>https://az-prod.metrics.nsatc.net</example>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.MdmEnvironment" -->
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Account">
+            <example>AD ROCS</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Namespace">
+            <summary>RecoveryService/V2</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Metric">
+            <example>RecoveryGatewayAvailability/Success</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.SamplingType">
+            <example>Sum</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.DimensionFiltersJson">
+            <example>
+            {inlcude: {"Datacenter", ["EastUS2"]}, {"Operation", ["RecoveryGatewayService::SubmitSerializedWatchdogHealthReportInternal"]},
+             exclude: {}}
+            </example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.ReferenceTime">
+            <summary>The end time for the data to be queried</summary>
+            <example>2017-07-11 14:52:00Z</example>
+            <remarks>target type: DateTimeOffset</remarks>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Stepback" -->
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Lookback">
+            <summary>Lookback from actual endTime for the data to be queried.</summary>
+            <remarks>startTime=<see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.ReferenceTime"/> - <see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Stepback"/> - <see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Lookback"/></remarks>
+            <example>00:05:00</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.StartTime">
+            <summary>Start time for the data to be queried. If not set, startTime=<see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.ReferenceTime"/> - <see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Stepback"/> - <see cref="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Lookback"/></summary>
+            <example>null</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.MDMQueryProcessorSettings.Output">
+            <summary>The target property name for the results</summary>
+            <example>Output: {Name: MyMDMQueryResults}</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.TimeseriesDefinition.MdmEndpoint">
+            <example>https://east.az-prod.metrics.nsatc.net</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.TimeseriesDefinition.MdmEnvironment">
+            <example>Productions|Int</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.TimeseriesDefinition.Account">
+            <example>AD ROCS</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.TimeseriesDefinition.Namespace">
+            <summary>RecoveryService/V2</summary>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.TimeseriesDefinition.Metric">
+            <example>RecoveryGatewayAvailability/Success</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.TimeseriesDefinition.SamplingType">
+            <example>Sum</example>
+        </member>
+        <member name="P:AlertEnrichment.Contracts.TimeseriesDefinition.DimensionValuesJson">
+            <example>[{key: "Datacenter", value: "EastUS2"}, {key: "Operation", value: "RecoveryGatewayService::SubmitSerializedWatchdogHealthReportInternal"}]</example>
+        </member>
+    </members>
+</doc>

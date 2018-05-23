@@ -1,0 +1,1621 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Online.Metrics.Serialization</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitAggregateMagic">
+            <summary>
+            The Aggregate Magic Algorithms adapted from @ http://aggregate.org/MAGIC/
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitAggregateMagic.CountOneBits(System.UInt64)">
+            <summary>
+            Counts the number of set bits in <paramref name="x"/>.
+            </summary>
+            <param name="x">The target for which to count the number of set bits.</param>
+            <returns>The number of set bits in <paramref name="x"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitAggregateMagic.CountLeadingZeros(System.Int64)">
+            <summary>
+            Counts the number of leading zeros.
+            </summary>
+            <param name="x">The target for which to count the number of leading zeros.</param>
+            <returns>The number of leading zeros.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitAggregateMagic.CountTrailingZeros(System.Int64)">
+            <summary>
+            Counts the number of trailing zeros.
+            </summary>
+            <param name="x">The target for which to count the number of trailing zeros.</param>
+            <returns>The number of trailing zeros.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitAggregateMagic.NextLargestPowerOf2(System.Int32)">
+            <summary>
+            Given a binary integer value x, the next largest power of 2 can be computed by a SWAR 
+            algorithm that recursively "folds" the upper bits into the lower bits. 
+            This process yields a bit vector with the same most significant 1 as x, but all 1's below it. 
+            Adding 1 to that value yields the next largest power of 2.
+            </summary>
+            <param name="x">The value for which the next largest power of 2 is needed</param>
+            <returns>The next largest power of 2 for x which is strictly more than x
+            Note that for x = 32 the result is 64, not 32.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitAggregateMagic.IsPowerOfTwo(System.UInt64)">
+            <summary>
+            Checks whether x is a power of two.
+            </summary>
+            <param name="x">The number to check,</param>
+            <returns>true if x is a power of 2, false otherwise. (Note that 0 is a power of 2)</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2">
+            <summary>
+            The class which allows reading bits from stream one by one.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.#ctor(System.IO.BinaryReader)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader"/> class.
+            </summary>
+            <param name="reader">The reader.</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.CurrentBitIndex">
+            <summary>
+            Gett the index of the current bit from which data is read.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.BinaryReader">
+            <summary>
+            Gets the <see cref="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.BinaryReader"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.ReadBits(System.Int32)">
+            <summary>
+            Reads bits from the stream.
+            </summary>
+            <param name="numBits">The number of bits.</param>
+            <returns>
+            Read bit.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.ReadBit">
+            <summary>
+            Reads one bit from the stream.
+            </summary>
+            <returns>Read bit.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.ReadUInt32FromBase128">
+            <summary>
+            Reads uint value stored in Base-128 encoding.
+            </summary>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.ReadUInt64FromBase128">
+            <summary>
+            Reads ulong value stored in Base-128 encoding.
+            </summary>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReaderV2.ReadTillEndOfByteBoundary">
+            <summary>
+            Reads till end of byte boundary is reached.
+            </summary>
+            <returns>Read bit.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2">
+            <summary>
+            A class which allows writing bits to the stream.
+            We accumulate current byte value bit by bit and when it is full, it is written to the stream.
+            <see cref="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.Flush" /> method must be called at the end since the last byte to write to stream could be partial.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.CurrentBitIndex">
+            <summary>
+            Gets the current bit position in the buffer.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.CurrentByte">
+            <summary>
+            Gets the value of the currently accumulated byte.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.BinaryWriter">
+            <summary>
+            Gets the underlying binary writer.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.#ctor(System.IO.BinaryWriter)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter"/> class.
+            </summary>
+            <param name="writer">The writer.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.WriteBits(System.Int64,System.Int32,System.Int32)">
+            <summary>
+            Write bits to the stream.
+            </summary>
+            <param name="oldValue">The value.</param>
+            <param name="numBits">The number bits.</param>
+            <param name="positionOfLeastSignificantBit">The position of least significant bit, starting with 0.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.WriteBit(System.Boolean)">
+            <summary>
+            Write bit to the stream.
+            </summary>
+            <param name="bit">Bit value to write, where True means 1 and False means 0.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.WriteUInt32AsBase128(System.UInt32)">
+            <summary>
+            Writes uint value Base-128 encoded.
+            </summary>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.WriteUInt64AsBase128(System.UInt64)">
+            <summary>
+            Writes ulong value Base-128 encoded.
+            </summary>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.WriteTillEndOfByteBoundary">
+            <summary>
+            Flush the current byte into stream even if it is partial.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriterV2.Flush">
+            <summary>
+            Flush the current byte into stream even if it is partial.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader">
+            <summary>
+            The class which allows reading bits from stream one by one.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader.#ctor(System.IO.BinaryReader)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader"/> class.
+            </summary>
+            <param name="reader">The reader.</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader.CurrentByte">
+            <summary>
+            Gets the value of the currently byte.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader.BinaryReader">
+            <summary>
+            Gets the <see cref="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader.BinaryReader"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader.ReadBits(System.Int32)">
+            <summary>
+            Reads bits from the stream.
+            </summary>
+            <param name="numBits">The number of bits.</param>
+            <returns>
+            Read bit.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader.ReadBit">
+            <summary>
+            Reads one bit from the stream.
+            </summary>
+            <returns>Read bit.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter">
+            <summary>
+            A class which allows writing bits to the stream.
+            We accumulate current byte value bit by bit and when it is full, it is written to the stream.
+            <see cref="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter.Flush" /> method must be called at the end since the last byte to write to stream could be partial.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter.CurrentByte">
+            <summary>
+            Gets the value of the currently accumulated byte.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter.BinaryWriter">
+            <summary>
+            Gets the underlying binary writer.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter.#ctor(System.IO.BinaryWriter)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter"/> class.
+            </summary>
+            <param name="writer">The writer.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter.WriteBits(System.Int64,System.Int32,System.Int32)">
+            <summary>
+            Write bits to the stream.
+            </summary>
+            <param name="value">The value.</param>
+            <param name="numBits">The number bits.</param>
+            <param name="positionOfLeastSignificantBit">The position of least significant bit, starting with 0.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter.WriteBit(System.Boolean)">
+            <summary>
+            Write bit to the stream.
+            </summary>
+            <param name="bit">Bit value to write, where True means 1 and False means 0.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter.Flush">
+            <summary>
+            Flush the current byte into stream even if it is partial.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.AverageExpression">
+            <summary>
+            This is the expression used by the build-in "Average" sampling type.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.NullableAverageExpression">
+            <summary>
+            This is the expression used by the build-in "NullableAverage" sampling type.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.RateExpression">
+            <summary>
+            This is the expression used by the build-in "Rate" sampling type.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.Name">
+            <summary>
+            Gets or sets the friendly name for the computed metric, e.g.: Successful calls, CPU utilization, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.Expression">
+            <summary>
+            Gets or sets the JavaScript expression used to produce this metric from raw values.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.ExpressionEngine">
+            <summary>
+            Gets or sets the engine to be used to evaluate the expression. If it is null, empty or blank
+            the engine defaults to the one configured for the appliucation.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.Unit">
+            <summary>
+            Gets or sets the number suffix.
+            </summary>
+            <remarks>
+            This is the unit to show in UI for the data points, such as seconds, ms, %, or any free text that make sense.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.IsBuiltIn">
+            <summary>
+            Gets or sets a value indicating whether the sampling type is added by the system.
+            </summary>
+            <remarks>
+            These sampling type configurations cannot be deleted or modified.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration">
+            <summary>
+            Represents the configuration of a dimension.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration"/> class.
+            </summary>
+            <param name="id">The dimension name.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration.#ctor(System.String,System.Collections.Generic.IList{System.String})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration"/> class.
+            </summary>
+            <param name="id">The dimension name.</param>
+            <param name="dimensionValuesToIgnore">The dimension values to ignore.</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration.Id">
+            <summary>
+            Gets or sets the identifier of this instance.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration.DimensionValuesToIgnore">
+            <summary>
+            Gets or sets the dimension values to ignore.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration.Identifier">
+            <summary>
+            Gets or sets the identifier.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.DimensionConfiguration.Validate">
+            <summary>
+            Validates the current instance and throws a <see cref="T:System.ArgumentException"/> if the instance is invalid.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Configuration.MetricFilterDetails">
+            <summary>
+            The details of the filter in order to filter the hints.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricFilterDetails.Prefix">
+            <summary>
+            The prefix to be used before a sampling type in the <see cref="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricFilterDetails.Expression"/>.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Microsoft.Online.Metrics.Serialization.Configuration.MetricFilterDetails.Expression" -->
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricFilterDetails.IsValid">
+            <summary>
+            Validates the contents of this instance.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier">
+            <summary>
+            Uniquely identifies a metric.
+            </summary>
+            <remarks>TODO: move to MDMetricsClient project.</remarks>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.monitoringAccount">
+            <summary>
+            The monitoring account.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.metricNamespace">
+            <summary>
+            The metric namespace.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.metricName">
+            <summary>
+            The metric name.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier" /> class.
+            </summary>
+            <param name="monitoringAccount">The monitoring account.</param>
+            <param name="metricNamespace">The metric namespace.</param>
+            <param name="metricName">Name of the metric.</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.MonitoringAccount">
+            <summary>
+            Gets the monitoring account which this metric belongs to.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.MetricNamespace">
+            <summary>
+            Gets the namespace which this metric belongs to.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.MetricName">
+            <summary>
+            Gets the name of the metric.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.IsValid">
+            <summary>
+            Checks the validity of this instance.
+            </summary>
+            <returns>True if valid, false otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.Equals(Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier)">
+            <summary>
+            Indicates whether the current object is equal to another object of the same type.
+            </summary>
+            <param name="other">An object to compare with this object.</param>
+            <returns>
+            true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:System.Object"/>, is equal to this instance.
+            </summary>
+            <param name="obj">The <see cref="T:System.Object" /> to compare with this instance.</param>
+            <returns>
+              <c>true</c> if the specified <see cref="T:System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>
+            A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier.Validate">
+            <summary>
+            Validates this instance.
+            </summary>
+            <exception cref="T:System.ArgumentException">
+            MonitoringAccount is null or empty.
+            or
+            MetricNamespace is null or empty.
+            or
+            MetricName is null or empty.
+            </exception>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Configuration.MetricNamespaceConfiguration">
+            <summary>
+            The data structure that the batch API for fetching metric configuration returns per namespace 
+            in the new (Monitoring Agent) pipeline. This is JSON serialized to the clients.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricNamespaceConfiguration.MetricNamespace">
+            <summary>
+            Gets or sets the metric namespace.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricNamespaceConfiguration.UpdatedAtUtc">
+            <summary>
+            Gets or sets the timestamp in UTC of the last updated metric in this namespace.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricNamespaceConfiguration.MetricConfigurations">
+            <summary>
+            Gets or sets the array of metric configurations.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricNamespaceConfiguration.TruncateToIntegralSeconds(System.DateTime)">
+            <summary>
+            Truncates to integral seconds.
+            </summary>
+            <param name="dateTime">The date time.</param>
+            <returns>
+            The trucated date time.
+            </returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration">
+            <summary>
+            Represents configuration for a pre-aggregate of a metric.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration.#ctor(System.String,System.Collections.Generic.IEnumerable{System.String},System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration"/> class.
+            </summary>
+            <param name="displayName">The display name.</param>
+            <param name="dimensions">The list of dimension names for the pre-aggregate.</param>
+            <param name="minMaxMetricsEnabled">Flag indicating whether min/max sampling types are enabled.</param>
+            <param name="percentileMetricsEnabled">Flag indicating whether percentile sampling type is enabled.</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration.DisplayName">
+            <summary>
+            Gets the display name.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration.Dimensions">
+            <summary>
+            Gets the collections of dimensions which this pre-aggregate represents.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration.DistinctCountColumns">
+            <summary>
+            Gets the collections of distinct count columns.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration.MinMaxMetricsEnabled">
+            <summary>
+            Gets a value indicating whether min and max should be generated for the pre-aggregate.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.PreAggregateConfiguration.PercentileMetricsEnabled">
+            <summary>
+            Gets a value indicating whether percentile should be generated for the pre-aggregate.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2">
+            <summary>
+            The configuration used by MetricsExtension.  It will only contain the necessary
+            fields needed by the client.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.CountMetricName">
+            <summary>
+            The name of the metric used for pumping data for <see cref="F:Microsoft.Online.Metrics.Serialization.SamplingTypes.Count"/>
+            in the new (Monitoring Agent) pipeline.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.SumMetricName">
+            <summary>
+            The name of the metric used for pumping data for <see cref="F:Microsoft.Online.Metrics.Serialization.SamplingTypes.Sum"/>
+            in the new (Monitoring Agent) pipeline.
+            </summary>
+            <remarks>
+            This is the metric contains configuration indicating whether <see cref="F:Microsoft.Online.Metrics.Serialization.SamplingTypes.Max"/>,
+            <see cref="F:Microsoft.Online.Metrics.Serialization.SamplingTypes.Min"/>, <see cref="T:Microsoft.Online.Metrics.Serialization.Histogram"/> etc.. are enabled.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.DefaultSamplingTypes">
+            <summary>
+            Gets the default configuration to be used, when the configuration is not obtained from server.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.DefaultScalingFactorForMetrics">
+            <summary>
+            The map of "special" strings in metric names to default scaling factors to be used when scaling factor is not configured for metrics.
+            </summary>
+            <remarks>
+            The values for scaling factor in this list must be greater than or equal to zero.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.#ctor(System.String,System.Nullable{System.Single},Microsoft.Online.Metrics.Serialization.SamplingTypes)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2"/> struct.
+            </summary>
+            <param name="metricName">Name of the metric.</param>
+            <param name="scalingFactor">The scaling factor.</param>
+            <param name="samplingTypes">The sampling types.</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.Version">
+            <summary>
+            Gets or sets the version of this instance.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.MonitoringAccount">
+            <summary>
+            Gets or sets the Monitoring Account to which this metric is reported.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.MetricNamespace">
+            <summary>
+            Gets or sets the metric namespace.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.MetricName">
+            <summary>
+            Gets or sets the metric name.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.SamplingTypes">
+            <summary>
+            Gets the metric name and sampling types.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.ScalingFactor">
+            <summary>
+            Gets or sets the scaling factor to be used.
+            </summary>
+            <remarks>
+            Clients should pass un-scaled values when this is null.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.HyperLogLogBValue">
+            <summary>
+            Gets or sets the collections of dimensions configured for Distinct count.
+            </summary>
+            <remarks>
+            Each HyperLogLog counter uses a small, fixed amount of space but can estimate
+            the cardinality of any set of up to around a billion values with relative error 
+            of 1.04 / Math.sqrt(2 ** b) with high probability.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.PreAggregationsWithDistinctCountColumns">
+            <summary>
+            Gets or sets the collections of dimensions configured for Distinct count.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.DimensionConfigurations">
+            <summary>
+            Gets or sets the list of dimension configurations.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.PreAggregations">
+            <summary>
+            Gets or sets the list of pre-aggregates which this metric will be aggregated with.
+            </summary>
+            <remarks>
+            We have hidden the configuration APIs. 
+            If we ever need to expose the configuration APIs, we need to revisit the types of properties. 
+            For this particular property, we can expose a strong-typed class named PreAggregateConfigurationList that can check for duplicate entries, 
+            or we can even make the whole configuration object read only. 
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.ComputedSamplingTypes">
+            <summary>
+            Gets or sets the computed sampling types.
+            In the case of <see cref="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.IsCompositeMetric"/>, this field is used to save the expressions and their names.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.MetricIdentifiers">
+            <summary>
+            Gets or sets the list of the variable names of metrics to the metric identifiers.
+            The keys can be used in the <see cref="P:Microsoft.Online.Metrics.Serialization.Configuration.ComputedSamplingTypeConfiguration.Expression"/> field of the <see cref="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.ComputedSamplingTypes"/>.
+            </summary>
+            <remarks>
+            Used only for composite metrics.
+            Composite metric cannot use <see cref="T:Microsoft.Online.Metrics.Serialization.Configuration.MetricIdentifier"/> of another composite metric as of now, so the UI should show hints appropriately.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.IsCompositeMetric">
+            <summary>
+            Gets a value indicating whether the metric configuration is for a composite metric (i.e. one that is composed of multiple metrics).
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.EnableClientSidePublication">
+            <summary>
+            Gets or sets whether this event should be published by the metrics extension to any of the account defined endpoints.
+            </summary>
+            <remarks>
+            If false, publication will not occur to the FE, but it will still be produced as a local aggregate on the client machine for Cosmos upload.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.EnableClientSideForking">
+            <summary>
+            Gets or sets whether this event should be published by the metrics extension to any of the external account endpoints.
+            </summary>
+            <remarks>
+            If false, publication will still occur to the MDM primary endpoint but not to any of the external/forking endpoints.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.EnableClientSideEtwPublication">
+            <summary>
+            Gets or sets whether this event should be published to the aggregated ETW provider.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.TreatMissingSeriesAsZeros">
+            <summary>
+            Gets or sets whether metrics in composite metrics should be considered as zero when metric is not reported or is missing.
+            </summary>
+            <remarks>
+            Only used for Composite metrics.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Configuration.MetricConfigurationV2.GetDefaultScalingFactor(System.String,System.String)">
+            <summary>
+            Gets the default scaling factor if <paramref name="metric" /> contains scaling indicators.
+            </summary>
+            <param name="metricNamespace">The metric namespace.</param>
+            <param name="metric">The metric name.</param>
+            <returns>
+            The default scaling factor.
+            </returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Crc">
+            <summary>
+            Class for computing CRC
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Crc.ComputeCrc(System.UInt32,System.IO.Stream,System.Int64)">
+            <summary>
+            Computes the CRC for given stream of data.
+            </summary>
+            <param name="crc">Seed value ( usually set to 0)</param>
+            <param name="data">Data stream.</param>
+            <param name="length">Length of stream.</param>
+            <returns>CRC value</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Crc.ComputeCrc(System.UInt32,System.Byte[],System.Int64)">
+            <summary>
+            Computes the CRC for given stream of data.
+            </summary>
+            <param name="crc">Seed value ( usually set to 0)</param>
+            <param name="data">Data stream.</param>
+            <param name="offset">Offset in the byte array</param>
+            <returns>CRC value</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.CrcCheckFailedSerializationException">
+            <summary>
+            An exception used to report about situation when CRC check fails.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.CrcCheckFailedSerializationException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.CrcCheckFailedSerializationException"/> object.
+            </summary>
+            <param name="message">A message explaining the cause for exception situation.</param>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer">
+            <summary>
+            This class provides set of methods to serialize double values using gorilla paper algorithm.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.Serialize(System.IO.BinaryWriter,System.Double[])">
+            <summary>
+            Serializes the specified <paramref name="values"/>.
+            </summary>
+            <param name="writer">The writer.</param>
+            <param name="values">The values to serialize.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.Serialize(System.IO.BinaryWriter,System.Double*,System.Int32)">
+            <summary>
+            Serializes the specified <paramref name="values"/>.
+            </summary>
+            <param name="writer">The writer.</param>
+            <param name="values">The pointer to the array of values to serialize.</param>
+            <param name="count">The number of elements in values array.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.Deserialize(System.IO.BinaryReader)">
+            <summary>
+            Deserializes to an array of <see lang="double"/> from the specified reader.
+            </summary>
+            <param name="reader">The reader.</param>
+            <returns>An array of <see lang="double"/>.</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.Deserialize(System.IO.BinaryReader,System.Double*,System.Int32)" -->
+        <member name="M:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.DeserializeToNullableDoubles(System.IO.BinaryReader)">
+            <summary>
+            Deserializes to an array of nullable <see lang="double"/> from the specified reader.
+            </summary>
+            <param name="reader">The reader.</param>
+            <returns>An array of nullable <see lang="double"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.WriteDouble(Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryWriter,System.Double,Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.DoubleValueState,Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.DoubleValueState@)">
+            <summary>
+            Encodes the given double value to the given writer.
+            </summary>
+            <param name="writer">The writer into which value needs to be encoded.</param>
+            <param name="value">The value to be encoded.</param>
+            <param name="previousValue">The previous value state.</param>
+            <param name="newValue">The new value state.</param>
+            <returns>True if encoding was success else false.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.ReadDouble(Microsoft.Online.Metrics.Serialization.BitHelper.BitBinaryReader,Microsoft.Online.Metrics.Serialization.DoubleValueSerializer.DoubleValueState)">
+            <summary>
+            Decodes the double value from the given reader.
+            </summary>
+            <param name="reader">The reader from which double value needs to be decoded.</param>
+            <param name="state">The state of previous decoding.</param>
+            <returns>Decoded double value with state.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch">
+            <summary>
+            Represents a hyperloglog sketch.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.MaxBValue">
+            <summary>
+            Maximum value of B.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.DefaultBValue">
+            <summary>
+            Maximum value of B.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.#ctor(System.Int32,System.Boolean)">
+            <summary>
+            Constructs an instance of class HyperLogLogSketch.
+            </summary>
+            <param name="bValue">HyperLogLog B value</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.Item(System.Int32)">
+            <summary>
+            Sets the register value for given key.
+            </summary>
+            <param name="key">Index value.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.BValue">
+            <summary>
+            Gets the B value for sketch.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.Registers">
+            <summary>
+            Gets the registers associated with the sketch.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.Reset">
+            <summary>
+            Initializes the Sketch.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch.Aggregate(Microsoft.Online.Metrics.Serialization.HyperLogLogSketch)">
+            <summary>
+            Aggregates the given sketch to this sketch.
+            </summary>
+            <param name="other">Other sketch.</param>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches">
+            <summary>
+            Represents a List of Distinct Count dimension name and HyperLogLogSketch associated with it.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches.HyperLogLogSketchesCount">
+            <summary>
+            Constucts an instance of class HyperLogLogSketches
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches.Microsoft#Online#Metrics#Serialization#IReadOnlyHyperLogLogSketches#HyperLogLogSketches">
+            <summary>
+            Implements the interface IReadOnlyHyperLogLogSketches
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches.ContainsKey(System.String)">
+            <summary>
+            Checks if given distinct count dimension exists.
+            </summary>
+            <param name="distinctCountDimensionName">Distinct count dimension name.</param>
+            <returns>True if exists else false.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches.GetOrAdd(System.String,System.Func{Microsoft.Online.Metrics.Serialization.HyperLogLogSketch})">
+            <summary>
+            Adds a key/value pair to <see cref="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches"/> by using the specified function, if the key does not already exist.
+            </summary>
+            <param name="key">Key of the element.</param>
+            <param name="valueFactory">The function used to generate <see cref="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch"/>.</param>
+            <returns><see cref="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch"/> for specified key. This will be either the existing value or the new value returned by valueFactory (if specified key is not found).</returns>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches.Item(System.String)">
+            <summary>
+            Sets the register value for given key.
+            </summary>
+            <param name="key">Index value.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.HyperLogLogSketches.Add(System.String,Microsoft.Online.Metrics.Serialization.HyperLogLogSketch)">
+            <summary>
+            Adds the given distinct count dimension and sketch to the list.
+            </summary>
+            <param name="distinctCountDimensionName">Distinct count dimension name.</param>
+            <param name="sketch">Sketch data.</param>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1">
+            <summary>
+            The interface used by deserializer to abstract the way how deserialized objects are created.
+            It is up to the user of the deserializer to implement type to which data are deserialized, use object pools or not etc.
+            </summary>
+            <typeparam name="TMetadata">Type of metadata to use for creation of metric data objects.</typeparam>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.SetSerializationVersion(System.UInt16)">
+            <summary>
+            Sets the packet serialization version.
+            </summary>
+            <param name="serializationVersion">Serialization version.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.CreateMetadata(System.String,System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Creates the custom object representing metric metadata. Note that the same metadata object can be shared
+            by many metric instances.
+            </summary>
+            <param name="metricNamespace">Namespace of the metric.</param>
+            <param name="metricName">Name of the metric.</param>
+            <param name="dimensionNames">Names of the metric dimensions.</param>
+            <returns>The metric metadata representing the given parameters.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.BeginMetricCreation">
+            <summary>
+            Signals to the builder that it should get ready to start filling up data for a new metric.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignMetadata(`0)">
+            <summary>
+            Assigns metadata to the metric being built.
+            </summary>
+            <param name="metadata">Metric metadata.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignMonitoringAccount(System.String)">
+            <summary>
+            Assigns a monitoring account to the metric being built. This is only called if the aggregated metric data was serialized
+            with a version prior to v3. For v3 and above the monitoring account should be captured on the request itself, as part of the
+            URL path or as a query parameter.
+            </summary>
+            <param name="value">
+            Monitoring account associated with the metric.
+            </param>
+            <remarks>
+            If we ever make this interface public we should check if there are no more clients submitting data prior to v3 and remove
+            this method from the interface to avoid confusion from the users.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignNamespace(System.String)">
+            <summary>
+            Assigns a namespace to the metric being built.
+            </summary>
+            <param name="value">Namespace associated with the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignTimeUtc(System.DateTime)">
+            <summary>
+            Assigns time (UTC) to the metric being built.
+            </summary>
+            <param name="value">Time of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AddDimensionValue(System.String)">
+            <summary>
+            Adds the value of a single dimension to the metric being built. The dimension values are passed in the same
+            order as the corresponding dimensions on the metric metadata.
+            </summary>
+            <param name="value">Value of one dimension of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignSamplingTypes(Microsoft.Online.Metrics.Serialization.SamplingTypes)">
+            <summary>
+            Assigns the sampling types of the metric being built.
+            </summary>
+            <param name="value">Available sampling types of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignMin(System.UInt64)">
+            <summary>
+            Assigns the minimum value of the metric being built.
+            </summary>
+            <param name="value">Minimum value of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignMax(System.UInt64)">
+            <summary>
+            Assigns the maximum value of the metric being built.
+            </summary>
+            <param name="value">Maximum value of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignSum(System.UInt64)">
+            <summary>
+            Assigns the sum value of the metric being built.
+            </summary>
+            <param name="value">Sum value of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignCount(System.UInt32)">
+            <summary>
+            Assigns the count (i.e.: how many times it was logged) value of the metric being built.
+            </summary>
+            <param name="value">Count value of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignHistogram(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.UInt64,System.UInt32}})">
+            <summary>
+            Assigns a histogram to the metric being built.
+            </summary>
+            <param name="value">Histogram of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.AssignHyperLogLogSketch(System.IO.BinaryReader,System.Int32)">
+            <summary>
+            Assigns hyperloglogsketches to the metric being built.
+            </summary>
+            <param name="reader">Stream containing the data.</param>
+            <param name="length">Length of data to read.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricBuilder`1.EndMetricCreation">
+            <summary>
+            Signals to the builder that the creation of the current metric was completed.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.IMetricMetadata">
+            <summary>
+            Represents an interface for the metric metadata object.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IMetricMetadata.MetricNamespace">
+            <summary>
+            Gets the namespace of the metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IMetricMetadata.MetricName">
+            <summary>
+            Gets the name of the metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IMetricMetadata.DimensionsCount">
+            <summary>
+            Gets the number of dimensions the metric has.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IMetricMetadata.GetDimensionName(System.Int32)">
+            <summary>
+            Gets the name of the dimension by index.
+            </summary>
+            <param name="dimensionIndex">Index of the dimension in 0..DimensionsCount-1 range.</param>
+            <returns>Name of the dimension.</returns>
+            <exception cref="T:System.IndexOutOfRangeException">Thrown when index is out of the specified range.</exception>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.IReadOnlyHyperLogLogSketches">
+            <summary>
+            Read-only interface for objects representing list of hyperloglog sketches.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyHyperLogLogSketches.HyperLogLogSketchesCount">
+            <summary>
+            Gets the total sketches count.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyHyperLogLogSketches.HyperLogLogSketches">
+            <summary>
+            Gets the list of sketches: ordered pairs of distinct count dimension name and HyperLogLogSketch.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.MetricDeserializer`1">
+            <summary>
+            Class which deserializes Autopilot count (metric) data.
+            Serialization format corresponds to one described in http://sharepoint/sites/autopilot/team/Docs/Silicon/Monitroing%20Team/AD%20Metrics%20%20Autopilot%20Counter%20Data%20Common%20Serialization%20Format.docx.
+            </summary>
+            <typeparam name="TMetadata">Type of metadata object used for deserialization.</typeparam>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.MetricDeserializer`1.ValidateCrc(System.Byte[])">
+            <summary>
+            Validates the data packet by CRC check
+            </summary>
+            <param name="dataPacket">Data packet to check.</param>
+            <exception cref="T:Microsoft.Online.Metrics.Serialization.CrcCheckFailedSerializationException">
+            Throws when CRC check fails.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.MetricDeserializer`1.Clear">
+            <summary>
+            Clears the deserializer state.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.MetricDeserializer`1.Deserialize(System.IO.Stream,Microsoft.Online.Metrics.Serialization.IMetricBuilder{`0},System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Deserializes counter (metric) data from the stream and adds all objects to provided collection.
+            </summary>
+            <param name="stream">Stream from which data should be deserialized. Stream should be readable and provide randon access.</param>
+            <param name="metricBuilder">An object responsible for creation and further consumption of deserialized data.</param>
+            <param name="maxMetricStringsLength">Maximum length of strings, which represent metric name, dimension names and values.</param>
+            <param name="maxMetricNamespaceStringsLength">Maximum length of metric namespace string.</param>
+            <param name="maxMetricDimensionValueStringsLength">Maximum length of metric dimension value string.</param>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.MetricValueV2">
+            <summary>
+            Represents metric value as union of Long, Ulong, Double.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.MetricValueV2.ValueAsDouble">
+            <summary>
+            The value as double datatype.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.MetricValueV2.ValueAsLong">
+            <summary>
+            The value as long datatype.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.MetricValueV2.ValueAsULong">
+            <summary>
+            The value as unsigned long datatype.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.MetricValueV2.CanRepresentDoubleAsLong">
+            <summary>
+            Determines whether this instance value for double can be represented as long
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Monitor.IMonitorHealthStatus">
+            <summary>
+            The interface representing the monitor health status.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Monitor.IMonitorHealthStatus.Healthy">
+            <summary>
+            Gets a value indicating the healthy status of the last report. 
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Monitor.IMonitorHealthStatus.TimeStamp">
+            <summary>
+            Gets the last time when monitor reported a status
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Monitor.IMonitorHealthStatus.Message">
+            <summary>
+            Gets the message for the last monitor report
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.FrontEndMetricDeserializer`1">
+            <summary>
+            Class which deserializes Autopilot count (metric) data.
+            Serialization format corresponds to one described in http://sharepoint/sites/autopilot/team/Docs/Silicon/Monitroing%20Team/AD%20Metrics%20%20Autopilot%20Counter%20Data%20Common%20Serialization%20Format.docx.
+            </summary>
+            <typeparam name="TMetadata">Type of metadata object used for deserialization.</typeparam>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.FrontEndMetricDeserializer`1.ValidateCrc(System.Byte[])">
+            <summary>
+            Validates the data packet by CRC check
+            </summary>
+            <param name="dataPacket">Data packet to check.</param>
+            <exception cref="T:Microsoft.Online.Metrics.Serialization.CrcCheckFailedSerializationException">
+            Throws when CRC check fails.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.FrontEndMetricDeserializer`1.Deserialize(System.IO.Stream,Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder{`0},System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Deserializes counter (metric) data from the stream and adds all objects to provided collection.
+            </summary>
+            <param name="stream">Stream from which data should be deserialized. Stream should be readable and provide randon access.</param>
+            <param name="metricBuilder">An object responsible for creation and further consumption of deserialized data.</param>
+            <param name="maxMetricStringsLength">Maximum length of strings, which represent metric name, dimension names and values.</param>
+            <param name="maxMetricNamespaceStringsLength">Maximum length of metric namespace string.</param>
+            <param name="maxMetricDimensionValueStringsLength">Maximum length of metric dimension value string.</param>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.MetricSerializer">
+            <summary>
+            Class which serializes Autopilot counter (metric) data.
+            Serialization format corresponds to one described in http://sharepoint/sites/autopilot/team/Docs/Silicon/Monitroing%20Team/AD%20Metrics%20%20Autopilot%20Counter%20Data%20Common%20Serialization%20Format.docx.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.MetricSerializer.#ctor(System.UInt16,System.UInt16)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.MetricSerializer"/> class.
+            </summary>
+            <param name="version">Serialization version to use (from 0 to MaxVersion).</param>
+            <param name="hllSerializationVersion">Hll serialization version till whi</param>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.MetricSerializer.SerializationVersion">
+            <summary>
+            Gets or sets the serialization version with which serializer is currently configured.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.MetricSerializer.ExpectedPackageSize">
+            <summary>
+            Gets the expected size of the package in current serialization state.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.MetricSerializer.Serialize(System.IO.Stream,System.Collections.Generic.IEnumerable{Microsoft.Online.Metrics.Serialization.IReadOnlyMetric})">
+            <summary>
+            Serializes counter (metric) data to the stream.
+            </summary>
+            <param name="stream">Stream to which data should be serialized. Stream should be writable and provide random access.</param>
+            <param name="metricData">Collection of metric data to be serialized.</param>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.Histogram">
+            <summary>
+            Represents a histogram.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Histogram.SamplesCount">
+            <summary>
+            Gets the number of samples in the histogram.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.Histogram.Samples">
+            <summary>
+            Gets the list of histogram samples: ordered pairs of value-count.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Histogram.Initialize(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.UInt64,System.UInt32}})">
+            <summary>
+            Reinitializes histogram object with new data.
+            </summary>
+            <param name="histogramData">Unordered pairs of value-count from which histogram will be constructed.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.Histogram.GetPercentile(System.Single)">
+            <summary>
+            Calculates percentile from the histogram.
+            </summary>
+            <param name="percent">Percent value for which to calculate percentile.</param>
+            <returns>Percentile value.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1">
+            <summary>
+            The interface used by deserializer to abstract the way how deserialized objects are created.
+            It is up to the user of the deserializer to implement type to which data are deserialized, use object pools or not etc.
+            </summary>
+            <typeparam name="TMetadata">Type of metadata to use for creation of metric data objects.</typeparam>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1.SetSerializationVersion(System.UInt16)">
+            <summary>
+            Sets the packet serialization version.
+            </summary>
+            <param name="serializationVersion">Serialization version.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1.GetString(System.String)">
+            <summary>
+            Gets interned string for given value.
+            </summary>
+            <param name="value">String to be interned.</param>
+            <returns>Interned string.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1.CreateMetadata(System.String,System.String,System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Creates the custom object representing metric metadata. Note that the same metadata object can be shared
+            by many metric instances.
+            </summary>
+            <param name="metricNamespace">Namespace of the metric.</param>
+            <param name="metricName">Name of the metric.</param>
+            <param name="dimensionNames">Names of the metric dimensions.</param>
+            <returns>The metric metadata representing the given parameters.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1.BeginMetricCreation(`0,System.Collections.Generic.IReadOnlyList{System.String},System.DateTime,Microsoft.Online.Metrics.Serialization.SamplingTypes,System.UInt32,Microsoft.Online.Metrics.Serialization.MetricValueV2,Microsoft.Online.Metrics.Serialization.MetricValueV2,Microsoft.Online.Metrics.Serialization.MetricValueV2)">
+            <summary>
+            Start adding metric data with populating common values.
+            </summary>
+            <param name="metadata">Metric metadata.</param>
+            <param name="dimensionValues">List of dimension values.</param>
+            <param name="timeUtc">Time of the metric.</param>
+            <param name="samplingTypes">Available sampling types of the metric.</param>
+            <param name="count">Count value of the metric (how many times it was reported).</param>
+            <param name="sum">Sum value of the metric.</param>
+            <param name="min">Minimum value of the metric.</param>
+            <param name="max">Maximum value of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1.AssignHistogram(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.UInt64,System.UInt32}})">
+            <summary>
+            Assigns a histogram to the metric being built.
+            </summary>
+            <param name="value">Histogram of the metric.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1.AssignHyperLogLogSketch(System.IO.BinaryReader,System.Int32)">
+            <summary>
+            Assigns hyperloglogsketches to the metric being built.
+            </summary>
+            <param name="reader">Stream containing the data.</param>
+            <param name="length">Length of data to read.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IFrontEndMetricBuilder`1.EndMetricCreation">
+            <summary>
+            Signals that deserializer has completed metric deserialization.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric">
+            <summary>
+            Read only interface for metric data.
+            </summary>
+            TODO: Once all publishers and recievers are moved to version 3 of serialization remove MonitoringAccount and MetricNamespace from here
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.MonitoringAccount">
+            <summary>
+            Gets the Monitoring Account to which this metric is reported.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.MetricNamespace">
+            <summary>
+            Gets the metric namespace.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.TimeUtc">
+            <summary>
+            Gets the time when metric was reported.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.MetricMetadata">
+            <summary>
+            Gets the metric metadata.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.SamplingTypes">
+            <summary>
+            Gets the sampling types this metric contains.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.Count">
+            <summary>
+            Gets the number of samples for which this metric is reported.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.Min">
+            <summary>
+            Gets the minimum value of samples reported this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.Max">
+            <summary>
+            Gets the maximum value of samples reported this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.Sum">
+            <summary>
+            Gets the sum of sample values reported this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.MinUnion">
+            <summary>
+            Gets the minimum value of samples reported this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.MaxUnion">
+            <summary>
+            Gets the maximum value of samples reported this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.SumUnion">
+            <summary>
+            Gets the sum of sample values reported this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.Histogram">
+            <summary>
+            Gets the histogram created from sample values reported for this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.HyperLogLogSketches">
+            <summary>
+            Gets the hyperloglog sketches from this metric.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.HyperLogLogSketchesStream">
+            <summary>
+            Gets the hyperloglog sketches stream.
+            </summary>
+            <remarks>
+            This will be null if HyperLogLogSketches is set and vice-versa.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IReadOnlyMetric.GetDimensionValue(System.Int32)">
+            <summary>
+            Gets the value of the dimension by dimension index.
+            Implementer of this interface has to make sure that number of dimensions specified in MetricMetadata be equal to number of dimension values.
+            </summary>
+            <param name="dimensionIndex">Index of the dimension for which to get value in 0..MetricMetadata.DimensionsCount range.</param>
+            <returns>Value of the dimension.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.IReadOnlyHistogram">
+            <summary>
+            Read-only interface for objects representing histograms.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyHistogram.SamplesCount">
+            <summary>
+            Gets the number of samples in the histogram.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Metrics.Serialization.IReadOnlyHistogram.Samples">
+            <summary>
+            Gets the list of histogram samples: ordered pairs of value-count.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.IReadOnlyHistogram.GetPercentile(System.Single)">
+            <summary>
+            Calculates percentile from the histogram.
+            </summary>
+            <param name="percent">Percent value for which to calculate percentile.</param>
+            <returns>Percentile value.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.SamplingTypes">
+            <summary>
+            Lists sampling types which metric may contain.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.SamplingTypesExtensionMethods">
+            <summary>
+            The helper class to hold the extension methods for <see cref="T:Microsoft.Online.Metrics.Serialization.SamplingTypes"/> type.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SamplingTypesExtensionMethods.Includes(Microsoft.Online.Metrics.Serialization.SamplingTypes,Microsoft.Online.Metrics.Serialization.SamplingTypes)">
+            <summary>
+            Returns true if the samplingTypes instance has value as one of the bits set.
+            </summary>
+            <param name="samplingTypes">The sampling types to check.</param>
+            <param name="value">The value to look for.</param>
+            <returns>True if value is present in samplingTypes, false otherwise.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.MetricSerializationException">
+            <summary>
+            A general exception used to report about metric serialization or deserialization failures.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.MetricSerializationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.MetricSerializationException"/> class.
+            </summary>
+            <param name="message">Message describing exception situation.</param>
+            <param name="innerException">Inner exception which caused exception situation.</param>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationConstants.DefaultSeriesResolutionInMinutes">
+            <summary>
+            The default series resolution in minutes.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationConstants.ScalingFactorDisabledHeader">
+            <summary>
+            The http header indicating if we should skip scaling the metrics data.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationConstants.OctetStreamContentType">
+            <summary>
+            The MIME type for octet streams.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationConstants.TraceIdHeader">
+            <summary>
+            The trace identifier header.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationConstants.ClientIdHeader">
+            <summary>
+            The client identifier header.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationConstants.MaximumMetricDescriptionLength">
+            <summary>
+            The maximum metric description length allowed.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:Microsoft.Online.Metrics.Serialization.SerializationConstants.MaximumDescriptionLength" -->
+        <member name="T:Microsoft.Online.Metrics.Serialization.SerializationUtils">
+            <summary>
+            Set of functions used for metrics serialization and deserialization.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationUtils.EmptyDimensionValueString">
+            <summary>
+            A string which replaces empty dimension value.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Metrics.Serialization.SerializationUtils.OneMinuteInterval">
+            <summary>
+            One minute size in 100th nanoseconds.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.Write(System.IO.Stream,System.UInt16)">
+            <summary>
+            Writes UInt16 value to the stream.
+            </summary>
+            <param name="stream"><see cref="T:System.IO.Stream"/> to write to.</param>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteInt32AsBase128(System.IO.BinaryWriter,System.Int32)">
+            <summary>
+            Writes int value Base-128 encoded.
+            </summary>
+            <param name="writer">Binary writer to be used.</param>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteInt64AsBase128(System.IO.BinaryWriter,System.Int64)">
+            <summary>
+            Writes long value Base-128 encoded.
+            </summary>
+            <param name="writer">Binary writer to be used.</param>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteUInt32AsBase128(System.IO.BinaryWriter,System.UInt32)">
+            <summary>
+            Writes uint value Base-128 encoded.
+            </summary>
+            <param name="writer">Binary writer to be used.</param>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteUInt32InBase128AsFixed4Bytes(System.IO.BinaryWriter,System.UInt32)">
+            <summary>
+            Writes uint value as 4 bytes, but Base-128 encoded.
+            Used for back compatibility between some versions of serializer.
+            </summary>
+            <param name="writer">Binary writer to be used.</param>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteUInt64AsBase128(System.IO.BinaryWriter,System.UInt64)">
+            <summary>
+            Writes ulong value Base-128 encoded.
+            </summary>
+            <param name="writer">Binary writer to be used.</param>
+            <param name="value">Value to write.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteHistogram(System.IO.BinaryWriter,System.Int32,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.UInt64,System.UInt32}},System.Boolean)">
+            <summary>
+            Writes a histogram.
+            </summary>
+            <param name="writer">Binary writer to be used.</param>
+            <param name="bucketsCount">The number of buckets in histogram (must be equal to the number of elements in buckets collection).</param>
+            <param name="buckets">Histogram buckets to write.</param>
+            <param name="hasHistogramSizePrefix">A flag indicating whether histogram size (in bytes) 
+                should be put as a 4-bytes prefix in the beginning of the histogram data.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteHyperLogLogSketches(System.IO.BinaryWriter,System.UInt32,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,Microsoft.Online.Metrics.Serialization.HyperLogLogSketch}})">
+            <summary>
+            Writes collection of <see cref="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch"/> objects to a <see cref="T:System.IO.BinaryWriter"/>.
+            </summary>
+            <param name="writer"><see cref="T:System.IO.BinaryWriter"/> object used for writing.</param>
+            <param name="count">Number of sketches to write.</param>
+            <param name="data">Collection of sketch dimension - sketch value pairs.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.WriteHyperLogLogSketchesV2(System.IO.BinaryWriter,System.UInt32,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,Microsoft.Online.Metrics.Serialization.HyperLogLogSketch}})">
+            <summary>
+            Writes collection of <see cref="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch"/> objects to a <see cref="T:System.IO.BinaryWriter"/>.
+            </summary>
+            <param name="writer"><see cref="T:System.IO.BinaryWriter"/> object used for writing.</param>
+            <param name="count">Number of sketches to write.</param>
+            <param name="data">Collection of sketch dimension - sketch value pairs.</param>
+            <remarks>
+            Will be replaced by V1 once deserialization code reaches everywhere.
+            
+            HLL data is serialized in two format:
+            Sparse HLL data format
+                Version = 2 as byte
+                BValue as byte
+                For all non-zero elements :    
+                    Position In Sketch(ushort), Value at that position(byte)
+            Full HLL data format
+                Version = 1 as byte
+                BValue as byte
+                For all elements :    
+                    Value at that position(byte)
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.EstimateUInt32InBase128Size(System.UInt32)">
+            <summary>
+            Estimates a size in bytes of the uint value when written in Base-128.
+            </summary>
+            <param name="value">Value which size has to be estimated.</param>
+            <returns>The estimated size in bytes.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadInt32FromBase128(System.IO.BinaryReader)">
+            <summary>
+            Reads int value stored in Base-128 encoding.
+            </summary>
+            <param name="reader">Binary reader to be used for reading.</param>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadInt64FromBase128(System.IO.BinaryReader)">
+            <summary>
+            Reads long value stored in Base-128 encoding.
+            </summary>
+            <param name="reader">Binary reader to be used for reading.</param>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadUInt32FromBase128(System.IO.BinaryReader)">
+            <summary>
+            Reads uint value stored in Base-128 encoding.
+            </summary>
+            <param name="reader">Binary reader to be used for reading.</param>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadUInt32FromBase128(System.Byte[],System.Int32@)">
+            <summary>
+            Reads uint value stored in Base-128 encoding.
+            </summary>
+            <param name="buffer">Buffer from which value to be read.</param>
+            <param name="offset">Offset in buffer to start reading from.</param>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadUInt64FromBase128(System.IO.BinaryReader)">
+            <summary>
+            Reads ulong value stored in Base-128 encoding.
+            </summary>
+            <param name="reader">Binary reader to be used for reading.</param>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadUInt64FromBase128(System.Byte[],System.Int32@)">
+            <summary>
+            Reads ulong value stored in Base-128 encoding.
+            </summary>
+            <param name="buffer">Buffer from which value to be read.</param>
+            <param name="offset">Offset in buffer to start reading from.</param>
+            <returns>Read value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadHistogram(System.IO.BinaryReader,System.Boolean)">
+            <summary>
+            Reads a histogram.
+            </summary>
+            <param name="reader">Binary reader to be used for reading.</param>
+            <param name="hasHistogramSizePrefix">A flag indicating whether histogram 
+            data contains histogram size (in bytes) as a 4-bytes prefix.</param>
+            <returns>An enumerable of key values pairs where key is a sample value
+            and value is a number of times the sample value appeared.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadHyperLogLogSketch(System.IO.BinaryReader,System.Int32,System.Func{System.Int32,Microsoft.Online.Metrics.Serialization.HyperLogLogSketch})">
+            <summary>
+            Assigns the hyperloglog sketches.
+            </summary>
+            <param name="reader">Stream reader containing the sketches data.</param>
+            <param name="length">Length of data to read.</param>
+            <param name="sketchConstructor">Function used to construct <see cref="T:Microsoft.Online.Metrics.Serialization.HyperLogLogSketch"/> object.</param>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadHyperLogLogSketch(System.IO.BinaryReader,System.Func{System.Int32,Microsoft.Online.Metrics.Serialization.HyperLogLogSketch},System.Int16@)">
+            <summary>
+            Reads the hyperloglog sketch.
+            </summary>
+            <param name="reader">The reader.</param>
+            <param name="sketchConstructor">The sketch constructor.</param>
+            <returns>Deserialized sketch.</returns>
+            <remarks>
+            HLL data is serialized in three formats:
+            Legacy HLL data format 
+                BValue as byte
+                For all elements :    
+                    Value at that position(byte)
+            Sparse HLL data format
+                Version = 2 as byte
+                BValue as byte
+                For all non-zero elements :    
+                    Position In Sketch(ushort), Value at that position(byte)
+            Full HLL data format
+                Version = 1 as byte
+                BValue as byte
+                For all elements :    
+                    Value at that position(byte)
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.SerializationUtils.ReadFromStream(System.IO.Stream,System.IO.Stream,System.Int32,System.Byte[])">
+            <summary>
+            Reads data from source stream and writes it to destination stream.
+            </summary>
+            <param name="source">Source stream.</param>
+            <param name="destination">Destination stream.</param>
+            <param name="len">Length to copy.</param>
+            <param name="tempBuffer">Temp buffer.</param>
+        </member>
+        <member name="T:Microsoft.Online.Metrics.Serialization.VersionNotSupportedMetricSerializationException">
+            <summary>
+            An exception used to report about situation when version of deserializer doesn't support format of package it is used to deserialize.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Metrics.Serialization.VersionNotSupportedMetricSerializationException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Metrics.Serialization.VersionNotSupportedMetricSerializationException"/> object.
+            </summary>
+            <param name="message">A message explaining the cause for exception situation.</param>
+        </member>
+    </members>
+</doc>

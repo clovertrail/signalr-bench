@@ -1,0 +1,505 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Cloud.Common.BaseUtilities</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetExtensions">
+            <summary>
+                Provides extension methods for <see cref="T:System.DateTimeOffset"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetExtensions.RoundDown(System.DateTimeOffset,System.TimeSpan)">
+            <summary>
+                Rounds <paramref name="dateTime"/> down to the nearest lower <paramref name="unit"/>.
+            </summary>
+            <param name="dateTime">The <see cref="T:System.DateTimeOffset"/> to round down.</param>
+            <param name="unit">The <see cref="T:System.TimeSpan"/> that represented the rounding granularity.</param>
+            <returns>
+                A <see cref="T:System.DateTimeOffset"/> in the same <see cref="P:System.DateTimeOffset.Offset"/> that is rounded down to the nearest <paramref name="unit"/>.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                If <paramref name="unit"/> is less than or equal to 0
+            </exception>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetExtensions.RoundUp(System.DateTimeOffset,System.TimeSpan)">
+            <summary>
+                Rounds <paramref name="dateTime"/> up to the nearest higher <paramref name="unit"/>.
+            </summary>
+            <param name="dateTime">The <see cref="T:System.DateTimeOffset"/> to round up.</param>
+            <param name="unit">The <see cref="T:System.TimeSpan"/> that represented the rounding granularity.</param>
+            <returns>
+                A <see cref="T:System.DateTimeOffset"/> in the same <see cref="P:System.DateTimeOffset.Offset"/> that is rounded up to the nearest <paramref name="unit"/>.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                If <paramref name="unit"/> is less than or equal to 0
+            </exception>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetExtensions.ToUnixTimeMilliseconds45(System.DateTimeOffset)">
+            <summary>
+                Converts the supplied <paramref name="dateTime"/> to milliseconds per
+                <see href="https://msdn.microsoft.com/en-us/library/system.datetimeoffset.tounixtimemilliseconds(v=vs.110).aspx" />
+            </summary>
+            <remarks>
+                For date and time values before 1970-01-01T00:00:00Z, this method returns a negative value.
+            </remarks>
+            <param name="dateTime">The <see cref="T:System.DateTimeOffset"/> to convert.</param>
+            <returns>The Unix representation of the supplied <paramref name="dateTime"/>, in milliseconds.</returns>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils">
+            <summary>
+                Provides static utility methods for <see cref="T:System.DateTimeOffset"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils.Min(System.DateTimeOffset,System.DateTimeOffset)">
+            <summary>Returns the minimum of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</summary>
+            <param name="dateTime1">The first of two <see cref="T:System.DateTimeOffset"/>s to compare.</param>
+            <param name="dateTime2">The second of two <see cref="T:System.DateTimeOffset"/>s to compare.</param>
+            <returns>The smaller of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils.Max(System.DateTimeOffset,System.DateTimeOffset)">
+            <summary>Returns the minimum of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</summary>
+            <param name="dateTime1">The first of two <see cref="T:System.DateTimeOffset"/>s to compare.</param>
+            <param name="dateTime2">The second of two <see cref="T:System.DateTimeOffset"/>s to compare.</param>
+            <returns>The bigger of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils.Min(System.DateTime,System.DateTime)">
+            <summary>Returns the minimum of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</summary>
+            <param name="dateTime1">The first of two <see cref="T:System.DateTime"/>s to compare.</param>
+            <param name="dateTime2">The second of two <see cref="T:System.DateTime"/>s to compare.</param>
+            <returns>The smaller of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils.Max(System.DateTime,System.DateTime)">
+            <summary>Returns the minimum of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</summary>
+            <param name="dateTime1">The first of two <see cref="T:System.DateTime"/>s to compare.</param>
+            <param name="dateTime2">The second of two <see cref="T:System.DateTime"/>s to compare.</param>
+            <returns>The bigger of <paramref name="dateTime1"/> and <paramref name="dateTime2"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils.TryParse(System.String)">
+            <summary>
+                Attempts to parse <paramref name="input"/> as a <see cref="T:System.DateTimeOffset"/>.
+                On failure, returns <c>null</c>.
+            </summary>
+            <param name="input">The <see cref="T:System.String"/> to attempt to parse.</param>
+            <returns>The parsed value or <c>null</c>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils.ParseOrDefault(System.String,System.DateTimeOffset,Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DateTimeOffsetUtils.LogParseFailure)">
+            <summary>Parses the value if possible - overwise returns default value</summary>
+            <param name="input">The <see cref="T:System.String"/> to attempt to parse</param>
+            <param name="defaultValue">The default value to be returned if parsing fails</param>
+            <param name="onParseFailure">
+                Delegate called in the event <paramref name="input"/> cannot be parsed.
+                Parsing is generally reserved for reading configs and user input. In both
+                of these cases, you should at a minimum log the parse failure.
+            </param>
+            <returns>The parsed value or <see cref="!:defaultValue"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DictionaryExtensions.GetValueOrDefault``2(System.Collections.Generic.IDictionary{``0,``1},``0,``1)">
+            <summary>Returns the value from the dictionary or the default key. In case if null is a key exception is thrown</summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DictionaryExtensions.GetValueOrDefaultNK``2(System.Collections.Generic.IDictionary{``0,``1},``0,``1)">
+            <summary>Returns the value from the dictionary or the default key. In case if null is a key, the default value will be returned</summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.EnumerableExtensions.TakeLast``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Take the last <paramref name="N"/> elements.
+            </summary>
+            <typeparam name="T">The type of elements.</typeparam>
+            <param name="source">The enumerable entity.</param>
+            <param name="N">The elements to take.</param>
+            <returns>The last <paramref name="N"/> of <paramref name="source"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.EnumerableExtensions.ConcatFormatted``1(System.Collections.Generic.IEnumerable{``0},System.Action{System.Text.StringBuilder,``0},System.Int32)">
+            <summary>
+            A formatted string concatenation.
+            </summary>
+            <typeparam name="T">The type of the entity.</typeparam>
+            <param name="source">The list of elements to be formatted and concatenated.</param>
+            <param name="formatter">The formatter to use.</param>
+            <param name="expectedLength">The expected length of the final string.</param>
+            <returns>The formatted concatenation.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ExceptionExtensions.Rethrow(System.Exception)">
+            <summary>
+                Rethrows the supplied exception without losing it's stack trace.
+                Prefer <code>throw;</code> where possible, this method is useful for rethrowing
+                <see cref="P:System.Exception.InnerException" />
+                which cannot be done with the <code>throw;</code> semantics.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.GenericFrameworkExtensions.ThrowIfNull``1(``0,System.Func{System.Exception})">
+            <summary>
+            invokes and throws resulting exception from the exception lambda if the source is null
+            this method is best used when chaining: 
+            GetSomeEnumerable()
+              .FirstOrDefault(...)
+              .ThrowIfNull(()=> new MyException())
+            </summary>
+            <typeparam name="T">the source type for the extension, any class</typeparam>
+            <param name="source">the instance source for this extension</param>
+            <param name="exceptionExpression">lambda for which exception to throw</param>
+            <exception cref="T:System.Exception">Result of <paramref name="exceptionExpression"/> is thrown if <paramref name="source"/> is <see langword="null"/></exception>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.GenericFrameworkExtensions.ThrowIfNull``1(``0,System.String)">
+            <summary>
+            throws ArgumentNullException if source is null
+            </summary>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is <see langword="null"/></exception>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ValidatedNotNullAttribute">
+            <summary>
+            Disables code analysis warnings on arguments requiring validation, e.g.
+            <list type="bullet">
+            <item>CA1062: ValidateArgumentsOfPublicMethods</item>
+            </list>
+            </summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.NumberUtils">
+            <summary>
+                Provides static utility methods for numeric types.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.NumberUtils.ParseOrDefault(System.String,System.Int32,Microsoft.Cloud.Common.BaseUtilities.BclExtensions.NumberUtils.ParseFailureHandler)">
+            <summary>Parses the value if possible - overwise returns default value</summary>
+            <param name="input">The <see cref="T:System.String"/> to attempt to parse</param>
+            <param name="defaultValue">The default value to be returned if parsing fails</param>
+            <param name="onParseFailure">
+                Delegate called in the event <paramref name="input"/> cannot be parsed.
+                Parsing is generally reserved for reading configs and user input. In both
+                of these cases, you should at a minimum log the parse failure.
+            </param>
+            <returns>The parsed value or <see cref="!:defaultValue"/>.</returns>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.Parsers">
+            <summary>Provides common parser helpers</summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.Parsers.ParseOrDefault(System.String,System.Guid)">
+            <summary>Parses guid, if the format is not value uses default value</summary>
+            <param name="input">The GUID to convert</param>
+            <param name="defaultValue">The default value to be returned if parsing failed</param>
+            <returns>The parsed GUID if the input is in valid format, defaultValue otherwise</returns>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions">
+            <summary>
+            The extension method for list objects.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.EachGroup``2(System.Collections.Generic.IReadOnlyList{``0},System.Func{``0,``1},System.Action{``1,System.Int32,System.Int32})">
+            <summary>
+            GroupBy implementation on a sorted list.
+            Accepts sorted list as an argument, gets the key of each element and invokes the specifed action for each group of
+            elements in that list that have the same key.
+            </summary>
+            <typeparam name="TValue">The lsit element type.</typeparam>
+            <typeparam name="TKey">The key type.</typeparam>
+            <param name="list">The list of elements. List must be sorted in such a way that same keys will be adajacent in list.</param>
+            <param name="groupKeySelector">The function to convert a list element to a key.</param>
+            <param name="action">The action to invoke for each group of elements that have the same key.
+            Accepts group key, first index of the group and the length as parameters.</param>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.EachGroupAsync``2(System.Collections.Generic.IReadOnlyList{``0},System.Func{``0,``1},System.Threading.CancellationToken,System.Func{``1,System.Int32,System.Int32,System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>
+            GroupBy implementation on a sorted list.
+            Accepts sorted list as an argument, gets the key of each element and invokes the specifed action for each group of
+            elements in that list that have the same key.
+            </summary>
+            <typeparam name="TValue">The lsit element type.</typeparam>
+            <typeparam name="TKey">The key type.</typeparam>
+            <param name="list">The list of elements. List must be sorted in such a way that same keys will be adajacent in list.</param>
+            <param name="groupKeySelector">The function to convert a list element to a key.</param>
+            <param name="action">The action to invoke for each group of elements that have the same key.
+            Accepts group key, first index of the group and the length as parameters.</param>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.EachGroup``2(System.Collections.Generic.IReadOnlyList{``0},System.Int32,System.Int32,System.Func{``0,``1},System.Action{``1,System.Int32,System.Int32})">
+            <summary>
+            GroupBy implementation on a part of the sorted list [startIndex, startIndex + length - 1].
+            Accepts sorted list as an argument, gets the key of each element and invokes the specifed action for each group of
+            elements in that list that have the same key.
+            </summary>
+            <typeparam name="TValue">The lsit element type.</typeparam>
+            <typeparam name="TKey">The key type.</typeparam>
+            <param name="list">The list of elements. List must be sorted in such a way that same keys will be adajacent in list.</param>
+            <param name="startIndex">The start index.</param>
+            <param name="length">The number of elements to process.</param>
+            <param name="groupKeySelector">The function to convert a list element to a key.</param>
+            <param name="action">The async action to invoke for each group of elements that have the same key.
+            Accepts group key, first index of the group and the length as parameters.</param>
+        </member>
+        <member name="P:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.Current">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.GroupKey">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.System#Collections#IEnumerator#Current">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.GetEnumerator">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.System#Collections#IEnumerable#GetEnumerator">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.MoveNext">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.GroupEnumerable`2.Reset">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.EachGroup``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Action{Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.IGroupEnumerable{``1,``0}})">
+            <summary>
+            GroupBy implementation for IEnumerable{T}
+            Accepts sorted enumeration list as an argument, gets the key of each element and invokes the specifed action for each group of
+            elements in that list that have the same key.
+            </summary>
+            <typeparam name="TValue">The lsit element type.</typeparam>
+            <typeparam name="TKey">The key type.</typeparam>
+            <param name="list">The list of elements. List must be sorted in such a way that same keys will be adajacent in list.</param>
+            <param name="groupKeySelector">The function to convert a list element to a key.</param>
+            <param name="action">The action to invoke for each group of elements that have the same key.
+            Accepts group key, first index of the group and the length as parameters.</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.EachGroupAsync``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Threading.CancellationToken,System.Func{Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.IGroupEnumerable{``1,``0},System.Threading.CancellationToken,System.Threading.Tasks.Task})" -->
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.ListExtensions.EachGroupAsync``2(System.Collections.Generic.IReadOnlyList{``0},System.Int32,System.Int32,System.Func{``0,``1},System.Threading.CancellationToken,System.Func{``1,System.Int32,System.Int32,System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>
+            GroupBy implementation on a part of the sorted list [startIndex, startIndex + length - 1].
+            Accepts sorted list as an argument, gets the key of each element and invokes the specifed action for each group of
+            elements in that list that have the same key.
+            </summary>
+            <typeparam name="TValue">The lsit element type.</typeparam>
+            <typeparam name="TKey">The key type.</typeparam>
+            <param name="list">The list of elements. List must be sorted in such a way that same keys will be adajacent in list.</param>
+            <param name="startIndex">The start index.</param>
+            <param name="length">The number of elements to process.</param>
+            <param name="groupKeySelector">The function to convert a list element to a key.</param>
+            <param name="action">The async action to invoke for each group of elements that have the same key.
+            Accepts group key, first index of the group and the length as parameters.</param>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DisposableExtensions.SafeDispose(System.IDisposable,System.Action{System.Exception},System.Boolean)">
+            <summary>
+            Safely dispose of <paramref name="disposable"/>, allowing for handling of nulls and
+            any exceptions thrown during <see cref="M:System.IDisposable.Dispose"/>.
+            </summary>
+            <remarks>
+            It is possible to call <see cref="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.DisposableExtensions.SafeDispose(System.IDisposable,System.Action{System.Exception},System.Boolean)"/> in a non-safe way due to it's parameters.
+            These are included for transparency into what the method is doing.
+            </remarks>
+            <param name="disposable">The object to dispose</param>
+            <param name="onException">An optional method to call in the event of an exception</param>
+            <param name="ignoreExceptionsFromOnException">If true, any exceptions from <paramref name="onException"/> will be silently swallowed.</param>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.StringExtensions.StartsWithCI(System.String,System.String)">
+            <summary>does an ordinal, case-insensitive StartsWith</summary>
+            <param name="target">string number 1</param>
+            <param name="value">string number 2</param>
+            <returns>true if target.StartsWith(value, StringComparison.OrdinalIgnoreCase) and false otherwise</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.StringExtensions.Truncate(System.String,System.Int32)">
+            <summary>truncates to the maxLength if string is longer than maxLength.</summary>
+            <param name="target">string which will be truncated</param>
+            <param name="maxLength">maxLength of the truncated string</param>
+            <returns>truncated string</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.StringExtensions.ReplaceCI(System.String,System.String,System.String)">
+            <summary>
+            Replaces every occurance of <paramref name="template"/> with <paramref name="replacement"/>
+            with <see cref="F:System.StringComparison.OrdinalIgnoreCase"/>.
+            </summary>
+            <param name="target">
+            The format string.
+            </param>
+            <param name="template">
+            The template to replace.
+            </param>
+            <param name="replacement">
+            The replacement value.
+            </param>
+            <returns>
+            The replaced string.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.TimeSpanUtils.TryParse(System.String)">
+            <summary>
+                Attempts to parse <paramref name="input"/> as a <see cref="T:System.DateTimeOffset"/>.
+                On failure, returns <c>null</c>.
+            </summary>
+            <param name="input">The <see cref="T:System.String"/> to attempt to parse.</param>
+            <returns>The parsed value or <c>null</c>.</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.TimeSpanUtils.ParseOrDefault(System.String,System.TimeSpan,Microsoft.Cloud.Common.BaseUtilities.BclExtensions.TimeSpanUtils.LogParseFailure)">
+            <summary>Parses the value if possible - overwise returns default value</summary>
+            <param name="input">The <see cref="T:System.String"/> to attempt to parse</param>
+            <param name="defaultValue">The default value to be returned if parsing fails</param>
+            <param name="onParseFailure">
+                Delegate called in the event <paramref name="input"/> cannot be parsed.
+                Parsing is generally reserved for reading configs and user input. In both
+                of these cases, you should at a minimum log the parse failure.
+            </param>
+            <returns>The parsed value or <see cref="!:defaultValue"/></returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.TimeSpanUtils.Max(System.TimeSpan,System.TimeSpan)">
+            <summary>Returns the largest of two timespans</summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.TimeSpanUtils.Min(System.TimeSpan,System.TimeSpan)">
+            <summary>Returns the smallest of two timespans</summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.TimeSpanUtils.Abs(System.TimeSpan)">
+            <summary>Returns the absolute value of the timespan</summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.UriUtils">
+            <summary>
+                Provides static utility methods for <see cref="T:System.Uri"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.UriUtils.TryParse(System.String,System.Uri@)">
+            <summary>
+                Converts <paramref name="input"/> the string representation of absolute uri to its <see cref="T:System.Uri"/> equivalent.
+            </summary>
+            <param name="input">The <see cref="T:System.String"/> to attempt to parse.</param>
+            <returns>true if s was converted successfully; otherwise, false</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.BclExtensions.UriUtils.ParseOrDefault(System.String,System.Uri,Microsoft.Cloud.Common.BaseUtilities.BclExtensions.UriUtils.ParseFailureHandler)">
+            <summary>Parses the value if possible - overwise returns default value</summary>
+            <param name="input">The <see cref="T:System.String"/> to attempt to parse</param>
+            <param name="defaultValue">The default value to be returned if parsing fails</param>
+            <param name="onParseFailure">
+                Delegate called in the event <paramref name="input"/> cannot be parsed.
+                Parsing is generally reserved for reading configs and user input. In both
+                of these cases, you should at a minimum log the parse failure.
+            </param>
+            <returns>The parsed value or <see cref="!:defaultValue"/>.</returns>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.Concurrency.LazyWithoutExceptionCaching`1">
+            <summary>
+                Provides the late(/lazy) binding of objects but without caching initialization exceptions.
+                Helpful for scenarios where you want to create the object as late as possible, have only
+                one instance of it, but retry in case there are failures.
+            
+                Example: a service that has a connector to another service that may or may not be up at
+                initialization time.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Cloud.Common.BaseUtilities.Concurrency.LazyWithoutExceptionCaching`1.Value">
+            <exception cref="T:System.Exception">Exceptions from the underlying value factory will be propogated.</exception>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.Concurrency.LazyWithoutExceptionCaching">
+            <summary>
+            Utility class for type inference
+            </summary>
+            <example>
+            <code>
+            LazyWithoutExceptionCaching.Create(() => "foo") // type LazyWithoutExceptionCaching{string} is inferred
+            </code>
+            </example>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.ListEqualityComparer">
+            <summary>
+            Helpers for <see cref="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.ListEqualityComparer`1"/> such as type inference
+            .
+            Creates equality comparers that operate based on ORDERED collections (aka <see cref="T:System.Collections.Generic.IList`1"/>'s).
+            </summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.ListEqualityComparer`1">
+            <summary>
+            Compares two collections for equality by using the contained items' <see cref="T:System.IEquatable`1"/> methods
+            </summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.CollectionEqualityComparer">
+            <summary>
+            Helpers for <see cref="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.CollectionEqualityComparer`1"/> such as type inference
+            </summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.CollectionEqualityComparer`1">
+            <summary>
+            Compares two collections for equality by using the contained items' <see cref="T:System.IEquatable`1"/> methods
+            </summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer`2">
+            <summary>
+            Equality comparer for <see cref="T:System.Collections.Generic.IDictionary`2"/>
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer`2.#ctor(System.Collections.Generic.IEqualityComparer{`0},System.Collections.Generic.IEqualityComparer{`1},Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer.ValidationMode)">
+            <summary>
+            Private to hide the concrete instance and prevent addition/dependency on fields/properties/methods
+            that are not specified by <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>, which would be an abstraction leak
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer`2.System#Collections#Generic#IEqualityComparer{System#Collections#Generic#IDictionary{TKey,TValue}}#Equals(System.Collections.Generic.IDictionary{`0,`1},System.Collections.Generic.IDictionary{`0,`1})">
+            <exception cref="T:System.Data.Linq.DuplicateKeyException">
+            If the input dictionaries contain keys that the <see cref="T:System.Collections.Generic.EqualityComparer`1"/> provided
+            to the ctor consider duplicates.
+            (However, NOT in the short-circuit cases of counts !=, == null, or ReferenceEquals)
+            </exception>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer">
+            <summary>
+            Non-generic parts of <see cref="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer`2"/>
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer.Create``2(System.Collections.Generic.IEqualityComparer{``0},System.Collections.Generic.IEqualityComparer{``1},Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer.ValidationMode)">
+            <summary>
+            Creates a new instance of <see cref="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer`2"/> with the supplied
+            <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>s for Keys and Values.
+            </summary>
+            <remarks>
+            Provided to support type inference based on the arguments.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer.ValidationMode.Optimistic">
+            <summary>
+                Will avoid additional validation under the premise that the caller
+                has ensured that the provided dictionaries have similar internal
+                <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>s
+                .
+                E.g., it will use <see cref="!:IDictionary&lt;TKey,TValue&gt;[]"/> to look up
+                values in the dictionaries (which will internally use the internal
+                equality comparer).
+                .
+                You should NOT use this option unless there were performance conerns
+                or you have assurances of the assumption, as the bugs it could cause
+                will be quite difficult to debug.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.DictionaryEqualityComparer.ValidationMode.Pessimistic">
+            <summary>
+                Makes no presumptions about the input <see cref="T:System.Collections.Generic.IDictionary`2"/>'s
+                and will throw an exception for undefined edge cases (e.g. providing 'a'
+                and 'A' but telling this instance to compare Case-Insenstive).
+            </summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.ReferenceEqualityComparer`1">
+            <summary>
+            Provides an implementation which compares two objects for being the references of same instance
+            </summary>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.ReferenceEqualityComparer`1.Equals(`0,`0)">
+            <summary>
+            Overrides <see cref="M:System.Collections.Generic.IEqualityComparer`1.Equals(`0,`0)"/> to compare if two objects are references of same object
+            </summary>
+            <param name="x">lhs object</param>
+            <param name="y">rhs object</param>
+            <returns>returns a boolean indicating whether variables are same references</returns>
+        </member>
+        <member name="M:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.ReferenceEqualityComparer`1.GetHashCode(`0)">
+            <summary>
+            Overrides <see cref="M:System.Collections.Generic.IEqualityComparer`1.GetHashCode(`0)"/> to return the hash code of the object
+            </summary>
+            <param name="obj">returns the same value as <see cref="M:System.Collections.Generic.IEqualityComparer`1.GetHashCode(`0)"/></param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.SetEqualityComparer">
+            <summary>
+            Helpers for <see cref="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.SetEqualityComparer`1"/>
+            </summary>
+        </member>
+        <member name="T:Microsoft.Cloud.Common.BaseUtilities.EqualityComparers.SetEqualityComparer`1">
+            <summary>
+            Compares two sets for equality by using the contained items' <see cref="T:System.IEquatable`1"/> methods
+            </summary>
+        </member>
+    </members>
+</doc>

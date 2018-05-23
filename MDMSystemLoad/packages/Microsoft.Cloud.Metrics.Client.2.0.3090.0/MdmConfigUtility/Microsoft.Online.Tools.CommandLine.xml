@@ -1,0 +1,498 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Online.Tools.CommandLine</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Online.Tools.CommandLine.CommandLineAliasAttribute">
+            <summary>
+            Specifies an alternative name for the command line option corresponding to a property of
+            the <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase"/> class or one of its derivatives.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineAliasAttribute.name">
+            <summary>
+            Alternative name for the command line option.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineAliasAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineAliasAttribute"/> class.
+            </summary>
+            <param name="name">Alternative name for the command line option.</param>
+        </member>
+        <member name="P:Microsoft.Online.Tools.CommandLine.CommandLineAliasAttribute.Name">
+            <summary>
+            Gets an alternative name for the command line option.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase">
+            <summary>
+            Base class for command line options.
+            </summary>
+            <remarks>
+            To add command line options specific to your executable, derive from this class and add
+            public properties, each decorated with <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineHelpAttribute"/> and
+            optionally one or more <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineAliasAttribute"/> attributes.  When an invalid
+            value is set, throw an exception with a message to display.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.options">
+            <summary>
+            Command line options.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.positionalArgs">
+            <summary>
+            Command line positional arguments.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.captureSubsequentArgs">
+            <summary>
+            Command line positional argument that captures all reamining positional arguments, or
+            <see langword="null"/> if none.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.nameToOptionMap">
+            <summary>
+            Mapping of name to command line option.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.exitCode">
+            <summary>
+            A process exit code to return if the command line is invalid, otherwise null.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.ResetExitCode">
+            <summary>
+            Reset the exit code after a parse failure.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.Parse(System.String[])">
+            <summary>
+            Parses command line arguments.
+            </summary>
+            <param name="args">Command line arguments.</param>
+            <returns>Null to continue execution, otherwise a process exit code.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.GetNetworkCredential(System.String,System.String)">
+            <summary>
+            Prompts for a password.
+            </summary>
+            <param name="targetName">
+            Name of the target for the credentials, typically a server name.
+            </param>
+            <param name="userName">Credential user name.</param>
+            <returns>
+            A new <see cref="T:System.Net.NetworkCredential"/> containing <paramref name="userName"/> and the
+            specified password.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.GetPassword(System.String,System.String)">
+            <summary>
+            Prompts for a password.
+            </summary>
+            <param name="targetName">
+            Name of the target for the credentials, typically a server name.
+            </param>
+            <param name="userName">Credential user name.</param>
+            <returns>The password.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.Validate">
+            <summary>
+            Validates the set of command line options once they have all been read.
+            </summary>
+            <exception cref="T:System.ApplicationException">The options are invalid.</exception>
+            <exception cref="T:System.InvalidOperationException">The options are invalid.</exception>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.SetExitCode(System.Int32)">
+            <summary>
+            Sets a process exit code indicating the command line is invalid.  Ignored if the exit
+            code has already been set.
+            </summary>
+            <param name="exitCode">Process exit code.</param>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.DisplayUsage">
+            <summary>
+            Displays command line help.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.SetOption(System.String,System.Reflection.PropertyInfo,System.String)">
+            <summary>
+            Sets an option as specified by the command line (as /option or /option=value).
+            </summary>
+            <param name="name">Name of the option, as specified on the command line.</param>
+            <param name="propertyInfo">
+            PropertyInfo for the property corresponding to the command line option.
+            </param>
+            <param name="value">The value of the option, or null if none.</param>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.AddArgument(System.Reflection.PropertyInfo,System.String)">
+            <summary>
+            Adds a positional argument value to a collection.
+            </summary>
+            <param name="propertyInfo">
+            PropertyInfo for the property corresponding to the argument.
+            </param>
+            <param name="value">The value of the argument.</param>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.IsNullableEnum(System.Type,System.Type@)">
+            <summary>
+            Checks if the given type is nullable enum.
+            </summary>
+            <param name="type">Type to check if it is a nullable enum or not.</param>
+            <param name="underlyingType">Gets the underlying type.</param>
+            <returns>
+            <see langword ="true"/> if the value is nullable enum type otherwise <see langword = "false"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.Convert(System.String,System.Type)">
+            <summary>
+            Converts a command-line option or argument value into a value of another type.
+            </summary>
+            <param name="value">Value to convert.</param>
+            <param name="type">Type to which to convert the value.</param>
+            <returns>
+            The converted value, or <see langword="null"/> if the value cannot be converted.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.GetHelpText(System.Reflection.PropertyInfo)">
+            <summary>
+            Gets the help text associated with a positional argument or option.
+            </summary>
+            <param name="propertyInfo">Positional argument or option.</param>
+            <returns>Help text, or <see langword="null"/> if none.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.WriteLineWithWordWrap(System.IO.TextWriter,System.String,System.Object[])">
+            <summary>
+            Writes a line of text, word wrapping as necessary.
+            </summary>
+            <param name="writer">Writer to receive the text.</param>
+            <param name="format">Format string for text to write.</param>
+            <param name="formatArgs">Format arguments for text to write.</param>
+            <remarks>
+            This method assumes that upon entry the "cursor" is positioned in the first column of a
+            line.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.WriteLineWithWordWrap(System.IO.TextWriter,System.String)">
+            <summary>
+            Writes a line of text, word wrapping as necessary.
+            </summary>
+            <param name="writer">Writer to receive the text.</param>
+            <param name="text">Text to write.</param>
+            <remarks>
+            This method assumes that upon entry the "cursor" is positioned in the first column of a
+            line.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.WriteLineWithWordWrap(System.IO.TextWriter,System.Int32,System.Int32,System.String,System.Object[])">
+            <summary>
+            Writes a line of text, word wrapping as necessary.
+            </summary>
+            <param name="writer">Writer to receive the text.</param>
+            <param name="firstIndent">Indentation at which to start the first line.</param>
+            <param name="subsequentIndent">Indentation at which to start lines after the first.
+            </param>
+            <param name="format">Format string for text to write.</param>
+            <param name="formatArgs">Format arguments for text to write.</param>
+            <remarks>
+            This method assumes that upon entry the "cursor" is positioned in the first column of a
+            line.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.WriteLineWithWordWrap(System.IO.TextWriter,System.Int32,System.Int32,System.String)">
+            <summary>
+            Writes a line of text, word wrapping as necessary.
+            </summary>
+            <param name="writer">Writer to receive the text.</param>
+            <param name="firstIndent">Indentation at which to start the first line.</param>
+            <param name="subsequentIndent">Indentation at which to start lines after the first.
+            </param>
+            <param name="text">Text to write.</param>
+            <remarks>
+            This method assumes that upon entry the "cursor" is positioned in the first column of a
+            line.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.IsOutputRedirected">
+            <summary>
+            Determines if stdout is redirected.
+            </summary>
+            <returns>True if redirected; false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase.SecureStringToString(System.Security.SecureString)">
+            <summary>
+            Converts a <see cref="T:System.Security.SecureString"/> to a <see cref="T:System.String"/> for the unfortunate
+            APIs that do not accept passwords represented as <see cref="T:System.Security.SecureString"/>.
+            </summary>
+            <param name="secureString">The <see cref="T:System.Security.SecureString"/> to convert.</param>
+            <returns>The corresponding clear text string.</returns>
+        </member>
+        <member name="T:Microsoft.Online.Tools.CommandLine.CommandLineExampleAttribute">
+            <summary>
+            Specifies an example for a command line option which will be displayed in usage.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineExampleAttribute.example">
+            <summary>
+            Example command line.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineExampleAttribute.help">
+            <summary>
+            Help for example command line.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineExampleAttribute.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineExampleAttribute"/> class.
+            </summary>
+            <param name="example">Example command line.</param>
+            <param name="help">Help string for example.</param>
+        </member>
+        <member name="P:Microsoft.Online.Tools.CommandLine.CommandLineExampleAttribute.Example">
+            <summary>
+            Gets an example command line.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Tools.CommandLine.CommandLineExampleAttribute.Help">
+            <summary>
+            Gets a help string for the xample command line.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Tools.CommandLine.CommandLineHelpAttribute">
+            <summary>
+            Specifies usage information for a command line option corresponding to a property of the
+            <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase"/> class or one of its derivatives.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineHelpAttribute.helpText">
+            <summary>
+            Usage information for the command line option.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineHelpAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineHelpAttribute"/> class.
+            </summary>
+            <param name="helpText">Usage information for the command line option.</param>
+        </member>
+        <member name="P:Microsoft.Online.Tools.CommandLine.CommandLineHelpAttribute.HelpText">
+            <summary>
+            Gets usage information for the command line option.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Tools.CommandLine.CommandLineNoteAttribute">
+            <summary>
+            Specifies a note to be displayed after the command-line options and examples for a class derived from
+            <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineArgumentsBase"/>.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.CommandLineNoteAttribute.noteText">
+            <summary>
+            Note to display.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLineNoteAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLineNoteAttribute"/> class.
+            </summary>
+            <param name="noteText">Note to display.</param>
+        </member>
+        <member name="P:Microsoft.Online.Tools.CommandLine.CommandLineNoteAttribute.NoteText">
+            <summary>
+            Gets the note to display.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Tools.CommandLine.CommandLinePositionAttribute">
+            <summary>
+            Specifies a positional command line argument.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.CommandLinePositionAttribute.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Online.Tools.CommandLine.CommandLinePositionAttribute"/> class.
+            </summary>
+            <param name="position">Position of the argument.</param>
+        </member>
+        <member name="P:Microsoft.Online.Tools.CommandLine.CommandLinePositionAttribute.Position">
+            <summary>
+            Gets the position of the argument.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Online.Tools.CommandLine.CommandLinePositionAttribute.CaptureAllSubsequentArguments">
+            <summary>
+            Gets or sets a value indicating whether to capture all subsequent positional values
+            also.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Tools.CommandLine.NativeMethods">
+            <summary>
+            Native methods invoked by this assembly.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CREDUI_MAX_USERNAME_LENGTH">
+            <summary>
+            Maximum length of the UserName field.  The worst case is User@DnsDomain.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CREDUI_MAX_PASSWORD_LENGTH">
+            <summary>
+            Maximum length of the Password field.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags">
+            <summary>
+            Flags for CredUICmdLinePromptForCredentials.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.None">
+            <summary>
+            No flag values.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.AlwaysShowUI">
+            <summary>
+            Display a user interface if the credentials can be returned from an existing
+            credential in credential manager.  This flag is permitted only if
+            CREDUI_FLAGS_GENERIC_CREDENTIALS is also specified and is used only in conjunction
+            with CREDUI_FLAGS_GENERIC_CREDENTIALS. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.DoNotPersist">
+            <summary>
+            Do not display the save message or store credentials.
+            CREDUI_FLAGS_SHOW_SAVE_CHECK_BOX can also be passed to display the save message
+            only and return the result in the save parameter.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.ExcludeCertificates">
+            <summary>
+            Prompt for user name/password. If the pszUserName parameter is specified, the user
+            name is omitted.  If the credential is persisted, store the passed-in user name with
+            the credential. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.ExpectConfirmation">
+            <summary>
+            Specifies that the caller will call CredUIConfirmCredentials to determine whether
+            the returned credentials are actually valid.  This ensures that credentials that are
+            not valid are not saved to the credential manager.  Specify this flag unless
+            CREDUI_FLAGS_DO_NOT_PERSIST is specified. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.GenericCredentials">
+            <summary>
+            Consider the credentials entered by the user a generic credential. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.IncorrectPassword">
+            <summary>
+            Silently ignore this flag.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.Persist">
+            <summary>
+            Do not show the save message, but save the credential as though the user answered
+            "y". 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.RequestAdministrator">
+            <summary>
+            Silently ignore this flag.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.RequireCertificate">
+            <summary>
+            Reserved for future use; do not pass this flag.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.RequireSmartCard">
+            <summary>
+            Use a smart card and prompt for a PIN. If more than one smart card is available,
+            select one of them.  If the userName parameter passes a string that is not empty,
+            the string must match the UPN associated with the certificate on one of the smart
+            cards.  A UPN matches if the string matches the whole UPN on the certificate or the
+            string matches the part to the left of the at sign (@) in the UPN of the
+            certificate.  If there is a match, the matching smart card is selected. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.ServerCredential">
+            <summary>
+            This flag is meaningful only in locating a matching credential to prefill the dialog
+            box, should authentication fail.  When this flag is specified, wildcard credentials
+            will not be matched.  It has no effect when writing a credential.  CredUI does not
+            create credentials that contain wildcard characters.  Any found were either created
+            explicitly by the user or created programmatically, as happens when a RAS connection
+            is made. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.ShowSaveCheckBox">
+            <summary>
+            Display the save message and return TRUE in the save out parameter if the user
+            answers "y", FALSE if the user answers "n".  CREDUI_FLAGS_DO_NOT_PERSIST must be
+            specified to use this flag. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags.UserNameTargetCredentials">
+            <summary>
+            The credential is a "runas" credential.  The targetName parameter specifies the name
+            of the command or program being run.  It is used for prompting purposes only. 
+            </summary>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.NativeMethods.GetStdHandle(System.Int32)">
+            <summary>
+            GetStdHandle win32 api.
+            </summary>
+            <param name="which">Which handle (-10 = stdin, -11 = stdout, -12 = stderr).</param>
+            <returns>Handle value.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.NativeMethods.GetConsoleMode(System.IntPtr,System.UInt32@)">
+            <summary>
+            GetConsoleMode win32 api.
+            </summary>
+            <param name="handle">Handle value.</param>
+            <param name="mode">Console mode (we don't use this).</param>
+            <returns>Zero for failure; 1 for success.</returns>
+        </member>
+        <member name="M:Microsoft.Online.Tools.CommandLine.NativeMethods.CredUICmdLinePromptForCredentialsW(System.String,System.IntPtr,System.Int32,System.IntPtr,System.Int32,System.IntPtr,System.Int32,System.IntPtr,Microsoft.Online.Tools.CommandLine.NativeMethods.CredUIFlags)">
+            <summary>
+            Prompts for and accepts credential information from a user working in a command-line
+            application.
+            </summary>
+            <param name="targetName">
+            Name of the target for the credentials, typically a server name.
+            </param>
+            <param name="reserved">Reserved; must be <see langword="null"/>.</param>
+            <param name="authError">
+            Win32 error specifying why prompting for credentials is needed.  May be 0.
+            </param>
+            <param name="userName">
+            Credential user name.  If a nonzero-length string is specified, the user will be
+            prompted only for the password.
+            </param>
+            <param name="userNameSize">
+            Maximum number of characters that can be copied to <paramref name="userName"/> including
+            the terminating null character.
+            </param>
+            <param name="password">
+            A pointer to a null-terminated string that contains the password for the credentials.
+            If a nonzero-length string is specified for password, the password parameter will be
+            prefilled with the string.
+            </param>
+            <param name="passwordSize">Size of the <paramref name="password"/> buffer.</param>
+            <param name="save">
+            A pointer to a BOOL that specifies the initial state of the Save message and receives
+            the state of the Save message after the user has responded to the command prompt.
+            </param>
+            <param name="flags">Combination of options.</param>
+            <returns>0 if successful, otherwise a Win32 error code.</returns>
+        </member>
+    </members>
+</doc>
