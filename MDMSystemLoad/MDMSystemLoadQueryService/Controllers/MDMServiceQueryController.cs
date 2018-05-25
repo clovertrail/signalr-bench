@@ -25,22 +25,6 @@ namespace MDMSystemLoadQueryService.Controllers
         [HttpGet, Route("query")]
         public string Get(string platform, string systemLoad, string podName, string dateStart, string dateEnd)
         {
-            if (DateTime.TryParse(dateStart, out DateTime normalDateStart))
-            {
-                Console.WriteLine($"Successfully parse the start date: {normalDateStart}");
-            }
-            else
-            {
-                Console.WriteLine($"Fail to parse the start date: {dateStart}");
-            }
-            if (DateTime.TryParse(dateEnd, out DateTime normalDateEnd))
-            {
-                Console.WriteLine($"Successfully parse the end date: {normalDateEnd}");
-            }
-            else
-            {
-                Console.WriteLine($"Fail to parse the end date: {dateEnd}");
-            }
             if (!Enum.TryParse<PlatformType>(platform, out var platformType))
             {
                 Console.WriteLine($"Fail to parse platform type {platform}");
@@ -49,7 +33,7 @@ namespace MDMSystemLoadQueryService.Controllers
             {
                 Console.WriteLine($"Fail to parse SystemLoad type {systemLoad}");
             }
-            Console.WriteLine($"Query metrics for {platformType}, {systemLoadType}, {podName}, {normalDateStart}, {normalDateEnd}");
+            Console.WriteLine($"Query metrics for {platformType}, {systemLoadType}, {podName}, {dateStart}, {dateEnd}");
             return _mDMQuery.QueryMetrics(platformType, systemLoadType, podName, dateStart, dateEnd);
         }
 

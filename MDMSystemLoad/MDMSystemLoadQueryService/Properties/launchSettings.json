@@ -23,7 +23,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:5353/"
+      "applicationUrl": "http://honzhan-deskhp:5353/"
     }
   }
 }
