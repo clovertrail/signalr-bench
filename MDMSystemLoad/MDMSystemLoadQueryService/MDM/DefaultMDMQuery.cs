@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace MDMSystemLoadQueryService
@@ -35,12 +36,15 @@ namespace MDMSystemLoadQueryService
                 .Append(endTime).Append(" ")
                 .Append(_mDMOptions.ResultPath);
             var task = RunProcessAsync(exePath, argsBuilder.ToString());
-            if (task)
+            if (task && File.Exists(_mDMOptions.ResultPath))
             {
-                using (System.IO.StreamReader file = new System.IO.StreamReader(_mDMOptions.ResultPath, true))
+                string content;
+                using (StreamReader file = new StreamReader(_mDMOptions.ResultPath, true))
                 {
-                    return file.ReadToEnd();
+                    content = file.ReadToEnd();
                 }
+                File.Delete(_mDMOptions.ResultPath);
+                return content;
             }
             else
             {
