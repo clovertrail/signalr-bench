@@ -496,3 +496,18 @@ _EOF
 		sleep 1
 	done
 }
+
+function extract_servicename_from_connectionstring() {
+	local connectionString=$1
+	local is_dogfood=`echo "$connectionString"|grep "servicedev.signalr.net"`
+	if [ "$is_dogfood" != "" ]
+	then
+		local serviceName=`echo "$connectionString"|awk -F = '{print $2}'|awk -F ";" '{print $1}'|awk -F '//' '{print $2}'|awk -F . '{print $1}'`
+		if [ "$serviceName" != "" ]
+		then
+			echo "$serviceName"
+			return
+		fi
+	fi
+	echo ""
+}

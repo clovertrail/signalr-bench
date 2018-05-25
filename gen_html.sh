@@ -1,12 +1,15 @@
 #!/bin/bash
 . ./func_env.sh
 
+connectionString=""
+
 function gen_single_html
 {
 	local bench_type=$1
 	local bench_codec=$2
 	local bench_name=$3
-
+	local serviceName="" metricName=""
+	local j=1 max=4
 	local resultdir=${bench_type}_${bench_codec}_${bench_name}
 	local html_dir=$result_dir/$resultdir
 	local norm_file=$result_dir/$resultdir/$sigbench_norm_file
@@ -22,12 +25,26 @@ function gen_single_html
 	go run parseresult.go -input $norm_file -lastlatabPercent > $html_dir/latency_table.js
 	go run parseresult.go -input $norm_file -category500ms > $html_dir/latency_table_500ms_category.js
 	go run parseresult.go -input $norm_file -category1s > $html_dir/latency_table_1s_category.js
-	#if [ "$bench_type" == "service" ]
-	#then
-	#	ssh -p $bench_service_pub_port ${bench_service_user}@${bench_service_pub_server} "lscpu" >$html_dir/cpuinfo.txt
-	#else
-	#	ssh -p $bench_app_pub_port ${bench_app_user}@${bench_app_pub_server} "lscpu" >$html_dir/cpuinfo.txt
-	#fi
+
+        if [ "$connectionString" != "" ]
+	then
+		serviceName=$(extract_servicename_from_connectionstring $connectionString)
+		if [ "$serviceName" != "" ]
+		then
+			local timeWindows=`go run parseresult.go -input $norm_file `
+			for i in `sh find_pod_name_by_resourcename.sh $serviceName`
+			do
+				metricName=CPU_metrics${j}
+				sh query_cpu_memory_usage.sh CPU $i $timeWindows > $html_dir/${metricName}.json
+				go run parsemdm.go -input $html_dir/${metricName}.json -index ${metricName} > ${metricName}.js
+
+				metricName=Memory_metrics${j}
+				sh query_cpu_memory_usage.sh Memory $i $timeWindows > $html_dir/${metricName}.json
+                                go run parsemdm.go -input $html_dir/${metricName}.json -index ${metricName} > ${metricName}.js
+				j=`expr $j + 1`
+			done
+		fi
+	fi
 
 	local cmd_prefix=$cmd_config_prefix
 	. $sigbench_config_dir/${cmd_prefix}_${bench_codec}_${bench_name}_${bench_type}
@@ -45,4 +62,9 @@ function gen_html() {
 	iterate_all_scenarios gen_single_html
 }
 
+if [ $# -eq 1 ]
+then
+  # Get the service name through connection string. It is used to query MDMetrics for CPU and Memory
+  connectionString=$1
+fi
 gen_html

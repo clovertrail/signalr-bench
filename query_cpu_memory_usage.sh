@@ -15,7 +15,6 @@ startDateUtc=$3
 endDateUtc=$4
 
 function dogfood_memory() {
-local startDateUtc=`echo $2| python -c 'import sys,urllib;print urllib.quote(sys.stdin.read().strip())'`
 curl -X GET --data-urlencode "platform=Dogfood" \
             --data-urlencode "systemLoad=Memory" \
             --data-urlencode "podName=${podName}" \

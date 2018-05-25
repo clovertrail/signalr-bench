@@ -7,6 +7,15 @@
     <script type="text/javascript" src="latency_area.js"></script>
     <script type="text/javascript" src="latency_rate.js"></script>
     <script type="text/javascript" src="latency_rate_size.js"></script>
+    <script type="text/javascript" src="CPU_metrics1.js"></script>
+    <script type="text/javascript" src="CPU_metrics2.js"></script>
+    <script type="text/javascript" src="CPU_metrics3.js"></script>
+    <script type="text/javascript" src="CPU_metrics4.js"></script>
+    <script type="text/javascript" src="Memory_metrics1.js"></script>
+    <script type="text/javascript" src="Memory_metrics2.js"></script>
+    <script type="text/javascript" src="Memory_metrics3.js"></script>
+    <script type="text/javascript" src="Memory_metrics4.js"></script>
+
 </head>
 <body>
   <div class="container">
@@ -48,6 +57,20 @@
 		    <div id="send_recv_size"></div>
                 </section>
           </div>
+	  <div class="content">
+                <section>
+                    <h2>CPU & Memory metrics for Service</h2>
+		    <div id="CPU_metrics1"></div>
+		    <div id="CPU_metrics2"></div>
+		    <div id="CPU_metrics3"></div>
+		    <div id="CPU_metrics4"></div>
+		    <div id="Memory_metrics1"></div>
+		    <div id="Memory_metrics2"></div>
+		    <div id="Memory_metrics3"></div>
+		    <div id="Memory_metrics4"></div>
+                </section>
+          </div>
+
         </div>
 {{template "footer"}}
 {{end}}

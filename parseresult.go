@@ -37,7 +37,7 @@ type Monitor struct {
 
 func main() {
 	var infile = flag.String("input", "", "Specify the input file")
-	var lastLatency, all, rate, sizerate, lastLatab, lastLatabPercent, category500ms, category1s, googlechart, areachart bool
+	var timeWindow, lastLatency, all, rate, sizerate, lastLatab, lastLatabPercent, category500ms, category1s, googlechart, areachart bool
 	lastLatency = false
 	all = false
 	rate = false
@@ -48,6 +48,7 @@ func main() {
 	category1s = false
 	googlechart = true
 	areachart = false
+	timeWindow = false
 	flag.BoolVar(&all, "all", false, "Print all information")
 	flag.BoolVar(&lastLatency, "lastlatency", false, "Print the last item of latency")
 	flag.BoolVar(&rate, "rate", false, "Print send/recv rate")
@@ -58,6 +59,7 @@ func main() {
 	flag.BoolVar(&category1s, "category1s", false, "Print a table for last latency percentage with 1s as a boundary")
 	flag.BoolVar(&googlechart, "googlechart", true, "Print Google chart function")
 	flag.BoolVar(&areachart, "areachart", false, "Print Area chart")
+	flag.BoolVar(&timeWindow, "timeWindow", false, "Print the time window for test [start_time - 1 minutes] and [end_time + 1 mintues]")
 	flag.Usage = func() {
 		fmt.Println("-input <input_file> : specify the input file")
 		fmt.Println("-lastlatency        : print the last item of latency")
@@ -70,6 +72,7 @@ func main() {
 		fmt.Println("-category1s         : print a table for last latency percentage with 1s as a boundry")
 		fmt.Println("-googlechart        : print Google chart function")
 		fmt.Println("-areachart          : print Area chart")
+		fmt.Println("-timeWindow         : Print the time window for test [start_time - 1 minutes] and [end_time + 1 mintues]")
 	}
 	flag.Parse()
 	if infile == nil || *infile == "" {
@@ -84,6 +87,11 @@ func main() {
 	}
 	var monitors []Monitor
 	json.Unmarshal(raw, &monitors)
+	if timeWindow && len(monitors) > 0 {
+		startTime, _ := time.Parse(time.RFC3339, monitors[0].Timestamp)
+		endTime, _ := time.Parse(time.RFC3339, monitors[len(monitors) - 1].Timestamp)
+		fmt.Printf("%s %s", startTime.Add(-2*time.Minute).Format(time.RFC3339), endTime.Add(2*time.Minute).Format(time.RFC3339))
+	}
 	if all {
 		for _, v := range monitors {
 			// timestamp succ err inprogress send recv sendSize recvSize lt_100 lt_200 lt_300 lt_400 lt_500 lt_600 lt_700 lt_800 lt_900 lt_1000 ge_1000
