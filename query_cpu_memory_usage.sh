@@ -5,7 +5,7 @@ service_url="http://signalr1.eastus.cloudapp.azure.com:5353/mdm/query"
 if [ $# -ne 4 ]
 then
   echo "Usage: <CPU|Memory> <PodName> <StartDateUtc> <EndDateUtc>"
-  echo "eg: CPU signalr-dc3f3d5f-6e33-424c-9773-0be8ce2a4f90-55cfCPU-rhmc2 2018-05-24T06:10:00 2018-05-24T06:25:00"
+  echo "eg: CPU signalr-dc3f3d5f-6e33-424c-9773-0be8ce2a4f90-55cfbb9784-rhmc2 2018-05-24T06:10:00 2018-05-24T06:25:00"
   exit 1
 fi
 

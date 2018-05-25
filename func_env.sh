@@ -337,7 +337,7 @@ function check_and_wait
 	local flag_file=$1
 	local end=$((SECONDS + $sigbench_run_duration))
 	local finish=0
-	while [ $SECONDS -lt $end ] || [ "$finish" == "0" ]
+	while [ $SECONDS -lt $end ] && [ "$finish" == "0" ]
 	do
 		# check whether master finished
 		finish=`cat $flag_file`
