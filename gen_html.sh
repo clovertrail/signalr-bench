@@ -31,16 +31,16 @@ function gen_single_html
 		serviceName=$(extract_servicename_from_connectionstring $connectionString)
 		if [ "$serviceName" != "" ]
 		then
-			local timeWindows=`go run parseresult.go -input $norm_file `
+			local timeWindows=`go run parseresult.go -input $norm_file -timeWindow`
 			for i in `sh find_pod_name_by_resourcename.sh $serviceName`
 			do
 				metricName=CPU_metrics${j}
 				sh query_cpu_memory_usage.sh CPU $i $timeWindows > $html_dir/${metricName}.json
-				go run parsemdm.go -input $html_dir/${metricName}.json -index ${metricName} > ${metricName}.js
+				go run parsemdm.go -input $html_dir/${metricName}.json -index ${metricName} > $html_dir/${metricName}.js
 
 				metricName=Memory_metrics${j}
 				sh query_cpu_memory_usage.sh Memory $i $timeWindows > $html_dir/${metricName}.json
-                                go run parsemdm.go -input $html_dir/${metricName}.json -index ${metricName} > ${metricName}.js
+                                go run parsemdm.go -input $html_dir/${metricName}.json -index ${metricName} > $html_dir/${metricName}.js
 				j=`expr $j + 1`
 			done
 		fi

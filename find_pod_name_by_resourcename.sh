@@ -1,11 +1,12 @@
 #!/bin/bash
-set +x
 
 if [ $# -ne 1 ]
 then
   echo "Usage: resourceName"
   exit 1
 fi
+
+resName=$1
 
 function k8s_query() {
   local config_file=$1
@@ -34,6 +35,8 @@ function query() {
      echo "$result"
   fi
 }
+
+set +x
 
 query
 
