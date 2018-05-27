@@ -54,6 +54,7 @@ function iterate_all_bench_server() {
 
 function iterate_all_scenarios() {
 	local callback=$1
+	local i j k
 	for i in $bench_name_list
 	do
 		for j in $bench_type_list

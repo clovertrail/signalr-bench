@@ -90,7 +90,8 @@ func main() {
 	if timeWindow && len(monitors) > 0 {
 		startTime, _ := time.Parse(time.RFC3339, monitors[0].Timestamp)
 		endTime, _ := time.Parse(time.RFC3339, monitors[len(monitors) - 1].Timestamp)
-		fmt.Printf("%s %s", startTime.Add(-2*time.Minute).Format(time.RFC3339), endTime.Add(2*time.Minute).Format(time.RFC3339))
+		//fmt.Printf("%s %s", startTime.Add(-2*time.Minute).Format(time.RFC3339), endTime.Add(2*time.Minute).Format(time.RFC3339))
+		fmt.Printf("%s %s", startTime.Format(time.RFC3339), endTime.Format(time.RFC3339))
 	}
 	if all {
 		for _, v := range monitors {

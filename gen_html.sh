@@ -9,7 +9,7 @@ function gen_single_html
 	local bench_codec=$2
 	local bench_name=$3
 	local serviceName="" metricName=""
-	local j=1 max=4
+	local i j=1 max=4
 	local resultdir=${bench_type}_${bench_codec}_${bench_name}
 	local html_dir=$result_dir/$resultdir
 	local norm_file=$result_dir/$resultdir/$sigbench_norm_file
