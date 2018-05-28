@@ -12,42 +12,42 @@ import (
 )
 
 type Datapoint struct {
-	TimestampUtc string `json:"TimestampUtc"`
-	Value float32 `json:"Value"`
+	TimestampUtc string  `json:"TimestampUtc"`
+	Value        float32 `json:"Value"`
 }
 
 type Dimension struct {
-	Key string `json:"Key"`
+	Key   string `json:"Key"`
 	Value string `json:"Value"`
 }
 
 type Id struct {
-	MetricName string `json:"MetricName"`
-	MetricNamespace string `json:"MetricNamespace"`
+	MetricName        string `json:"MetricName"`
+	MetricNamespace   string `json:"MetricNamespace"`
 	MonitoringAccount string `json:"MonitoringAccount"`
 }
 
 type Definition struct {
-	AggregationType int `json:"AggregationType"`
+	AggregationType      int         `json:"AggregationType"`
 	DimensionCombination []Dimension `json:"DimensionCombination"`
-	EndTimeUtc string `json:"EndTimeUtc"`
-	Id Id `json:"Id"`
-	SamplingTypes []struct {
+	EndTimeUtc           string      `json:"EndTimeUtc"`
+	Id                   Id          `json:"Id"`
+	SamplingTypes        []struct {
 		Name string `json:"Name"`
-	}	`json:"SamplingTypes"`
+	} `json:"SamplingTypes"`
 	StartTimeUtc string `json:"StartTimeUtc"`
 }
 
 type TimeSeries struct {
-	Definition Definition `json:"Definition"`
-	Datapoints []Datapoint `json:"Datapoints"`
-	EndTimeUtc string `json:"EndTimeUtc"`
-	ErrorCode int `json:"ErrorCode"`
-        StartTimeUtc string `json:"StartTimeUtc"`
+	Definition   Definition  `json:"Definition"`
+	Datapoints   []Datapoint `json:"Datapoints"`
+	EndTimeUtc   string      `json:"EndTimeUtc"`
+	ErrorCode    int         `json:"ErrorCode"`
+	StartTimeUtc string      `json:"StartTimeUtc"`
 }
 
 // require .FuncName, .MetricName
-const chart_template1=`
+const chart_template1 = `
       google.charts.load("current", {packages:["corechart", "line", "table"]});
       google.charts.setOnLoadCallback({{.FuncName}});
       function {{.FuncName}}() {
@@ -56,8 +56,9 @@ const chart_template1=`
         data.addColumn('number', '{{.MetricName}}');
         data.addRows([
         `
+
 // require .Title, .SubTitle, .ElementId
-const chart_template2=`
+const chart_template2 = `
         ]);
       var options = {
         chart: {
@@ -110,11 +111,16 @@ func main() {
 	var timeSeries TimeSeries
 	json.Unmarshal(raw, &timeSeries)
 	// dimension information
+	var rawBuffer bytes.Buffer
 	var buffer bytes.Buffer
 	for _, dimension := range timeSeries.Definition.DimensionCombination {
 		buffer.WriteString(dimension.Key)
 		buffer.WriteString("_")
 		buffer.WriteString(strings.Replace(dimension.Value, "-", "_", -1))
+		// generate raw dimention
+		rawBuffer.WriteString(dimension.Key)
+		rawBuffer.WriteString(":")
+		rawBuffer.WriteString(dimension.Value)
 	}
 	dimensionName := buffer.String()
 	// metric information
@@ -126,21 +132,21 @@ func main() {
 	buffer.WriteString(timeSeries.Definition.Id.MetricName)
 	metricName := buffer.String()
 
-	map1 := map[string]interface{} {
-		"FuncName": "draw" + dimensionName,
+	map1 := map[string]interface{}{
+		"FuncName":   "draw" + dimensionName,
 		"MetricName": metricName,
 	}
 	result := gen_func(chart_template1, map1)
-        fmt.Printf("%s\n", result)
-        for _, datapoint := range timeSeries.Datapoints {
-                t1, _ := time.Parse(time.RFC3339, datapoint.TimestampUtc+"+00:00")
-                fmt.Printf("\t [[%d, %d, %d], %.0f],\n", t1.Hour(), t1.Minute(), t1.Second(), datapoint.Value)
-        }
-	map2 := map[string]interface{} {
-		"Title": timeSeries.Definition.Id.MetricName,
-		"SubTitle": dimensionName,
+	fmt.Printf("%s\n", result)
+	for _, datapoint := range timeSeries.Datapoints {
+		t1, _ := time.Parse(time.RFC3339, datapoint.TimestampUtc+"+00:00")
+		fmt.Printf("\t [[%d, %d, %d], %.0f],\n", t1.Hour(), t1.Minute(), t1.Second(), datapoint.Value)
+	}
+	map2 := map[string]interface{}{
+		"Title":     timeSeries.Definition.Id.MetricName,
+		"SubTitle":  rawBuffer.String(),
 		"ElementId": inElementIndex,
 	}
 	result2 := gen_func(chart_template2, map2)
-        fmt.Printf("%s\n", result2)
+	fmt.Printf("%s\n", result2)
 }
