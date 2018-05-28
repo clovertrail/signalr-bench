@@ -4,7 +4,7 @@ connection_string=$ConnectionString
 connection_number=$ClientConnectionNumber
 connection_concurrent=$ConcurrentConnectionNumber
 send_number=$SendNumber
-
+MaxConnectionNumber=20000
 # verify jenkins input
 
 if [ "$connection_string" == "" ]
@@ -19,9 +19,9 @@ then
    exit 1
 fi
 
-if [ $connection_number -gt 12000 ]
+if [ $connection_number -gt $MaxConnectionNumber ]
 then
-   echo "connection number's maximum limit is 12000"
+   echo "connection number's maximum limit is $MaxConnectionNumber"
    exit 1
 fi
 
