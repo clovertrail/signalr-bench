@@ -7,42 +7,6 @@ send_number=$SendNumber
 MaxConnectionNumber=20000
 # verify jenkins input
 
-if [ "$connection_string" == "" ]
-then
-   echo "connection string must not be empty!"
-   exit 1
-fi
-
-if [ "$connection_number" == "" ]
-then
-   echo "connection number must not be empty"
-   exit 1
-fi
-
-if [ $connection_number -gt $MaxConnectionNumber ]
-then
-   echo "connection number's maximum limit is $MaxConnectionNumber"
-   exit 1
-fi
-
-if [ $connection_number -lt 1 ]
-then
-   echo "connection number's minimum limit is 1"
-   exit 1
-fi
-
-if [ "$send_number" == "" ]
-then
-   echo "Warning: send number is empty, so the default send number will be set to connection number"
-   send_number=$connection_number
-fi
-
-if [ $send_number -gt $connection_number ]
-then
-   echo "Warning: currently we did not support sending number larger than connection number, so set it to be connection number"
-   send_number=$connection_number
-fi
-
 # check UseWss
 if [[ $connection_string = *"https://"* ]]
 then
@@ -50,3 +14,4 @@ then
 else
    use_https=0
 fi
+
