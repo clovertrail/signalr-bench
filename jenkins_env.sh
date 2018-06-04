@@ -4,7 +4,6 @@ connection_string=$ConnectionString
 connection_number=$ClientConnectionNumber
 connection_concurrent=$ConcurrentConnectionNumber
 send_number=$SendNumber
-MaxConnectionNumber=20000
 # verify jenkins input
 
 # check UseWss

@@ -35,6 +35,11 @@ array_len() {
 }'
 }
 
+function create_root_folder() {
+  export result_root=`date +%Y%m%d%H%M%S`
+  mkdir $result_root
+}
+
 function iterate_all_bench_server() {
 	local callback=$1
 	local len=$(array_len "$bench_server_list" "$bench_server_sep")
@@ -55,9 +60,9 @@ function iterate_all_bench_server() {
 function iterate_all_scenarios() {
 	local callback=$1
 	local i j k
-	for i in $bench_name_list
+	for j in $bench_type_list
 	do
-		for j in $bench_type_list
+		for i in $bench_name_list
 		do
 			for k in $bench_codec_list
 			do
@@ -175,6 +180,18 @@ function append_agents_to_env_file() {
 	fi
 }
 
+
+function gen_benchmark_impls_name()
+{
+	local bench_type=$1
+	local bench_codec=$2
+	local bench_name=$3
+	local g_bench_env_file="/tmp/autogen_bench_env.sh"
+cat << _EOF >> $g_bench_env_file
+${bench_type}_${bench_codec}_${bench_name}=signalr:service:${bench_codec}:${bench_name}
+_EOF
+}
+
 function gen_websocket_bench_env()
 {
 	local bench_env=$1
@@ -182,17 +199,11 @@ cat << _EOF > $bench_env
 #automatic generated file
 # for agents
 agent_output=$sigbench_agent_output
-
-# for master
-selfhost_json_echo=signalr:json:echo
-selfhost_msgpack_echo=signalr:msgpack:echo
-selfhost_json_broadcast=signalr:json:broadcast
-selfhost_msgpack_broadcast=signalr:msgpack:broadcast
-service_json_echo=signalr:service:json:echo
-service_msgpack_echo=signalr:service:msgpack:echo
-service_json_broadcast=signalr:service:json:broadcast
-service_msgpack_broadcast=signalr:service:msgpack:broadcast
 _EOF
+	local g_bench_env_file="/tmp/autogen_bench_env.sh"
+	echo "# for master" > $g_bench_env_file
+	iterate_all_scenarios gen_benchmark_impls_name
+	cat $g_bench_env_file >> $bench_env
 
 	agents_g=""
 	iterate_all_bench_server append_agents_to_env_file

@@ -3,6 +3,7 @@
 
 function run_unit() {
   local unit=$1
+  local loc=$2
   local ClientConnectionNumber=`expr $unit \* 1000`
   az_login_signalr_dev_sub
   az group create --name $rsg --location $loc
@@ -30,14 +31,15 @@ EOF
 }
 
 echo "------jenkins inputs------"
-echo "[units] $UnitList"
+echo "[Units] $UnitList"
 echo "[Duration]: $sigbench_run_duration"
+echo "[Location]: $Location"
 
 if [ "$UnitList" == "all" ]
 then
   for i in 1 2 3 4 5 6 7 8 9 10
   do
-    run_unit $i
+    run_unit $i $Location
   done
 else
   run_unit $UnitList

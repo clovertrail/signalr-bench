@@ -1,6 +1,61 @@
 #!/bin/bash
 . ./utils.sh
 
+ASRS_cloud_name=AzureSignalRServiceDogfood
+
+function register_signalr_service_dogfood() {
+  local check_existing=`az cloud list|jq .[].name|grep $ASRS_cloud_name`
+  if [ "$check_existing" == "" ]
+  then
+     az cloud register -n $ASRS_cloud_name \
+                  --endpoint-active-directory "https://login.windows-ppe.net" \
+                  --endpoint-active-directory-graph-resource-id "https://graph.ppe.windows.net/" \
+                  --endpoint-active-directory-resource-id "https://management.core.windows.net/" \
+                  --endpoint-gallery "https://gallery.azure.com/" \
+                  --endpoint-management "https://umapi-preview.core.windows-int.net/" \
+                  --endpoint-resource-manager "https://api-dogfood.resources.windows-int.net/" \
+                  --profile "latest"
+  fi
+  az cloud set -n $ASRS_cloud_name
+}
+
+function unregister_signalr_service_dogfood() {
+#recover the default cloud
+  az cloud set -n AzureCloud
+  local check_existing=`az cloud list|jq .[].name|grep $ASRS_cloud_name`
+  if [ "$check_existing" != "" ]
+  then
+     az cloud unregister -n $ASRS_cloud_name
+  fi
+}
+
+function add_signalr_extension()
+{
+ # `az extension list |jq .[].name`
+  az extension show --name "signalr"
+  if [ $? -ne 0 ]
+  then
+    az extension add -n "signalr"
+  fi
+}
+
+function create_group_if_not_exist() {
+  local resgrp=$1
+  local location=$2
+  local grps=`az group list -o json|jq .[].name|grep $resgrp`
+
+  if [ "$grps" != "" ]
+  then
+    delete_signalr_service $resgrp
+  fi
+  az group create --name $resgrp --location $location
+}
+
+function delete_group() {
+  local rsg=$1
+  az group delete --name $rsg -y
+}
+
 function create_signalr_service()
 {
   local rsg=$1
@@ -8,6 +63,9 @@ function create_signalr_service()
   local sku=$3
   local unitCount=$4
   local signalrHostName
+  # add extension
+  add_signalr_extension
+
   signalrHostName=$(az signalr create \
      --name $name                     \
      --resource-group $rsg            \
@@ -47,6 +105,7 @@ function query_connection_string()
 
 function delete_signalr_service()
 {
-  local rsg=$1
-  az group delete --name $rsg -y
+  local name=$1
+  local rsg=$2
+  az signalr delete --name $name -g $rsg
 }

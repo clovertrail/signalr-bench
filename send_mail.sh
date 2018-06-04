@@ -21,10 +21,7 @@ send_mail()
    echo "Check the result from: $html_href"
    cat << EOF > /tmp/send_mail.txt
 subject:<SignalRServicePerf>$subject</SignalRServicePerf>
-from:$from
 Performance result: $html_href
-EOF
-   cat << EOF >> /tmp/send_mail.txt
 
 Auto generated mail. Never reply it.
 EOF
