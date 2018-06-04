@@ -2,6 +2,7 @@
 . ./az_signalr_service.sh
 
 . ./func_env.sh
+. ./kubectl_utils.sh
 
 target_grp="honzhanautoperf"
 location=$Location
@@ -35,6 +36,9 @@ send_number=$ClientConnectionNumber
 bench_type_list="unit${unit}"
 use_https=1
 EOF
+  # patch it to be 1 replica
+  patch_replicas ${signalr_service} 1
+
   sh jenkins-run-websocket.sh
 
   delete_signalr_service $name $rsg
