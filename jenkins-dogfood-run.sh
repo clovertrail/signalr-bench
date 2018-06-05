@@ -6,7 +6,7 @@
 
 target_grp="honzhanautoperf"
 location=$Location
-asrs_name="honzhanautoservice"
+asrs_name="autoperf"`date +%H%M%S`
 sku="Basic_DS2"
 
 function run_unit_benchmark() {
@@ -24,6 +24,7 @@ function run_unit_benchmark() {
   else
     echo "Create SignalR Service ${signalr_service}"
   fi
+  check_signalr_service_dns $rsg $name
   local ConnectionString=$(query_connection_string $name $rsg)
   echo "Connection string: '$ConnectionString'"  
   # override jenkins_env.sh
@@ -37,9 +38,14 @@ bench_type_list="unit${unit}"
 use_https=1
 EOF
   # patch it to be 1 replica
-  patch_replicas ${signalr_service} 1
+  #patch_replicas ${name} 1
+  patch_replicas_env ${name} 1 12000
 
   sh jenkins-run-websocket.sh
+
+  mkdir $result_root/unit${unit}
+
+  get_k8s_pod_status ${name} $result_root/unit${unit}
 
   delete_signalr_service $name $rsg
 }

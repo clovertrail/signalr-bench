@@ -60,5 +60,19 @@ fi
 
 gen_jenkins_command_config
 
+. ./kubectl_utils.sh
+
+service_name=$(extract_servicename_from_connectionstring $connection_string)
+if [ "$service_name" != "" ]
+then
+   start_connection_tracking $service_name
+fi
+
 sh run_websocket.sh
+
+if [ "$service_name" != "" ]
+then
+   stop_connection_tracking $service_name $result_root
+fi
+
 sh gen_html.sh $connection_string # gen_html

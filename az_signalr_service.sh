@@ -46,7 +46,7 @@ function create_group_if_not_exist() {
 
   if [ "$grps" != "" ]
   then
-    delete_signalr_service $resgrp
+    delete_group $resgrp
   fi
   az group create --name $resgrp --location $location
 }
@@ -74,6 +74,25 @@ function create_signalr_service()
      --query hostName                 \
      -o tsv)
   echo "$signalrHostName"
+}
+
+function check_signalr_service_dns()
+{
+  local rsg=$1
+  local name=$2
+  local nslookupData
+  local externalIp=`az signalr show -n $name -g $rsg -o=json|jq ".externalIp"|tr -d '"'`
+  local hostname=`az signalr list --query [*].hostName --output table|grep "$name"`
+  local end=$((SECONDS + 120))
+  while [ $SECONDS -lt $end ]
+  do
+    nslookupdata=`nslookup $hostname|grep "Address:"|grep "$externalIp"`
+    if [ "$nslookupdata" != "" ]
+    then
+      break
+    fi
+    sleep 1
+  done
 }
 
 function check_signalr_service()

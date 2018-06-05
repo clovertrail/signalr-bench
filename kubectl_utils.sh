@@ -46,15 +46,58 @@ function update_k8s_deploy_env_connections() {
   fi
 }
 
+function get_pod() {
+  local resName=$1
+  local output=$2
+  local config_file=kvsignalrdevseasia.config
+  local result=$(get_k8s_deploy_name $resName $config_file)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(get_k8s_deploy_name $resName $config_file)
+  fi
+  echo "$result"
+  kubectl get deploy $result -o=json --kubeconfig=${config_file} > $output
+}
+
+function get_k8s_pod_status() {
+  local resName=$1
+  local outdir=$2
+  local config_file=kvsignalrdevseasia.config
+  local kubeId=`kubectl get deploy -o=json --selector resourceName=$resName --kubeconfig=${config_file}|jq '.items[0].metadata.labels.resourceKubeId'|tr -d '"'`
+  local len=`kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq '.items|length'`
+  if [ $len == "0" ]
+  then
+     config_file=srdevacsrpd.config
+     kubeId=`kubectl get deploy -o=json --selector resourceName=$resName --kubeconfig=${config_file}|jq '.items[0].metadata.labels.resourceKubeId'|tr -d '"'`
+     if [ "$kubeId" == "" ]
+     then
+       echo "Cannot find $resName"
+       return
+     fi
+     len=`kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq '.items|length'`
+  fi
+  local i=0
+  while [ $i -lt $len ]
+  do
+     local podname=`kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq ".items[$i].metadata.name"|tr -d '"'`
+     kubectl get pod $podname --kubeconfig=${config_file} > $outdir/${podname}_pod.txt
+     kubectl get pod $podname -o=json --kubeconfig=${config_file} > $outdir/${podname}_pod.json
+     i=`expr $i + 1`
+  done
+  
+}
+
 function k8s_query() {
   local config_file=$1
+  local resName=$2
   local kubeId=`kubectl get deploy -o=json --selector resourceName=$resName --kubeconfig=${config_file}|jq '.items[0].metadata.labels.resourceKubeId'|tr -d '"'`
   local len=`kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq '.items|length'`
   if [ $len == "0" ]
   then
      return
   fi
-  i=0
+  local i=0
   while [ $i -lt $len ]
   do
      kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq ".items[$i].metadata.name"|tr -d '"'
@@ -83,6 +126,89 @@ function update_k8s_deploy_memory_limits() {
   kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/resources/limits/memory', 'value': '$memory_limit'}]" --kubeconfig=$config_file
 }
 
+function install_nettools() {
+  local pod_name=$1
+  local config_file=$2
+  kubectl exec --kubeconfig=${config_file} ${pod_name} apt-get install net-tools
+}
+
+function start_connection_tracking() {
+  local i
+  local dir="tmp"
+  local resName=$1
+  local config_file=kvsignalrdevseasia.config
+  local result=$(k8s_query $config_file $resName)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(k8s_query $config_file $resName)
+  fi
+  for i in $result
+  do
+     kubectl exec --kubeconfig=$config_file $i apt-get install net-tools
+     kubectl exec --kubeconfig=$config_file $i -- bash -c "rm /tmp/client_connection*"
+     kubectl exec --kubeconfig=$config_file $i -- bash -c "rm /tmp/*.sh"
+     kubectl cp dump_connections.sh default/${i}:/${dir}/ --kubeconfig=$config_file
+     kubectl exec --kubeconfig=$config_file $i chmod +x /${dir}/dump_connections.sh
+     kubectl exec --kubeconfig=$config_file $i nohup /${dir}/dump_connections.sh &
+  done
+}
+
+function stop_connection_tracking() {
+  local i
+  local dir="tmp"
+  local resName=$1
+  local outdir=$2
+  local config_file=kvsignalrdevseasia.config
+  local result=$(k8s_query $config_file $resName)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(k8s_query $config_file $resName)
+  fi
+  for i in $result
+  do
+     local pid=`kubectl exec --kubeconfig=$config_file $i cat /tmp/client_connection.pid`
+     kubectl exec --kubeconfig=$config_file $i kill $pid
+     kubectl cp default/${i}:/$dir/client_connection.txt $outdir/${i}_connections.txt --kubeconfig=$config_file
+  done
+}
+
+function wait_deploy_ready() {
+  local deploy=$1
+  local config_file=$2
+  local end=$((SECONDS + 120))
+  while [ $SECONDS -lt $end ]
+  do
+    echo kubectl rollout status deployment/$result --kubeconfig=$config_file
+    kubectl rollout status deployment/$result --kubeconfig=$config_file
+    if [ $? -eq 0 ]
+    then
+      break
+    fi
+    sleep 1
+  done
+}
+
+function patch_replicas_env() {
+  local resName=$1
+  local replicas=$2
+  local connection_limit=$3
+
+  local config_file=kvsignalrdevseasia.config
+  local result=$(get_k8s_deploy_name $resName $config_file)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(get_k8s_deploy_name $resName $config_file)
+  fi
+  #echo "$result"
+  update_k8s_deploy_replicas $result $replicas $config_file
+  update_k8s_deploy_env_connections $result "${connect_limit}" $config_file
+
+  wait_deploy_ready $result $config_file
+}
+
 function patch_replicas() {
   local resName=$1
   local replicas=$2
@@ -95,6 +221,8 @@ function patch_replicas() {
   fi
   #echo "$result"
   update_k8s_deploy_replicas $result $replicas $config_file
+
+  wait_deploy_ready $result $config_file
 }
 
 # resource_name, replicas, cpu_limit, cpu_req, mem_limit, connect_limit
@@ -122,4 +250,6 @@ function patch() {
   update_k8s_deploy_memory_limits $result "${mem_limit}Mi" $config_file
 
   update_k8s_deploy_env_connections $result "${connect_limit}" $config_file
+
+  wait_deploy_ready $result $config_file
 }
