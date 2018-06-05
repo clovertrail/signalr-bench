@@ -174,6 +174,24 @@ function stop_connection_tracking() {
   done
 }
 
+function copy_syslog() {
+  local i
+  local resName=$1
+  local outdir=$2
+  local config_file=kvsignalrdevseasia.config
+  local result=$(k8s_query $config_file $resName)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(k8s_query $config_file $resName)
+  fi
+  for i in $result
+  do
+     kubectl cp default/${i}:/var/log/syslog $outdir/${i}_syslog.txt --kubeconfig=$config_file
+  done
+
+}
+
 function wait_deploy_ready() {
   local deploy=$1
   local config_file=$2

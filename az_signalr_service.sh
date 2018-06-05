@@ -89,10 +89,12 @@ function check_signalr_service_dns()
     nslookupdata=`nslookup $hostname|grep "Address:"|grep "$externalIp"`
     if [ "$nslookupdata" != "" ]
     then
-      break
+      echo 0
+      return
     fi
     sleep 1
   done
+  echo 1
 }
 
 function check_signalr_service()

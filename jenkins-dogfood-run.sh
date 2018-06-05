@@ -4,10 +4,26 @@
 . ./func_env.sh
 . ./kubectl_utils.sh
 
+# unit 1 ~ 10
+g_CPU_requests="1|1|1|2|2|3|3|3|3|4"
+g_CPU_limits="1|2|2|2|3|3|4|4|4|4"
+g_Memory_limits="1500|1500|1500|1500|1500|2000|2000|2000|3000|3000"
+
 target_grp="honzhanautoperf"
-location=$Location
-asrs_name="autoperf"`date +%H%M%S`
 sku="Basic_DS2"
+location=$Location
+
+function patch_and_wait() {
+  local name=$1
+  local rsg=$2
+  local index=$3
+  local cpu_req=$(array_get $g_CPU_requests $index "|")
+  local cpu_limit=$(array_get $g_CPU_limits $index "|")
+  local mem_limit=$(array_get $g_Memory_limits $index "|")
+  patch ${name} 1 $cpu_limit $cpu_req $mem_limit 12000
+
+  check_signalr_service_dns $rsg $name
+}
 
 function run_unit_benchmark() {
   local rsg=$1
@@ -24,7 +40,13 @@ function run_unit_benchmark() {
   else
     echo "Create SignalR Service ${signalr_service}"
   fi
-  check_signalr_service_dns $rsg $name
+  local dns_ready=$(check_signalr_service_dns $rsg $name)
+  if [ $dns_ready -eq 1 ]
+  then
+    echo "SignalR Service DNS is not ready, suppose it is failed!"
+    delete_signalr_service $name $rsg
+    return
+  fi
   local ConnectionString=$(query_connection_string $name $rsg)
   echo "Connection string: '$ConnectionString'"  
   # override jenkins_env.sh
@@ -39,11 +61,13 @@ use_https=1
 EOF
   # patch it to be 1 replica
   #patch_replicas ${name} 1
-  patch_replicas_env ${name} 1 12000
+  #patch_replicas_env ${name} 1 12000
+  #patch_and_wait $name $rsg $unit
+
+  # create unit folder before run-websocket because it may require that folder
+  mkdir $result_root/unit${unit}
 
   sh jenkins-run-websocket.sh
-
-  mkdir $result_root/unit${unit}
 
   get_k8s_pod_status ${name} $result_root/unit${unit}
 
@@ -59,9 +83,8 @@ function gen_final_report() {
 
 function run_units() {
   local grp=$1
-  local name=$2
-  local sku=$3
-  local unitlist=$4
+  local sku=$2
+  local unitlist=$3
   local i
 
   create_root_folder
@@ -70,9 +93,11 @@ function run_units() {
   then
     for i in 1 2 3 4 5 6 7 8 9 10
     do
+       name="autoperf"`date +%H%M%S`
        run_unit_benchmark $grp $name $sku $i
     done
   else
+    name="autoperf"`date +%H%M%S`
     run_unit_benchmark $grp $name $sku $unitlist
   fi
 
@@ -90,7 +115,7 @@ az_login_ASRS_dogfood
 
 create_group_if_not_exist $target_grp $location
 
-run_units $target_grp $asrs_name $sku $UnitList
+run_units $target_grp $sku $UnitList
 
 delete_group $target_grp
 

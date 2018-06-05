@@ -72,7 +72,14 @@ sh run_websocket.sh
 
 if [ "$service_name" != "" ]
 then
-   stop_connection_tracking $service_name $result_root
+   if [[ $bench_type_list == unit* ]] && [ -d $result_root/$bench_type_list ]
+   then
+     stop_connection_tracking $service_name $result_root/$bench_type_list
+     copy_syslog $service_name $result_root/$bench_type_list
+   else
+     stop_connection_tracking $service_name $result_root
+     copy_syslog $service_name $result_root
+   fi
 fi
 
 sh gen_html.sh $connection_string # gen_html
