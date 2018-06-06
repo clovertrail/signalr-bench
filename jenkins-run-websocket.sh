@@ -76,9 +76,11 @@ then
    then
      stop_connection_tracking $service_name $result_root/$bench_type_list
      copy_syslog $service_name $result_root/$bench_type_list
+     get_k8s_pod_status $service_name $result_root/$bench_type_list
    else
      stop_connection_tracking $service_name $result_root
      copy_syslog $service_name $result_root
+     get_k8s_pod_status $service_name $result_root
    fi
 fi
 

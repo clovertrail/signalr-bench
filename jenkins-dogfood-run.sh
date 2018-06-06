@@ -69,8 +69,6 @@ EOF
 
   sh jenkins-run-websocket.sh
 
-  get_k8s_pod_status ${name} $result_root/unit${unit}
-
   delete_signalr_service $name $rsg
 }
 
@@ -86,7 +84,7 @@ function run_units() {
   local sku=$2
   local unitlist=$3
   local i
-
+  local name
   create_root_folder
 
   if [ "$unitlist" == "all" ]
@@ -97,8 +95,11 @@ function run_units() {
        run_unit_benchmark $grp $name $sku $i
     done
   else
-    name="autoperf"`date +%H%M%S`
-    run_unit_benchmark $grp $name $sku $unitlist
+    for i in $unitlist
+    do
+       name="autoperf"`date +%H%M%S`
+       run_unit_benchmark $grp $name $sku $unitlist
+    done
   fi
 
   gen_final_report 
@@ -115,7 +116,7 @@ az_login_ASRS_dogfood
 
 create_group_if_not_exist $target_grp $location
 
-run_units $target_grp $sku $UnitList
+run_units $target_grp $sku "$UnitList"
 
 delete_group $target_grp
 
