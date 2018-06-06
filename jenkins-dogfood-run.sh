@@ -5,9 +5,9 @@
 . ./kubectl_utils.sh
 
 # unit 1 ~ 10
-g_CPU_requests="1|1|1|2|2|3|3|3|3|4"
-g_CPU_limits="1|2|2|2|3|3|4|4|4|4"
-g_Memory_limits="1500|1500|1500|1500|1500|2000|2000|2000|3000|3000"
+g_CPU_requests="1|1|1|2|2|3|3|3|4|4"
+g_CPU_limits="1|1|2|2|3|3|4|4|4|4"
+g_Memory_limits="1500|2000|2000|2000|2000|2000|2000|3000|3000|3000"
 
 target_grp="honzhanautoperf"
 sku="Basic_DS2"
@@ -20,7 +20,7 @@ function patch_and_wait() {
   local cpu_req=$(array_get $g_CPU_requests $index "|")
   local cpu_limit=$(array_get $g_CPU_limits $index "|")
   local mem_limit=$(array_get $g_Memory_limits $index "|")
-  patch ${name} 1 $cpu_limit $cpu_req $mem_limit 12000
+  patch ${name} 1 $cpu_limit $cpu_req $mem_limit 20000
 
   check_signalr_service_dns $rsg $name
 }

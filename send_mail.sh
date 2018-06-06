@@ -19,8 +19,8 @@ send_mail()
    echo $curr_dir
    html_href="http://${server_ip}:8000/$curr_dir"
    echo "Check the result from: $html_href"
+#subject:<SignalRServicePerf>$subject</SignalRServicePerf>
    cat << EOF > /tmp/send_mail.txt
-subject:<SignalRServicePerf>$subject</SignalRServicePerf>
 Performance result: $html_href
 
 Auto generated mail. Never reply it.
