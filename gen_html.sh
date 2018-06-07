@@ -50,6 +50,7 @@ function gen_single_html
 	. $sigbench_config_dir/${cmd_prefix}_${bench_codec}_${bench_name}_${bench_type}
 	export OnlineConnections=$connection
 	export ActiveConnections=$send
+	export ConcurrentConnection=$connection_concurrent
 	export Duration=$sigbench_run_duration
 	export Endpoint=$bench_config_endpoint
 	export Hub=$bench_config_hub

@@ -8,17 +8,25 @@ import (
 )
 
 type BenchEnv struct {
-	OnlineConnections string
-	ActiveConnections string
-	Duration          string
-	Endpoint          string
-	Hub               string
-	Key               string
-	Benchmark         string
+	OnlineConnections    string
+	ActiveConnections    string
+	ConcurrentConnection string
+	Duration             string
+	Endpoint             string
+	Hub                  string
+	Key                  string
+	Benchmark            string
 }
 
 func main() {
-	env := BenchEnv{os.Getenv("OnlineConnections"), os.Getenv("ActiveConnections"), os.Getenv("Duration"), os.Getenv("Endpoint"), os.Getenv("Hub"), os.Getenv("Key"), os.Getenv("Benchmark")}
+	env := BenchEnv{os.Getenv("OnlineConnections"),
+		os.Getenv("ActiveConnections"),
+		os.Getenv("ConcurrentConnection"),
+		os.Getenv("Duration"),
+		os.Getenv("Endpoint"),
+		os.Getenv("Hub"),
+		os.Getenv("Key"),
+		os.Getenv("Benchmark")}
 	var header = flag.String("header", "", "Specify the header template file")
 	var content = flag.String("content", "", "Specify the content template file")
 	var footer = flag.String("footer", "", "Specify the footer template file")

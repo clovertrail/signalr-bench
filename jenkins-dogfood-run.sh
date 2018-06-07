@@ -22,7 +22,8 @@ function patch_and_wait() {
   local mem_limit=$(array_get $g_Memory_limits $index "|")
   patch ${name} 1 $cpu_limit $cpu_req $mem_limit 20000
 
-  check_signalr_service_dns $rsg $name
+  local status=$(check_signalr_service_dns $rsg $name)
+  echo $status
 }
 
 function run_unit_benchmark() {
@@ -62,7 +63,16 @@ EOF
   # patch it to be 1 replica
   #patch_replicas ${name} 1
   #patch_replicas_env ${name} 1 12000
-  #patch_and_wait $name $rsg $unit
+  if [ "$g_require_patch" == "1" ]
+  then
+    local status=$(patch_and_wait $name $rsg $unit)
+    if [ $status == 1 ]
+    then
+      echo "!!!Provisioning SignalR service failed!!!"
+      delete_signalr_service $name $rsg
+      return
+    fi
+  fi
 
   # create unit folder before run-websocket because it may require that folder
   mkdir $result_root/unit${unit}
@@ -83,25 +93,23 @@ function run_units() {
   local grp=$1
   local sku=$2
   local unitlist=$3
+  local list
   local i
   local name
   create_root_folder
 
   if [ "$unitlist" == "all" ]
   then
-    for i in 1 2 3 4 5 6 7 8 9 10
-    do
-       name="autoperf"`date +%H%M%S`
-       run_unit_benchmark $grp $name $sku $i
-    done
+    list="1 2 3 4 5 6 7 8 9 10"
   else
-    for i in $unitlist
-    do
-       name="autoperf"`date +%H%M%S`
-       run_unit_benchmark $grp $name $sku $unitlist
-    done
+    list=$unitlist
   fi
 
+  for i in $list
+  do
+     name="autoperf"`date +%H%M%S`
+     run_unit_benchmark $grp $name $sku $i
+  done
   gen_final_report 
 }
 

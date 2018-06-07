@@ -134,8 +134,8 @@ function install_nettools() {
 
 function start_connection_tracking() {
   local i
-  local dir="tmp"
   local resName=$1
+  local output_dir=$2
   local config_file=kvsignalrdevseasia.config
   local result=$(k8s_query $config_file $resName)
   if [ "$result" == "" ]
@@ -143,35 +143,28 @@ function start_connection_tracking() {
      config_file=srdevacsrpd.config
      result=$(k8s_query $config_file $resName)
   fi
+  # install netstat
   for i in $result
   do
-     kubectl exec --kubeconfig=$config_file $i apt-get install net-tools
-     kubectl exec --kubeconfig=$config_file $i -- bash -c "rm /tmp/client_connection*"
-     kubectl exec --kubeconfig=$config_file $i -- bash -c "rm /tmp/*.sh"
-     kubectl cp dump_connections.sh default/${i}:/${dir}/ --kubeconfig=$config_file
-     kubectl exec --kubeconfig=$config_file $i chmod +x /${dir}/dump_connections.sh
-     kubectl exec --kubeconfig=$config_file $i nohup /${dir}/dump_connections.sh &
+     (kubectl exec --kubeconfig=$config_file $i apt-get install net-tools) > /dev/null
+  done
+  # collect connections
+  while [ 1 ]
+  do
+     for i in $result
+     do
+       local date_time=`date --iso-8601='seconds'`
+       local cli_connection=`kubectl exec $i --kubeconfig=$config_file -- bash -c "netstat -an|grep 5001|grep EST|wc -l"`
+       local ser_connection=`kubectl exec $i --kubeconfig=$config_file -- bash -c "netstat -an|grep 5002|grep EST|wc -l"`
+       echo "${date_time} $cli_connection $ser_connection" >> $output_dir/${i}_connections.txt
+     done
+     sleep 1
   done
 }
 
 function stop_connection_tracking() {
-  local i
-  local dir="tmp"
-  local resName=$1
-  local outdir=$2
-  local config_file=kvsignalrdevseasia.config
-  local result=$(k8s_query $config_file $resName)
-  if [ "$result" == "" ]
-  then
-     config_file=srdevacsrpd.config
-     result=$(k8s_query $config_file $resName)
-  fi
-  for i in $result
-  do
-     local pid=`kubectl exec --kubeconfig=$config_file $i cat /tmp/client_connection.pid`
-     kubectl exec --kubeconfig=$config_file $i kill $pid
-     kubectl cp default/${i}:/$dir/client_connection.txt $outdir/${i}_connections.txt --kubeconfig=$config_file
-  done
+  local connection_start_pid=$1
+  kill $connection_start_pid
 }
 
 function copy_syslog() {

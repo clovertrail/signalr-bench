@@ -433,6 +433,7 @@ function start_sdk_server()
 {
 . ./servers_env.sh
 	local connection_str="$1"
+	local output_log=$2
 	local local_run_script="auto_local_launch.sh"
 	local remote_run_script="auto_launch_app.sh"
 cat << _EOF > $remote_run_script
@@ -452,14 +453,14 @@ cat << _EOF > $local_run_script
 ssh -p ${bench_app_pub_port} ${bench_app_user}@${bench_app_pub_server} "sh $remote_run_script"
 _EOF
 
-        nohup sh $local_run_script > ${result_dir}/${app_running_log} 2>&1 &
+        nohup sh $local_run_script > ${output_log} 2>&1 &
 
 	local end=$((SECONDS + 60))
 	local finish=0
 	local check
 	while [ $SECONDS -lt $end ] && [ "$finish" == "0" ]
 	do
-		check=`grep "HttpConnection Started" ${result_dir}/${app_running_log}|wc -l`
+		check=`grep "HttpConnection Started" ${output_log}|wc -l`
 		if [ "$check" -ge "5" ]
 		then
 			finish=1

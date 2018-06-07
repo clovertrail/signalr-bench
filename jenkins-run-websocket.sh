@@ -49,12 +49,25 @@ echo "[Duration]: $sigbench_run_duration"
 
 . ./func_env.sh
 
-start_sdk_server $connection_string
+service_name=$(extract_servicename_from_connectionstring $connection_string)
+app_launch_log_file=""
+k8s_result_dir=""
+if [ "$service_name" != "" ] && [[ $bench_type_list == unit* ]] && [ -d $result_root/$bench_type_list ]
+then
+  app_launch_log_file=$result_root/${bench_type_list}/${app_running_log}
+  k8s_result_dir=$result_root/$bench_type_list
+else
+  app_launch_log_file=${result_dir}/${app_running_log}
+  k8s_result_dir=$result_root
+fi
 
-err_check=`grep -i "error" ${result_dir}/${app_running_log}`
+start_sdk_server $connection_string $app_launch_log_file
+
+err_check=`grep -i "error" ${app_launch_log_file}`
 if [ "$err_check" != "" ]
 then
    echo "Fail to start app server: $err_check"
+   cat ${app_launch_log_file}
    exit 1
 fi
 
@@ -62,26 +75,19 @@ gen_jenkins_command_config
 
 . ./kubectl_utils.sh
 
-service_name=$(extract_servicename_from_connectionstring $connection_string)
 if [ "$service_name" != "" ]
 then
-   start_connection_tracking $service_name
+   nohup sh collect_connections.sh $service_name $k8s_result_dir &
+   collect_conn_pid=$!
 fi
 
 sh run_websocket.sh
 
 if [ "$service_name" != "" ]
 then
-   if [[ $bench_type_list == unit* ]] && [ -d $result_root/$bench_type_list ]
-   then
-     stop_connection_tracking $service_name $result_root/$bench_type_list
-     copy_syslog $service_name $result_root/$bench_type_list
-     get_k8s_pod_status $service_name $result_root/$bench_type_list
-   else
-     stop_connection_tracking $service_name $result_root
-     copy_syslog $service_name $result_root
-     get_k8s_pod_status $service_name $result_root
-   fi
+   kill $collect_conn_pid
+   copy_syslog $service_name $k8s_result_dir
+   get_k8s_pod_status $service_name $k8s_result_dir
 fi
 
 sh gen_html.sh $connection_string # gen_html
