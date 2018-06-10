@@ -38,3 +38,4 @@ nginx_root=$HOME/NginxRoot
 cmd_file_prefix=auto_cmds
 cmd_config_prefix="cmd_4"
 websocket_script_prefix=autorun_websocket
+error_mark_file=error.mark

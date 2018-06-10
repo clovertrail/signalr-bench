@@ -303,6 +303,7 @@ function check_single_agent() {
 	if [ "$fail_flag_g" != "" ]
 	then
 		echo "Error occurs, so break the benchmark, please check ${agent_log}"
+		mark_error ${agent_log}
 	fi
 }
 
@@ -324,6 +325,20 @@ function check_and_wait
 		#echo "wait benchmark to complete ('$finish')..."
 		sleep 1
 	done
+}
+
+function mark_error() {
+	local err_file=$1
+	local mark_err_file=${result_dir}/$error_mark_file
+	cat $err_file >> ${mark_err_file}
+	echo "Mark the error in ${mark_err_file}"
+}
+
+function clear_error_mark() {
+	if [ -e ${result_dir}/$error_mark_file ]
+	then
+		rm ${result_dir}/$error_mark_file
+	fi
 }
 
 function run_single_master_script_and_check() {
@@ -384,6 +399,7 @@ EOF
 
 function launch_all_websocket_scripts()
 {
+	clear_error_mark
 	iterate_all_scenarios run_single_master_script_and_check
 }
 

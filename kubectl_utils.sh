@@ -143,10 +143,11 @@ function start_connection_tracking() {
      config_file=srdevacsrpd.config
      result=$(k8s_query $config_file $resName)
   fi
+  echo "$result"
   # install netstat
   for i in $result
   do
-     (kubectl exec --kubeconfig=$config_file $i apt-get install net-tools) > /dev/null
+     kubectl exec --kubeconfig=$config_file $i apt-get install net-tools > /dev/null
   done
   # collect connections
   while [ 1 ]

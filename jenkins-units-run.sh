@@ -27,7 +27,7 @@ send_number=$ClientConnectionNumber
 use_https=1
 EOF
   sh jenkins-run.sh
-  delete_signalr_service $rsg  
+  delete_signalr_service $name $rsg
 }
 
 echo "------jenkins inputs------"

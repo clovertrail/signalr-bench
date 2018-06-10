@@ -21,9 +21,6 @@ function patch_and_wait() {
   local cpu_limit=$(array_get $g_CPU_limits $index "|")
   local mem_limit=$(array_get $g_Memory_limits $index "|")
   patch ${name} 1 $cpu_limit $cpu_req $mem_limit 20000
-
-  local status=$(check_signalr_service_dns $rsg $name)
-  echo $status
 }
 
 function run_unit_benchmark() {
@@ -65,7 +62,8 @@ EOF
   #patch_replicas_env ${name} 1 12000
   if [ "$g_require_patch" == "1" ]
   then
-    local status=$(patch_and_wait $name $rsg $unit)
+    patch_and_wait $name $rsg $unit
+    local status=$(check_signalr_service_dns $rsg $name)
     if [ $status == 1 ]
     then
       echo "!!!Provisioning SignalR service failed!!!"
