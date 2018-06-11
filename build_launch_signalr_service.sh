@@ -90,7 +90,9 @@ function launch_service() {
 cat << EOF > $auto_launch_script
 #!/bin/bash
 #automatic generated script
-ssh -p $port ${user}@${hostname} "killall Microsoft.Azure.SignalR.Server; cd $outdir; ./Microsoft.Azure.SignalR.Server"
+ssh -p $port ${user}@${hostname} "killall Microsoft.Azure.SignalR.Server"
+sleep 2 # wait for the exit of previous running
+ssh -p $port ${user}@${hostname} "cd $outdir; ./Microsoft.Azure.SignalR.Server"
 EOF
 
  nohup sh $auto_launch_script > ${output_log} 2>&1 &

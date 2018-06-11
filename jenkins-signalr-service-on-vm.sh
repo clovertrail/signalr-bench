@@ -83,7 +83,7 @@ echo "[RedisConnectString]: $RedisConnectString"
 appsetting_file="$result_root/appsetting_tmpl.json"
 if [ "$RedisConnectString" != "" ]
 then
-  sed -i "s/RedisConnectString/$RedisConnectString/g" servicetmpl/appsettings_redis.json > $appsetting_file
+  sed "s/RedisConnectString/$RedisConnectString/g" servicetmpl/appsettings_redis.json > $appsetting_file
 else
   appsetting_file="servicetmpl/appsettings.json"
 fi
