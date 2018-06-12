@@ -140,9 +140,9 @@ function do_single_sigbench() {
 	local port=$2
 	local user=$3
 	local script=$4
-	scp -P $port $script ${user}@${server}:~/$sigbench_home
-	ssh -p $port ${user}@${server} "cd $sigbench_home; chmod +x ./$script"
-	ssh -p $port ${user}@${server} "cd $sigbench_home; ./$script"
+	scp -o StrictHostKeyChecking=no -P $port $script ${user}@${server}:~/$sigbench_home
+	ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd $sigbench_home; chmod +x ./$script"
+	ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd $sigbench_home; ./$script"
 }
 
 function gen_agent_start_stop_script
@@ -280,7 +280,7 @@ cat << _EOF > $remote_run
 #!/bin/bash
 #automatic generated script
 echo "0" > $status_file # flag indicates not finish
-ssh -p $port ${user}@${server} "cd $sigbench_home; sh $script_name" 2>&1|tee -a ${result_dir}/${script_name}.log
+ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd $sigbench_home; sh $script_name" 2>&1|tee -a ${result_dir}/${script_name}.log
 echo "1" > $status_file # flag indicates finished
 _EOF
 	nohup sh $remote_run &
@@ -298,7 +298,7 @@ function check_single_agent() {
 		# already encounter error
 		return
 	fi
-	scp -P $port ${user}@${server}:~/$sigbench_home/$sigbench_agent_output ${agent_log} > /dev/null 2>&1
+	scp -o StrictHostKeyChecking=no -P $port ${user}@${server}:~/$sigbench_home/$sigbench_agent_output ${agent_log} > /dev/null 2>&1
 	fail_flag_g=`egrep -i "fail|error" ${agent_log}`
 	if [ "$fail_flag_g" != "" ]
 	then
@@ -360,7 +360,7 @@ function run_single_master_script_and_check() {
 
 	check_and_wait $flag_file
 	# fetch result
-	scp -r -P $port ${user}@${server}:~/$sigbench_home/$result_name ${result_dir}/
+	scp -o StrictHostKeyChecking=no -r -P $port ${user}@${server}:~/$sigbench_home/$result_name ${result_dir}/
 }
 
 function gen_single_websocket_script() {
@@ -424,7 +424,7 @@ function copy_scripts_to_all_server()
 	local server=$1
 	local port=$2
 	local user=$3
-	scp -P $port $sigbench_env_file ${user}@${server}:~/${sigbench_home}/
+	scp -o StrictHostKeyChecking=no -P $port $sigbench_env_file ${user}@${server}:~/${sigbench_home}/
 }
 
 function copy_scripts_to_master()
@@ -435,8 +435,8 @@ function copy_scripts_to_master()
 	server=$(array_get $servers 1 $bench_server_inter_sep)
 	port=$(array_get $servers 2 $bench_server_inter_sep)
 	user=$(array_get $servers 3 $bench_server_inter_sep)
-	scp -P $port ${websocket_script_prefix}_*.sh ${user}@${server}:~/${sigbench_home}/
-	scp -P $port ${cmd_file_prefix}* ${user}@${server}:~/${sigbench_home}/
+	scp -o StrictHostKeyChecking=no -P $port ${websocket_script_prefix}_*.sh ${user}@${server}:~/${sigbench_home}/
+	scp -o StrictHostKeyChecking=no -P $port ${cmd_file_prefix}* ${user}@${server}:~/${sigbench_home}/
 }
 
 function deploy_all_scripts_config_bench()
@@ -461,12 +461,12 @@ export Azure__SignalR__ConnectionString="$connection_str"
 /home/${bench_app_user}/.dotnet/dotnet run
 _EOF
 
-scp -P ${bench_app_pub_port} $remote_run_script ${bench_app_user}@${bench_app_pub_server}:~/
+scp -o StrictHostKeyChecking=no -P ${bench_app_pub_port} $remote_run_script ${bench_app_user}@${bench_app_pub_server}:~/
 
 cat << _EOF > $local_run_script
 #!/bin/bash
 #automatic generated script
-ssh -p ${bench_app_pub_port} ${bench_app_user}@${bench_app_pub_server} "sh $remote_run_script"
+ssh -o StrictHostKeyChecking=no -p ${bench_app_pub_port} ${bench_app_user}@${bench_app_pub_server} "sh $remote_run_script"
 _EOF
 
         nohup sh $local_run_script > ${output_log} 2>&1 &
