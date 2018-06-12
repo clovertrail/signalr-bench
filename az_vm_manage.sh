@@ -45,8 +45,7 @@ user_pubkey_update_all_vms() {
   local username=$1
   local pub_key_file=$2
   local rsg=$3
-  az vm user update --no-wait \
-                    -u $username \
+  az vm user update -u $username \
                     --ssh-key-value "$(< $pub_key_file)" \
                     --ids $(az vm list -g $rsg --query "[].id" -o tsv)
 }
