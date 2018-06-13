@@ -9,7 +9,7 @@ g_CPU_requests="1|1|1|2|2|3|3|3|4|4"
 g_CPU_limits="1|1|2|2|3|3|4|4|4|4"
 g_Memory_limits="1500|2000|2000|2000|2000|2000|2000|3000|3000|3000"
 
-target_grp="honzhanautoperf"
+target_grp="honzhanautoperf"`date +%M%S`
 sku="Basic_DS2"
 location=$Location
 
