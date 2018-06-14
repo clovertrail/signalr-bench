@@ -143,7 +143,7 @@ function start_connection_tracking() {
      config_file=srdevacsrpd.config
      result=$(k8s_query $config_file $resName)
   fi
-  echo "$result"
+  echo "'$result'"
   # install netstat
   for i in $result
   do

@@ -15,10 +15,9 @@ function query() {
   if [ "$result" == "" ]
   then
      config_file=srdevacsrpd.config
-     k8s_query $config_file $resName
-  else
-     echo "$result"
+     result=$(k8s_query $config_file $resName)
   fi
+  echo "$result"
 }
 
 set +x

@@ -1,7 +1,7 @@
 #!/bin/bash
 . ./jenkins_env.sh
 
-MaxConnectionNumber=20000
+MaxConnectionNumber=100000
 
 if [ "$connection_string" == "" ]
 then
@@ -79,6 +79,8 @@ if [ "$service_name" != "" ]
 then
    nohup sh collect_connections.sh $service_name $k8s_result_dir &
    collect_conn_pid=$!
+else
+   echo "no service name is found"
 fi
 
 sh run_websocket.sh
