@@ -2,8 +2,6 @@
 . ./az_vm_manage.sh
 . ./vm_env.sh
 
-az_login_jenkins_sub
-
 check_exisiting() {
   local grp=$1
   local is_existing=$(az group exists --name $grp 2>&1)
@@ -21,6 +19,50 @@ iterate_all_vm_name() {
   $callback $i $dns $name
   i=$(($i + 1))
  done
+}
+
+add_user_pub_key_for_single_vm() {
+ local index=$1
+ local dns=$2
+ local name=$3
+
+ az vm user update \
+  --resource-group $g_resource_group \
+  --name $name \
+  --username ${g_ssh_user} \
+  --ssh-key-value $t_pub_key_file \
+  --no-wait
+}
+
+add_user_pub_key_for_all_vms() {
+ t_pub_key_file=$1
+ iterate_all_vm_name add_user_pub_key_for_single_vm
+
+ verify_ssh_connection_for_all_vms $t_pub_key_file
+}
+
+verify_ssh_connection_for_single_vm() {
+ local index=$1
+ local dns=$2
+ local name=$3
+ local hostname=${dns}.${g_location}".cloudapp.azure.com"
+
+ local end=$((SECONDS + 60))
+ while [ $SECONDS -lt $end ]
+ do
+   ssh -i $t_pub_key_file -p $g_ssh_port -q -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname} exit
+   if [ $? -eq 0 ]
+   then
+     break
+   fi
+   sleep 1
+ done
+ echo "Fail to ssh -i $t_pub_key_file ${g_ssh_user}@${hostname}"
+}
+
+verify_ssh_connection_for_all_vms() {
+ t_pub_key_file=$1
+ iterate_all_vm_name verify_ssh_connection_for_single_vm
 }
 
 create_single_vm() {
@@ -85,11 +127,24 @@ setup_benchmark_on_single_vm() {
  local dns=$2
  local name=$3
  local hostname=${dns}.${g_location}".cloudapp.azure.com"
- prepare_bench_client $hostname $g_ssh_user ${g_ssh_port} $g_ansible_scripts_folder
+ local pubip=`az vm list-ip-addresses -g $g_resource_group -n $name|jq ".[].virtualMachine.network.publicIpAddresses[0].ipAddress"|tr -d '"'`
+ #prepare_bench_client $hostname $g_ssh_user ${g_ssh_port} $g_ansible_scripts_folder
+cat << EOF >> $t_host_file
+cli${index} ansible_host=$pubip ansible_port=$g_ssh_port ansible_user=${g_ssh_user}
+EOF
 }
 
 setup_benchmark_on_all_clients() {
+ t_host_file=$g_ansible_scripts_folder/autogen_install_bench_cli
+ echo "[linux]" > $t_host_file
  iterate_all_vm_name setup_benchmark_on_single_vm
+
+ cd $g_ansible_scripts_folder
+ ansible-playbook -i $t_host_file pam_limits.yaml
+ ansible-playbook -i $t_host_file install_config_go.yaml
+ ansible-playbook -i $t_host_file git_clone_websocket.yaml
+ ansible-playbook -i $t_host_file build_websocket.yaml
+ cd -
 }
 
 list_pubip_for_single_vm() {
@@ -115,26 +170,6 @@ wait_for_all_vm_creation() {
   iterate_all_vm_name wait_for_single_vm_creation
 }
 
-create_vms_instance() {
-  create_all_vms
-
-  wait_for_all_vm_creation
-
-  enable_nsg_ports_for_all
-
-  change_all_vm_sshd_port
-
-  user_pubkey_update_all_vms $g_ssh_user pubkey/id_rsa.pub $g_resource_group
-  user_pubkey_update_all_vms $g_ssh_user pubkey/benchserver_id_rsa.pub $g_resource_group
-  user_pubkey_update_all_vms $g_ssh_user pubkey/singlecpu_id_rsa.pub $g_resource_group
-
-  setup_benchmark_on_all_clients
-
-  gen_ssh_access_endpoint_for_signalr_bench
-
-  list_all_pubip
-}
-
 add_pubkey_on_all_vms() {
   user_pubkey_update_all_vms $g_ssh_user pubkey/id_rsa.pub $g_resource_group
 }
@@ -142,19 +177,3 @@ add_pubkey_on_all_vms() {
 delete_resource_group() {
   az group delete --name $g_resource_group -y
 }
-
-echo "---------------------------"
-date
-
-#create_vms_instance
-#add_pubkey_on_all_vms
-#list_all_pubip
-#setup_benchmark_on_all_clients
-#change_all_vm_sshd_port
- setup_benchmark_on_all_clients
- gen_ssh_access_endpoint_for_signalr_bench
-#delete_resource_group
-
-echo "---------------------------"
-date
-
