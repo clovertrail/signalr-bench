@@ -37,8 +37,6 @@ add_user_pub_key_for_single_vm() {
 add_user_pub_key_for_all_vms() {
  t_pub_key_file=$1
  iterate_all_vm_name add_user_pub_key_for_single_vm
-
- verify_ssh_connection_for_all_vms $t_pub_key_file
 }
 
 verify_ssh_connection_for_single_vm() {
@@ -50,7 +48,7 @@ verify_ssh_connection_for_single_vm() {
  local end=$((SECONDS + 60))
  while [ $SECONDS -lt $end ]
  do
-   ssh -i $t_pub_key_file -p $g_ssh_port -q -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname} exit
+   ssh -i $t_private_key_file -p $g_ssh_port -q -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname} exit
    if [ $? -eq 0 ]
    then
      break
@@ -60,8 +58,9 @@ verify_ssh_connection_for_single_vm() {
  echo "Fail to ssh -i $t_pub_key_file ${g_ssh_user}@${hostname}"
 }
 
+# require private key to verify ssh connection
 verify_ssh_connection_for_all_vms() {
- t_pub_key_file=$1
+ t_private_key_file=$1
  iterate_all_vm_name verify_ssh_connection_for_single_vm
 }
 
@@ -115,11 +114,20 @@ change_sshd_port_for_single_vm() {
  local dns=$2
  local name=$3
  local hostname=${dns}.${g_location}".cloudapp.azure.com"
- change_sshd_port $hostname ${g_ssh_user} $g_ansible_scripts_folder
+ local pubip=`az vm list-ip-addresses -g $g_resource_group -n $name|jq ".[].virtualMachine.network.publicIpAddresses[0].ipAddress"|tr -d '"'`
+ #change_sshd_port $hostname ${g_ssh_user} $g_ansible_scripts_folder
+cat << EOF >> $t_host_file
+client${index} ansible_host=$pubip ansible_port=22 ansible_user=${g_ssh_user}
+EOF
 }
 
 change_all_vm_sshd_port() {
+ t_host_file=$g_ansible_scripts_folder/autogen_sshd_port_hosts
+ echo "[linux]" > $t_host_file
  iterate_all_vm_name change_sshd_port_for_single_vm
+ cd $g_ansible_scripts_folder
+ ansible-playbook -i $t_host_file change_sshd_port.yaml
+ cd - 
 }
 
 setup_benchmark_on_single_vm() {
