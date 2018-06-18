@@ -21,6 +21,17 @@ iterate_all_vm_name() {
  done
 }
 
+restart_single_vm() {
+ local index=$1
+ local dns=$2
+ local name=$3
+ az vm restart -g $g_resource_group -n $name --no-wait
+}
+
+restart_all_vms() {
+ iterate_all_vm_name restart_single_vm
+}
+
 add_user_pub_key_for_single_vm() {
  local index=$1
  local dns=$2

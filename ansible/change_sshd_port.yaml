@@ -11,8 +11,8 @@
           dest: "/etc/ssh/sshd_config"
           regexp: "^Port"
           line: "Port 22222"
-        notify: "Restart sshd"
-      - name: "Restart sshd"
-        service:
-          name: sshd
-          state: restarted
+      #  notify: "Restart sshd"
+      #- name: "Restart sshd"
+      #  service:
+      #    name: sshd
+      #    state: restarted
