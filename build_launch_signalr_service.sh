@@ -4,7 +4,7 @@ function build_signalr_service() {
   local SignalRRootInDir=$1
   local OutDir=$2
   local commit_hash_file="$3"
-  cd $SignalRRootInDir/SignalRServer/src/Microsoft.Azure.SignalR.Server
+  cd $SignalRRootInDir/src/Microsoft.Azure.SignalR.ServiceRuntime
   pwd
   git log -n 1 --pretty=format:"%H" > "$commit_hash_file"
 
