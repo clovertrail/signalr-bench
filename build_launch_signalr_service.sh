@@ -31,7 +31,7 @@ function gen_connection_string_from_host() {
 
 function check_build_status() {
   local dir=$1
-  if [ -e $dir/Microsoft.Azure.SignalR.Server ]
+  if [ -e $dir/Microsoft.Azure.SignalR.ServiceRuntime ]
   then
     echo 0
   else
