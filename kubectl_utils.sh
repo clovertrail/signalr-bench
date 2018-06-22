@@ -88,6 +88,14 @@ function get_k8s_pod_status() {
   
 }
 
+function k8s_get_pod_number() {
+  local config_file=$1
+  local resName=$2
+  local kubeId=`kubectl get deploy -o=json --selector resourceName=$resName --kubeconfig=${config_file}|jq '.items[0].metadata.labels.resourceKubeId'|tr -d '"'`
+  local len=`kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq '.items|length'`
+  echo $len
+}
+
 function k8s_query() {
   local config_file=$1
   local resName=$2
@@ -186,6 +194,23 @@ function copy_syslog() {
 
 }
 
+function wait_replica_ready() {
+  local config_file=$1
+  local resName=$2
+  local replica=$3
+  local pods
+  local end=$((SECONDS + 120))
+  while [ $SECONDS -lt $end ]
+  do
+    pods=$(k8s_get_pod_number $config_file $resName)
+    if [ $pods -eq $replica ]
+    then
+      break
+    fi
+    sleep 1
+  done
+}
+
 function wait_deploy_ready() {
   local deploy=$1
   local config_file=$2
@@ -264,4 +289,6 @@ function patch() {
   update_k8s_deploy_env_connections $result "${connect_limit}" $config_file
 
   wait_deploy_ready $result $config_file
+
+  wait_replica_ready $config_file $resName $replicas
 }

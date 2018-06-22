@@ -4,7 +4,7 @@ function build_signalr_service() {
   local SignalRRootInDir=$1
   local OutDir=$2
   local commit_hash_file="$3"
-  cd $SignalRRootInDir/SignalRServer/src/Microsoft.Azure.SignalR.Server
+  cd $SignalRRootInDir/src/Microsoft.Azure.SignalR.ServiceRuntime
   pwd
   git log -n 1 --pretty=format:"%H" > "$commit_hash_file"
 
@@ -31,7 +31,7 @@ function gen_connection_string_from_host() {
 
 function check_build_status() {
   local dir=$1
-  if [ -e $dir/Microsoft.Azure.SignalR.Server ]
+  if [ -e $dir/Microsoft.Azure.SignalR.ServiceRuntime ]
   then
     echo 0
   else
@@ -90,9 +90,9 @@ function launch_service() {
 cat << EOF > $auto_launch_script
 #!/bin/bash
 #automatic generated script
-ssh -p $port ${user}@${hostname} "killall Microsoft.Azure.SignalR.Server"
+ssh -p $port ${user}@${hostname} "killall Microsoft.Azure.SignalR.ServiceRuntime"
 sleep 2 # wait for the exit of previous running
-ssh -p $port ${user}@${hostname} "cd $outdir; ./Microsoft.Azure.SignalR.Server"
+ssh -p $port ${user}@${hostname} "cd $outdir; ./Microsoft.Azure.SignalR.ServiceRuntime"
 EOF
 
  nohup sh $auto_launch_script > ${output_log} 2>&1 &

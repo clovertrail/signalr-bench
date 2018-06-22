@@ -52,7 +52,7 @@ echo "[Duration]: $sigbench_run_duration"
 service_name=$(extract_servicename_from_connectionstring $connection_string)
 app_launch_log_file=""
 k8s_result_dir=""
-if [ "$service_name" != "" ] && [[ $bench_type_list == unit* ]] && [ -d $result_root/$bench_type_list ]
+if [ "$service_name" != "" ] && [ -d $result_root/$bench_type_list ]
 then
   app_launch_log_file=$result_root/${bench_type_list}/${app_running_log}
   k8s_result_dir=$result_root/$bench_type_list
@@ -85,10 +85,15 @@ fi
 
 sh run_websocket.sh
 
+stop_sdk_server
+
 if [ "$service_name" != "" ]
 then
    kill $collect_conn_pid
-   copy_syslog $service_name $k8s_result_dir
+   if [ "$copy_syslog" == "true" ]
+   then
+     copy_syslog $service_name $k8s_result_dir
+   fi
    get_k8s_pod_status $service_name $k8s_result_dir
 fi
 
