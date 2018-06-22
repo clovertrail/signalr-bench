@@ -9,10 +9,11 @@ function patch_and_wait() {
   local name=$1
   local rsg=$2
   local index=$3
+  local replica=$4
   local cpu_req=$(array_get $g_CPU_requests $index "|")
   local cpu_limit=$(array_get $g_CPU_limits $index "|")
   local mem_limit=$(array_get $g_Memory_limits $index "|")
-  patch ${name} 1 $cpu_limit $cpu_req $mem_limit 500000
+  patch ${name} $replica $cpu_limit $cpu_req $mem_limit 500000
 }
 
 function run_signalr_service() {
@@ -39,9 +40,10 @@ function run_signalr_service() {
   local ConnectionString=$(query_connection_string $name $rsg)
   echo "Connection string: '$ConnectionString'"
 
+  local replica=1
   if [ "$g_require_patch" == "1" ]
   then
-    patch_and_wait $name $rsg $unit
+    patch_and_wait $name $rsg $unit $replica
     local status=$(check_signalr_service_dns $rsg $name)
     if [ $status == 1 ]
     then
