@@ -489,6 +489,12 @@ _EOF
 	done
 }
 
+function stop_sdk_server()
+{
+. ./servers_env.sh
+	ssh -o StrictHostKeyChecking=no -p ${bench_app_pub_port} ${bench_app_user}@${bench_app_pub_server} "killall dotnet"
+}
+
 function extract_servicename_from_connectionstring() {
 	local connectionString=$1
 	local is_dogfood=`echo "$connectionString"|grep "servicedev.signalr.net"`

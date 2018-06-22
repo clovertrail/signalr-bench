@@ -56,7 +56,7 @@ function run_signalr_service() {
   local max_try=$(array_get $g_max_try_list $unit "|")
   local concurrent_connection=$(array_get $g_concurrent_connection_number_list $unit "|")
 
-  multiple_try_run $ConnectionString $base_connection_number $connection_step $concurrent_connection $duration $max_try
+  multiple_try_run $ConnectionString $base_connection_number $connection_step $concurrent_connection $duration $max_try $unit
 
   delete_signalr_service $name $rsg
 }
@@ -72,6 +72,7 @@ function multiple_try_run() {
   local concurrent_number=$4
   local duration=$5
   local max_try=$6
+  local core=$7
   local i=0
   local use_https
   if [[ $connection_string = *"https://"* ]]
@@ -89,10 +90,10 @@ connection_concurrent=$concurrent_number
 connection_string="$connection_string"
 connection_number=$connection_number
 send_number=$connection_number
-bench_type_list="c${connection_number}"
+bench_type_list="cpu${core}_c${connection_number}"
 use_https=$use_https
 EOF
-    mkdir $result_root/c$connection_number
+    mkdir $result_root/cpu${core}_c$connection_number
     single_run
     if [ -e $result_root/$error_mark_file ]
     then
