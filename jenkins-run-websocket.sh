@@ -90,7 +90,10 @@ stop_sdk_server
 if [ "$service_name" != "" ]
 then
    kill $collect_conn_pid
-   copy_syslog $service_name $k8s_result_dir
+   if [ "$copy_syslog" == "true" ]
+   then
+     copy_syslog $service_name $k8s_result_dir
+   fi
    get_k8s_pod_status $service_name $k8s_result_dir
 fi
 
