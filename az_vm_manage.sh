@@ -117,6 +117,13 @@ get_vm_img_resource_id() {
   echo "$resource_id"
 }
 
+get_vm_img_location() {
+  local rsg=$1
+  local img_name=$2
+  local location=`az image show -g $rsg -n $img_name -o=json|jq ".location"|tr -d '"'`
+  echo "$location"
+}
+
 create_vm_from_img_no_wait() {
   local rsg=$1
   local vm_name=$2
@@ -127,7 +134,7 @@ create_vm_from_img_no_wait() {
   local resource_id=$7
   az vm create --resource-group $rsg \
                --name $vm_name \
-               --image $resource_id \
+               --image "$resource_id" \
                --admin-username $user --ssh-key-value $pub_key_file \
                --public-ip-address-dns-name $vm_name \
                --size $vm_size \

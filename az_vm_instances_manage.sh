@@ -54,7 +54,7 @@ verify_ssh_connection_for_single_vm() {
  local index=$1
  local dns=$2
  local name=$3
- local hostname=${dns}.${g_location}".cloudapp.azure.com"
+ local hostname=${name}.${g_location}".cloudapp.azure.com"
 
  local end=$((SECONDS + 60))
  while [ $SECONDS -lt $end ]
@@ -66,7 +66,7 @@ verify_ssh_connection_for_single_vm() {
    fi
    sleep 1
  done
- echo "Fail to ssh -i $t_pub_key_file ${g_ssh_user}@${hostname}"
+ echo "Fail to ssh -p $g_ssh_port -i $t_private_key_file ${g_ssh_user}@${hostname}"
 }
 
 # require private key to verify ssh connection
@@ -194,7 +194,7 @@ wait_for_single_vm_creation() {
  local dns=$2
  local name=$3
 
- az vm wait -g $g_resource_group -n $name --created
+ az vm wait -g $g_resource_group -n $name --created --timeout $g_vm_wait_timeout
 }
 
 wait_for_all_vm_creation() {
