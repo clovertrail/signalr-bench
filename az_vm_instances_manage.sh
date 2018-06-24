@@ -87,6 +87,18 @@ create_all_vms() {
  iterate_all_vm_name create_single_vm
 }
 
+create_single_vm_from_img() {
+ local index=$1
+ local dns=$2
+ local name=$3
+ create_vm_from_img_no_wait $g_resource_group $name $g_ssh_user $g_ssh_pubkey_file $g_vm_size $g_location $g_myimg_resouce_id 
+}
+
+create_all_vms_from_img() {
+ create_resource_group $g_resource_group $g_location
+ iterate_all_vm_name create_single_vm_from_img 
+}
+
 add_nsg_ports_for_single_vm() {
  local index=$1
  local dns=$2

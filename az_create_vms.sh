@@ -26,7 +26,8 @@ create_vms_instance() {
 echo "---------------------------"
 date
 
-az_login_signalr_dev_sub
+#az_login_signalr_dev_sub
+az_login_jenkins_sub
 
 create_vms_instance
 

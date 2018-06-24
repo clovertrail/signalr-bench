@@ -58,10 +58,10 @@ add_nsg_ports_for_all() {
   local web_client_port="7000"
   local signalr_hub_port="5050"
 
-  az vm open-port --port $signalr_service_ports --resource-group $rsg --name $vmName --priority 900
-  az vm open-port --port $new_ssh_port --resource-group $rsg --name $vmName --priority 901
-  az vm open-port --port $web_client_port --resource-group $rsg --name $vmName --priority 902
-  az vm open-port --port $signalr_hub_port --resource-group $rsg --name $vmName --priority 903
+  nohup az vm open-port --port $signalr_service_ports --resource-group $rsg --name $vmName --priority 900 &
+  nohup az vm open-port --port $new_ssh_port --resource-group $rsg --name $vmName --priority 901 &
+  nohup az vm open-port --port $web_client_port --resource-group $rsg --name $vmName --priority 902 &
+  nohup az vm open-port --port $signalr_hub_port --resource-group $rsg --name $vmName --priority 903 &
 }
 
 create_resource_group() {
@@ -108,5 +108,30 @@ create_vm() {
      --ssh-key-value $sshPubKeyFile \
      --public-ip-address-dns-name $dns \
      --no-wait
+}
+
+get_vm_img_resource_id() {
+  local rsg=$1
+  local img_name=$2
+  local resource_id=`az image show -g $rsg -n $img_name -o=json|jq ".id"|tr -d '"'`
+  echo "$resource_id"
+}
+
+create_vm_from_img_no_wait() {
+  local rsg=$1
+  local vm_name=$2
+  local user=$3
+  local pub_key_file=$4
+  local vm_size=$5
+  local location=$6
+  local resource_id=$7
+  az vm create --resource-group $rsg \
+               --name $vm_name \
+               --image $resource_id \
+               --admin-username $user --ssh-key-value $pub_key_file \
+               --public-ip-address-dns-name $vm_name \
+               --size $vm_size \
+               --location $location \
+               --no-wait
 }
 
