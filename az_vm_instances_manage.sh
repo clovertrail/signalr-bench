@@ -72,7 +72,7 @@ verify_ssh_connection_for_single_vm() {
 # require private key to verify ssh connection
 verify_ssh_connection_for_all_vms() {
  t_private_key_file=$1
- echo "" > ~/.ssh/known_hosts
+ echo "" > ~/.ssh/known_hosts # clean the known_hosts to avoid key conflict
  iterate_all_vm_name verify_ssh_connection_for_single_vm
 }
 
