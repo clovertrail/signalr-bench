@@ -62,7 +62,7 @@ verify_ssh_connection_for_single_vm() {
    ssh -i $t_private_key_file -p $g_ssh_port -q -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname} exit
    if [ $? -eq 0 ]
    then
-     break
+     return
    fi
    sleep 1
  done
