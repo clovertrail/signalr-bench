@@ -121,7 +121,7 @@ function run_all_pods() {
 }
 
 function gen_final_report() {
-  sh gen_all_units.sh
+  sh gen_all_tabs.sh
   sh publish_report.sh
   sh gen_summary.sh # refresh summary.html in NginxRoot gen_summary
   sh send_mail.sh $HOME/NginxRoot/$result_root/allunits.html
