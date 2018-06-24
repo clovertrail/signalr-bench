@@ -59,19 +59,20 @@ verify_ssh_connection_for_single_vm() {
  local end=$((SECONDS + 60))
  while [ $SECONDS -lt $end ]
  do
-   ssh -i $t_private_key_file -p $g_ssh_port -q -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname} exit
+   ssh -i $t_private_key_file -p $g_ssh_port -q -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname} exit
    if [ $? -eq 0 ]
    then
      break
    fi
    sleep 1
  done
- echo "Fail to ssh -p $g_ssh_port -i $t_private_key_file ${g_ssh_user}@${hostname}"
+ echo "Fail to ssh -i $t_private_key_file -p $g_ssh_port -q -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname}"
 }
 
 # require private key to verify ssh connection
 verify_ssh_connection_for_all_vms() {
  t_private_key_file=$1
+ echo "" > ~/.ssh/known_hosts
  iterate_all_vm_name verify_ssh_connection_for_single_vm
 }
 
@@ -114,7 +115,7 @@ gen_ssh_access_endpoint_for_single_vm() {
  local index=$1
  local dns=$2
  local name=$3
- local hostname=${dns}.${g_location}".cloudapp.azure.com"
+ local hostname=${name}.${g_location}".cloudapp.azure.com"
 
  if [ $index -ne 0 ]
  then
@@ -207,4 +208,19 @@ add_pubkey_on_all_vms() {
 
 delete_resource_group() {
   az group delete --name $g_resource_group -y
+}
+
+
+create_vms_instance_from_img() {
+  create_all_vms_from_img
+
+  wait_for_all_vm_creation
+
+  enable_nsg_ports_for_all
+
+  sleep 120
+
+  verify_ssh_connection_for_all_vms $g_ssh_private_file
+  #add_user_pub_key_for_all_vms pubkey/benchserver_id_rsa.pub
+  #add_user_pub_key_for_all_vms pubkey/singlecpu_id_rsa.pub
 }
