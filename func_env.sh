@@ -35,6 +35,15 @@ array_len() {
 }'
 }
 
+## given "echo" and "connection_number"
+## return the value of $echoconnection_number
+derefer_2vars() {
+  local prefix=$1
+  local postfix=$2
+  local v=${prefix}${postfix}
+  eval echo \$${v}
+}
+
 function create_root_folder() {
   export result_root=`date +%Y%m%d%H%M%S`
   mkdir $result_root
@@ -233,10 +242,31 @@ function update_jenkins_command_configs()
 	local bench_codec=$2
 	local bench_name=$3
 	local cmd_prefix="cmd_4"
+	# echo and broadcast have different connection_number, concurrent_connection_number and send_number
+	local customized_connection=$(derefer_2vars $bench_name "connection_number")
+	local customized_concurrent=$(derefer_2vars $bench_name "connection_concurrent")
+	local customized_send=$(derefer_2vars $bench_name "send_number")
+
+	local connection_num=$connection_number
+	local concurrent_num=$connection_concurrent
+	local send_num=$send_number
+
+	if [ "$customized_connection" != "" ]
+	then
+		connection_num=$customized_connection
+	fi
+	if [ "$customized_concurrent" != "" ]
+	then
+		concurrent_num=$customized_concurrent
+	fi
+	if [ "$customized_send" != "" ]
+	then
+		send_num=$customized_send
+	fi
 cat << EOF > $sigbench_config_dir/${cmd_prefix}_${bench_codec}_${bench_name}_${bench_type}
-connection=$connection_number
-connection_concurrent=$connection_concurrent
-send=$send_number
+connection=$connection_num
+connection_concurrent=$concurrent_num
+send=$send_num
 EOF
 }
 

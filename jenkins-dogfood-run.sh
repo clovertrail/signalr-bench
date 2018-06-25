@@ -4,24 +4,9 @@
 . ./func_env.sh
 . ./kubectl_utils.sh
 
-# unit 1 ~ 10
-g_CPU_requests="1|1|1|2|2|3|3|3|4|4"
-g_CPU_limits="1|1|2|2|3|3|4|4|4|4"
-g_Memory_limits="1500|2000|2000|2000|2000|2000|2000|3000|3000|3000"
-
-target_grp="honzhanautoperf"`date +%M%S`
+target_grp="honzhanatperf"`date +%M%S`
 sku="Basic_DS2"
 location=$Location
-
-function patch_and_wait() {
-  local name=$1
-  local rsg=$2
-  local index=$3
-  local cpu_req=$(array_get $g_CPU_requests $index "|")
-  local cpu_limit=$(array_get $g_CPU_limits $index "|")
-  local mem_limit=$(array_get $g_Memory_limits $index "|")
-  patch ${name} 1 $cpu_limit $cpu_req $mem_limit 20000
-}
 
 function run_unit_benchmark() {
   local rsg=$1
@@ -57,20 +42,6 @@ send_number=$ClientConnectionNumber
 bench_type_list="unit${unit}"
 use_https=1
 EOF
-  # patch it to be 1 replica
-  #patch_replicas ${name} 1
-  #patch_replicas_env ${name} 1 12000
-  if [ "$g_require_patch" == "1" ]
-  then
-    patch_and_wait $name $rsg $unit
-    local status=$(check_signalr_service_dns $rsg $name)
-    if [ $status == 1 ]
-    then
-      echo "!!!Provisioning SignalR service failed!!!"
-      delete_signalr_service $name $rsg
-      return
-    fi
-  fi
 
   # create unit folder before run-websocket because it may require that folder
   mkdir $result_root/unit${unit}
@@ -81,7 +52,7 @@ EOF
 }
 
 function gen_final_report() {
-  sh gen_all_units.sh
+  sh gen_all_tabs.sh
   sh publish_report.sh
   sh gen_summary.sh # refresh summary.html in NginxRoot gen_summary
   sh send_mail.sh $HOME/NginxRoot/$result_root/allunits.html
