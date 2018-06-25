@@ -207,11 +207,18 @@ add_pubkey_on_all_vms() {
 }
 
 delete_resource_group() {
-  az group delete --name $g_resource_group -y
+  local isExisting=$(check_exisiting $g_resource_group)
+  if [ "$isExisting" == "true" ]
+  then
+    az group delete --name $g_resource_group -y
+  else
+    echo "resource group '$g_resource_group' has been removed"
+  fi
 }
 
-
 create_vms_instance_from_img() {
+  g_location=$(get_vm_img_location $g_myimg_rsg_name $g_myimg_name)
+
   create_all_vms_from_img
 
   wait_for_all_vm_creation
