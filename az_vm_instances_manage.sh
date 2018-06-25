@@ -15,16 +15,14 @@ iterate_all_vm_name() {
  while [ $i -lt $g_total_vms ]
  do
   local dns=${g_dns_prefix}${i}
-  local name=${g_ssh_user}${dns}
-  $callback $i $dns $name
+  $callback $i $dns
   i=$(($i + 1))
  done
 }
 
 restart_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
  az vm restart -g $g_resource_group -n $name --no-wait
 }
 
@@ -34,8 +32,7 @@ restart_all_vms() {
 
 add_user_pub_key_for_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
 
  az vm user update \
   --resource-group $g_resource_group \
@@ -52,8 +49,7 @@ add_user_pub_key_for_all_vms() {
 
 verify_ssh_connection_for_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
  local hostname=${name}.${g_location}".cloudapp.azure.com"
 
  local end=$((SECONDS + 60))
@@ -78,8 +74,7 @@ verify_ssh_connection_for_all_vms() {
 
 create_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
  create_vm $name $g_img $g_location $g_ssh_user $g_ssh_pubkey_file $g_vm_size $g_resource_group $dns
 }
 
@@ -90,8 +85,7 @@ create_all_vms() {
 
 create_single_vm_from_img() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
  create_vm_from_img_no_wait $g_resource_group $name $g_ssh_user $g_ssh_pubkey_file $g_vm_size $g_location $g_myimg_resouce_id 
 }
 
@@ -102,8 +96,7 @@ create_all_vms_from_img() {
 
 add_nsg_ports_for_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
  add_nsg_ports_for_all $name $g_resource_group $g_ssh_port
 }
 
@@ -113,8 +106,7 @@ enable_nsg_ports_for_all() {
 
 gen_ssh_access_endpoint_for_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
  local hostname=${name}.${g_location}".cloudapp.azure.com"
 
  if [ $index -ne 0 ]
@@ -135,9 +127,8 @@ gen_ssh_access_endpoint_for_signalr_bench() {
 
 change_sshd_port_for_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
- local hostname=${dns}.${g_location}".cloudapp.azure.com"
+ local name=$2
+ local hostname=${name}.${g_location}".cloudapp.azure.com"
  local pubip=`az vm list-ip-addresses -g $g_resource_group -n $name|jq ".[].virtualMachine.network.publicIpAddresses[0].ipAddress"|tr -d '"'`
  #change_sshd_port $hostname ${g_ssh_user} $g_ansible_scripts_folder
 cat << EOF >> $t_host_file
@@ -156,9 +147,8 @@ change_all_vm_sshd_port() {
 
 setup_benchmark_on_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
- local hostname=${dns}.${g_location}".cloudapp.azure.com"
+ local name=$2
+ local hostname=${name}.${g_location}".cloudapp.azure.com"
  local pubip=`az vm list-ip-addresses -g $g_resource_group -n $name|jq ".[].virtualMachine.network.publicIpAddresses[0].ipAddress"|tr -d '"'`
  #prepare_bench_client $hostname $g_ssh_user ${g_ssh_port} $g_ansible_scripts_folder
 cat << EOF >> $t_host_file
@@ -181,8 +171,7 @@ setup_benchmark_on_all_clients() {
 
 list_pubip_for_single_vm() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
  list_vm_public_ip $name $g_resource_group
 }
 
@@ -192,8 +181,7 @@ list_all_pubip() {
 
 wait_for_single_vm_creation() {
  local index=$1
- local dns=$2
- local name=$3
+ local name=$2
 
  az vm wait -g $g_resource_group -n $name --created --timeout $g_vm_wait_timeout
 }
