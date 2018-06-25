@@ -392,9 +392,17 @@ then
 	pid=\`cat /tmp/websocket-bench-master.pid\`
 	kill -9 \$pid
 fi
-
+EOF
+	if [ "$bench_send_size" == "0" ]
+	then
+cat << EOF >> ${websocket_script_prefix}_${result_name}.sh
 ./websocket-bench -m master -a "\${agents}" -s "${server_endpoint}" -t \$${result_name} -c ${cmd_file_prefix}_${bench_codec}_${bench_name}_${bench_type} -o ${result_name} ${wss_option}
 EOF
+	else
+cat << EOF >> ${websocket_script_prefix}_${result_name}.sh
+./websocket-bench -m master -a "\${agents}" -s "${server_endpoint}" -t \$${result_name} -c ${cmd_file_prefix}_${bench_codec}_${bench_name}_${bench_type} -o ${result_name} ${wss_option} -b $bench_send_size
+EOF
+	fi
 }
 
 function launch_all_websocket_scripts()
