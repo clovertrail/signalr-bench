@@ -22,6 +22,11 @@ then
   bench_config_hub="chat"
 fi
 
+if [ "$bench_send_size" == "" ]
+then
+  bench_send_size=0
+fi
+
 if [ "$use_https" == "" ]
 then
   use_https=1
