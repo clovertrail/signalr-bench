@@ -14,7 +14,6 @@ cat <<EOF > vm_env.sh
 g_total_vms=$total_vm_count
 g_myimg_name="$myimg_name"
 g_myimg_rsg_name="$myimg_rsg_name"
-
 g_resource_group="$target_rsg_name"
 g_dns_prefix="$dns_prefix"
 g_ssh_user=$ssh_user

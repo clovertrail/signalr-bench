@@ -2,6 +2,20 @@
 . ./az_vm_manage.sh
 . ./vm_env.sh
 
+exit_if_fail_to_ssh_all_vms() {
+ local xa=$(verify_ssh_connection_for_all_vms ${g_ssh_private_file})
+ local xb
+ if [ "$xa" != "" ]
+ then
+    xb=`echo "${xa}"|grep "Fail"`
+    if [ "${xb}" != "" ]
+    then
+      echo "Cannot access the VMs"
+      exit 1
+    fi
+ fi
+}
+
 check_exisiting() {
   local grp=$1
   local is_existing=$(az group exists --name $grp 2>&1)
@@ -206,6 +220,7 @@ delete_resource_group() {
 
 create_vms_instance_from_img() {
   g_location=$(get_vm_img_location $g_myimg_rsg_name $g_myimg_name)
+  g_myimg_resouce_id=$(get_vm_img_resource_id $g_myimg_rsg_name $g_myimg_name)
 
   create_all_vms_from_img
 
