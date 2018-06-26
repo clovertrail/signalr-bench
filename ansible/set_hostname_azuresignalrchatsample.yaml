@@ -3,5 +3,5 @@
   - replace:
       dest: /home/{{ansible_user}}/signalr-bench/AzureSignalRChatSample/ChatSample/Properties/launchSettings.json
       regexp: 'localhost'
-      replace: "{{ansible_host}}"
+      replace: "{{'*'}}"
       backup: yes
