@@ -34,7 +34,7 @@ gen_all_tabs_report() {
     echo "                <li><a href='#${i}'>${i}</a></li>" >>$tabs_list_gen
 
     echo "{{define \"tabcontentlist\"}}" > $tmp_tabs_tmpl_single
-    for j in $in_dir/${i}*
+    for j in $in_dir/${i}_*
     do
       if [ -e $j/latency_table_1s_category.js ]
       then

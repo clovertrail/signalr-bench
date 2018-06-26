@@ -243,6 +243,8 @@ function update_jenkins_command_configs()
 	local bench_name=$3
 	local cmd_prefix="cmd_4"
 	# echo and broadcast have different connection_number, concurrent_connection_number and send_number
+	# we first find connection_number, connection_concurrent, and send_number from customized setting,
+	# if they are empty, then we fallback to default values
 	local customized_connection=$(derefer_2vars $bench_name "connection_number")
 	local customized_concurrent=$(derefer_2vars $bench_name "connection_concurrent")
 	local customized_send=$(derefer_2vars $bench_name "send_number")

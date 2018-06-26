@@ -9,10 +9,10 @@
 #  BroadcastConnectionNumberList, BroadcastSendNumberList, BroadcastConcurrentConnectNumberList
 
 echo "------jenkins inputs------"
-echo "[Units] $UnitList"
-echo "[Duration]: $Duration"
-echo "[Location]: $Location"
-echo "[SendMsgSizeList]: $SendSizeList"
+echo "[Units] '$UnitList'"
+echo "[Duration]: '$Duration'"
+echo "[Location]: '$Location'"
+echo "[SendMsgSizeList]: '$SendSizeList'"
 echo "[EchoConnectionNumberList]: '$EchoConnectionNumberList'"
 echo "[EchoSendNumberList]: '$EchoSendNumberList'"
 echo "[EchoConcurrentConnectNumberList]: '$EchoConcurrentConnectNumberList'"
@@ -64,6 +64,9 @@ function run_unit_benchmark() {
   local broadcast_concurrent_number=$(array_get $BroadcastConcurrentConnectNumberList $unit "|")
   # override jenkins_env.sh
 cat << EOF > jenkins_env.sh
+connection_number=$echo_connection_number
+connection_concurrent=$echo_concurrent_number
+send_number=$echo_send_number
 sigbench_run_duration=$Duration
 echoconnection_number=$echo_connection_number
 echoconnection_concurrent=$echo_concurrent_number
@@ -126,7 +129,7 @@ az_login_ASRS_dogfood
 
 create_group_if_not_exist $target_grp $location
 
-run_units $target_grp $sku "$UnitList"
+run_units $target_grp $sku "$UnitList" "$SendSizeList"
 
 delete_group $target_grp
 
