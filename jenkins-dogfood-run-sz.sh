@@ -145,13 +145,6 @@ EOF
   delete_signalr_service $name $rsg
 }
 
-function gen_final_report() {
-  sh gen_all_tabs.sh
-  sh publish_report.sh
-  sh gen_summary.sh # refresh summary.html in NginxRoot gen_summary
-  sh send_mail.sh $HOME/NginxRoot/$result_root/allunits.html
-}
-
 function run_units() {
   local grp=$1
   local sku=$2
