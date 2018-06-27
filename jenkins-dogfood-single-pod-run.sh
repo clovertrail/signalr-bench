@@ -120,13 +120,6 @@ function run_all_pods() {
   gen_final_report
 }
 
-function gen_final_report() {
-  sh gen_all_tabs.sh
-  sh publish_report.sh
-  sh gen_summary.sh # refresh summary.html in NginxRoot gen_summary
-  sh send_mail.sh $HOME/NginxRoot/$result_root/allunits.html
-}
-
 g_CPU_requests="1|2|3|4"
 g_CPU_limits="1|2|3|4"
 g_Memory_limits="4000|4000|4000|4000"

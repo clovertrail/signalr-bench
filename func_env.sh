@@ -549,3 +549,10 @@ function extract_servicename_from_connectionstring() {
 	fi
 	echo ""
 }
+
+function gen_final_report() {
+  sh gen_all_tabs.sh
+  sh publish_report.sh
+  sh gen_summary.sh # refresh summary.html in NginxRoot gen_summary
+  sh send_mail.sh $HOME/NginxRoot/$result_root/allunits.html
+}
