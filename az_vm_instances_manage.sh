@@ -209,7 +209,7 @@ add_pubkey_on_all_vms() {
 }
 
 delete_resource_group() {
-  local $rsg=$1
+  local rsg=$1
   local isExisting=$(check_exisiting $rsg)
   if [ "$isExisting" == "true" ]
   then
