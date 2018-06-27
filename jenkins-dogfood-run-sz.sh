@@ -8,6 +8,9 @@
 #  EchoConnectionNumberList, EchoSendNumberList, EchoConcurrentConnectNumberList
 #  BroadcastConnectionNumberList, BroadcastSendNumberList, BroadcastConcurrentConnectNumberList
 
+## Optional parameters:
+#  DisableThrottling, EchoStepList, BroadcastStepList, MaxRetry
+
 echo "------jenkins inputs------"
 echo "[Units] '$UnitList'"
 echo "[Duration]: '$Duration'"
@@ -18,6 +21,11 @@ echo "[EchoSendNumberList]: '$EchoSendNumberList'"
 echo "[EchoConcurrentConnectNumberList]: '$EchoConcurrentConnectNumberList'"
 echo "[BroadcastConnectionNumberList]: '$BroadcastConnectionNumberList'"
 echo "[BroadcastConcurrentConnectNumberList]: '$BroadcastConcurrentConnectNumberList'"
+echo "-----optional inputs-----"
+echo "[DisableThrottling]: '$DisableThrottling'"
+echo "[EchoStepList]: '$EchoStepList'"
+echo "[BroadcastStepList]: '$BroadcastStepList'"
+echo "[MaxRetry]: '$MaxRetry'"
 
 target_grp="honzhanatperf"`date +%M%S`
 sku="Basic_DS2"
@@ -29,16 +37,14 @@ function run_unit_benchmark() {
   local sku=$3
   local unit=$4
   local sendsize=$5
-  local bench_type_tag
 
-  if [ $sendsize != "0" ]
+  local signalr_service
+  local normal_unit=$unit
+  if [ $normal_unit -gt 10 ]
   then
-    bench_type_tag="unit${unit}_${sendsize}"
-  else
-    bench_type_tag="unit${unit}"
+    normal_unit=10
   fi
-
-  local signalr_service=$(create_signalr_service $rsg $name $sku $unit)
+  $(create_signalr_service $rsg $name $sku $normal_unit)
   if [ "$signalr_service" == "" ]
   then
     echo "Fail to create SignalR Service"
@@ -53,9 +59,23 @@ function run_unit_benchmark() {
     delete_signalr_service $name $rsg
     return
   fi
+
+  if [ "$DisableThrottling" == "true" ]
+  then
+    patch_connection_throttling_env $name 5000000
+  fi
+
   local ConnectionString=$(query_connection_string $name $rsg)
   echo "Connection string: '$ConnectionString'"
 
+  local bench_type_tag
+
+  if [ $sendsize != "0" ]
+  then
+    bench_type_tag="unit${unit}_${sendsize}"
+  else
+    bench_type_tag="unit${unit}"
+  fi
   local echo_connection_number=$(array_get $EchoConnectionNumberList $unit "|")
   local echo_send_number=$(array_get $EchoSendNumberList $unit "|")
   local echo_concurrent_number=$(array_get $EchoConcurrentConnectNumberList $unit "|")
@@ -79,12 +99,49 @@ bench_type_list=$bench_type_tag
 bench_send_size=$sendsize
 use_https=1
 EOF
+  if [ "$DisableThrottling" == "true" ] && [ "$EchoStepList" != "" ] && [ "$BroadcastStepList" != "" ] && [ $MaxRetry -gt 0 ]
+  then
+    local i=0
+    local echostep=$(array_get $EchoStepList $unit "|")
+    local broadcaststep=$(array_get $BroadcastStepList $unit "|")
+    while [ $i -t $MaxRetry ]
+    do
+       echo_connection_number=`$echo_connection_number + $echostep`
+       echo_send_number=`$echo_send_number + $echostep`
+       broadcast_connection_number=`$broadcast_connection_number + $broadcaststep`
+       broadcast_send_number=`$broadcast_send_number + $broadcaststep`
+       if [ $sendsize != "0" ]
+       then
+           bench_type_tag="unit${unit}_echo${echo_send_number}_bd${broadcast_send_number}_${sendsize}"
+       else
+           bench_type_tag="unit${unit}_echo${echo_send_number}_bd${broadcast_send_number}"
+       fi
 
-  # create unit folder before run-websocket because it may require that folder
-  mkdir $result_root/$bench_type_tag
-
-  sh jenkins-run-websocket.sh
-
+cat << EOF > jenkins_env.sh
+connection_number=$echo_connection_number
+connection_concurrent=$echo_concurrent_number
+send_number=$echo_send_number
+sigbench_run_duration=$Duration
+echoconnection_number=$echo_connection_number
+echoconnection_concurrent=$echo_concurrent_number
+echosend_number=$echo_send_number
+broadcastconnection_number=$broadcast_connection_number
+broadcastconnection_concurrent=$broadcast_concurrent_number
+broadcastsend_number=$broadcast_send_number
+connection_string="$ConnectionString"
+bench_type_list=$bench_type_tag
+bench_send_size=$sendsize
+use_https=1
+EOF
+       mkdir $result_root/$bench_type_tag
+       sh jenkins-run-websocket.sh
+       i=`expr $i + 1`
+    done
+  else
+    # create unit folder before run-websocket because it may require that folder
+    mkdir $result_root/$bench_type_tag
+    sh jenkins-run-websocket.sh
+  fi
   delete_signalr_service $name $rsg
 }
 
@@ -114,6 +171,10 @@ function run_units() {
 
   for i in $list
   do
+     if [ $i -eq 11 ]
+     then
+       DisableThrottling="true"
+     fi
      for j in $sizelist
      do
         name="autoperf"`date +%H%M%S`

@@ -227,6 +227,25 @@ function wait_deploy_ready() {
   done
 }
 
+function patch_connection_throttling_env() {
+  local resName=$1
+  local connection_limit=$2
+  local config_file=kvsignalrdevseasia.config
+  local result=$(get_k8s_deploy_name $resName $config_file)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(get_k8s_deploy_name $resName $config_file)
+  fi
+
+  local pods=$(k8s_get_pod_number $config_file $resName)
+  update_k8s_deploy_env_connections $result "${connect_limit}" $config_file
+
+  wait_deploy_ready $result $config_file
+
+  wait_replica_ready $config_file $resName $pods
+}
+
 function patch_replicas_env() {
   local resName=$1
   local replicas=$2
