@@ -1,15 +1,54 @@
 #!/bin/bash
-. ./jenkins_env.sh
 
-# jenkins normalized input
+## Required parameters:
+# EchoConnectionNumber, EchoConcurrentConnectionNumber,
+# BroadcastConnectionNumber, BroadcastConcurrentConnectionNumber,
+# Duration, SendSize, NginxServer, UseHttps, ServerHost
+# BenchNameList, BenchCodecList, AppBenchPort
 
 echo "-------jenkins normalize your inputs------"
 echo "[ServerHost]: $ServerHost"
-echo "[ClientConnectionNumber]: $connection_number"
-echo "[ConcurrentConnectionNumber]: $connection_concurrent"
-echo "[SendNumber]: $send_number"
-echo "[Duration]: $sigbench_run_duration"
+echo "[EchoConnectionNumber]: $EchoConnectionNumber"
+echo "[EchoConcurrentNumber]: $EchoConcurrentConnectionNumber"
+echo "[BroadcastConnectionNumber]: $BroadcastConnectionNumber"
+echo "[BroadcastConcurrentNumber]: $BroadcastConcurrentConnectionNumber"
+echo "[Duration]: $Duration"
 echo "[UseHttps]: $UseHttps"
+echo "[SendSize]: $SendSize"
+echo "[NginxServer]: $NginxServer"
+echo "[BenchNameList]: '$BenchNameList'"
+echo "[BenchCodecList]: '$BenchCodecList'"
+echo "[AppBenchPort]: $AppBenchPort"
+
+gen_jenkins_env_from_in_parameters() {
+ local use_https
+ if [ "$UseHttps" == "true" ]
+ then
+   use_https="1"
+ fi
+
+cat << EOF >> servers_env.sh
+bench_app_pub_server=$ServerHost
+bench_app_port=$AppBenchPort
+EOF
+
+cat << EOF > jenkins_env.sh
+## replace builtin variable
+bench_config_hub="chat"
+bench_codec_list="$BenchCodecList"
+bench_send_size=$SendSize
+bench_name_list="$BenchNameList"
+echoconnection_number=$EchoConnectionNumber
+echoconnection_concurrent=$EchoConcurrentConnectionNumber
+echosend_number=$EchoConnectionNumber
+broadcastconnection_number=$BroadcastConnectionNumber
+broadcastconnection_concurrent=$BroadcastConcurrentConnectionNumber
+broadcastsend_number=$BroadcastConnectionNumber
+nginx_server_dns=$NginxServer
+EOF
+}
+
+gen_jenkins_env_from_in_parameters
 
 . ./func_env.sh
 
