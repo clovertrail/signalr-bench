@@ -209,12 +209,13 @@ add_pubkey_on_all_vms() {
 }
 
 delete_resource_group() {
-  local isExisting=$(check_exisiting $g_resource_group)
+  local $rsg=$1
+  local isExisting=$(check_exisiting $rsg)
   if [ "$isExisting" == "true" ]
   then
-    az group delete --name $g_resource_group -y
+    az group delete --name $rsg -y
   else
-    echo "resource group '$g_resource_group' has been removed"
+    echo "resource group '$rsg' has been removed"
   fi
 }
 
