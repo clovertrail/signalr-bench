@@ -25,6 +25,8 @@ gen_jenkins_env_from_in_parameters() {
  if [ "$UseHttps" == "true" ]
  then
    use_https="1"
+ else
+   use_https="0"
  fi
 
 cat << EOF >> servers_env.sh
@@ -45,6 +47,7 @@ broadcastconnection_number=$BroadcastConnectionNumber
 broadcastconnection_concurrent=$BroadcastConcurrentConnectionNumber
 broadcastsend_number=$BroadcastConnectionNumber
 nginx_server_dns=$NginxServer
+use_https=$use_https
 EOF
 }
 
