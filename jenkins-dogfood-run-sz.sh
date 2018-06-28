@@ -44,7 +44,7 @@ function run_unit_benchmark() {
   then
     normal_unit=10
   fi
-  $(create_signalr_service $rsg $name $sku $normal_unit)
+  signalr_service=$(create_signalr_service $rsg $name $sku $normal_unit)
   if [ "$signalr_service" == "" ]
   then
     echo "Fail to create SignalR Service"
@@ -99,17 +99,13 @@ bench_type_list=$bench_type_tag
 bench_send_size=$sendsize
 use_https=1
 EOF
-  if [ "$DisableThrottling" == "true" ] && [ "$EchoStepList" != "" ] && [ "$BroadcastStepList" != "" ] && [ $MaxRetry -gt 0 ]
+  if [ "$EchoStepList" != "" ] && [ "$BroadcastStepList" != "" ] && [ $MaxRetry -gt 0 ]
   then
     local i=0
     local echostep=$(array_get $EchoStepList $unit "|")
     local broadcaststep=$(array_get $BroadcastStepList $unit "|")
-    while [ $i -t $MaxRetry ]
+    while [ $i -lt $MaxRetry ]
     do
-       echo_connection_number=`$echo_connection_number + $echostep`
-       echo_send_number=`$echo_send_number + $echostep`
-       broadcast_connection_number=`$broadcast_connection_number + $broadcaststep`
-       broadcast_send_number=`$broadcast_send_number + $broadcaststep`
        if [ $sendsize != "0" ]
        then
            bench_type_tag="unit${unit}_echo${echo_send_number}_bd${broadcast_send_number}_${sendsize}"
@@ -135,6 +131,11 @@ use_https=1
 EOF
        mkdir $result_root/$bench_type_tag
        sh jenkins-run-websocket.sh
+       echo_connection_number=$((echo_connection_number + $echostep))
+       echo_send_number=$((echo_send_number + $echostep))
+       broadcast_connection_number=$((broadcast_connection_number + $broadcaststep))
+       broadcast_send_number=$((broadcast_send_number + $broadcaststep))
+       broadcast_concurrent_number=$broadcast_connection_number
        i=`expr $i + 1`
     done
   else
