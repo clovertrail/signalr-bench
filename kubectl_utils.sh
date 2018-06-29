@@ -190,6 +190,13 @@ function copy_syslog() {
   for i in $result
   do
      kubectl cp default/${i}:/var/log/syslog $outdir/${i}_syslog.txt --kubeconfig=$config_file
+     if [ -e $outdir/${i}_syslog.txt ]
+     then
+        cd $outdir
+        tar zcvf ${i}_syslog.tgz ${i}_syslog.txt
+        rm ${i}_syslog.txt
+        cd -
+     fi
   done
 
 }
