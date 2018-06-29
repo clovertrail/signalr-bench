@@ -58,10 +58,10 @@ add_nsg_ports_for_all() {
   local web_client_port="7000"
   local signalr_hub_port="5050"
 
-  nohup az vm open-port --port $signalr_service_ports --resource-group $rsg --name $vmName --priority 900 &
-  nohup az vm open-port --port $new_ssh_port --resource-group $rsg --name $vmName --priority 901 &
-  nohup az vm open-port --port $web_client_port --resource-group $rsg --name $vmName --priority 902 &
-  nohup az vm open-port --port $signalr_hub_port --resource-group $rsg --name $vmName --priority 903 &
+  az vm open-port --port $signalr_service_ports --resource-group $rsg --name $vmName --priority 900
+  az vm open-port --port $new_ssh_port --resource-group $rsg --name $vmName --priority 901
+  az vm open-port --port $web_client_port --resource-group $rsg --name $vmName --priority 902
+  az vm open-port --port $signalr_hub_port --resource-group $rsg --name $vmName --priority 903
 }
 
 create_resource_group() {
