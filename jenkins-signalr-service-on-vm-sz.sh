@@ -12,28 +12,18 @@ echo "-------Your Jenkins Inputs------"
 echo "[EchoConnectionNumberList]: $EchoConnectionNumberList"
 echo "[EchoSendNumberList]: $EchoSendNumberList"
 echo "[EchoConcurrentConnectNumberList]: $EchoConcurrentConnectNumberList"
-echo "[EchoConnectionStepList]: $EchoConnectionStepList"
+echo "[EchoConnectionStepList]: $EchoStepList"
 echo "[BroadcastConnectionNumberList]: $BroadcastConnectionNumberList"
 echo "[BroadcastSendNumberList]: $BroadcastSendNumberList"
 echo "[BroadcastConcurrentConnectNumberList]: $BroadcastConcurrentConnectNumberList"
-echo "[BroadcastConnectionStepList]: $BroadcastConnectionStepList"
+echo "[BroadcastConnectionStepList]: $BroadcastStepList"
 echo "[Duration]: $Duration"
 echo "[MaxTryList]: $MaxTryList"
 echo "[VMSizeList]: $VMSizeList"
 echo "[VMHostPrefixList]: $VMHostPrefixList"
 echo "[GitBranch]: $GitBranch"
 echo "[RedisConnectString]: $RedisConnectString"
-
-g_service_host=$ServiceHost
-g_echo_connection_number=$EchoConnectionNumber
-g_echo_send_number=$EchoSendNumber
-g_echo_concurrent_connection_number=$EchoConcurrentConnectNumber
-g_echo_connection_step=$EchoConnectionStep
-g_broadcast_connection_number=$BroadcastConnectionNumber
-g_broadcast_send_number=$BroadcastSendNumber
-g_broadcast_concurrent_connection_number=$BroadcastConcurrentConnectNumber
-g_broadcast_connection_step=$BroadcastConnectionStep
-g_duration=$Duration
+echo "[ResourceGroup]: $ResourceGroup"
 
 function multiple_try_run() {
   local servicebin_dir=$1
@@ -58,7 +48,7 @@ function multiple_try_run() {
   while [ $i -lt $max_try ]
   do
     local normal_vmsize=`echo "${g_vmsize}"|sed -e 's/_//g'` # remove '_'
-    tag="${normal_vmsize}e${echo_connection_number}b${broadcast_connection_number}"
+    tag="${normal_vmsize}_e${echo_connection_number}b${broadcast_connection_number}"
 cat << EOF > jenkins_env.sh
 sigbench_run_duration=$duration
 echoconnection_number=$echo_connection_number

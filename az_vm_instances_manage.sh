@@ -116,7 +116,7 @@ create_single_vm() {
 }
 
 create_all_vms() {
- create_resource_group $g_resource_group $g_location
+ #create_resource_group $g_resource_group $g_location
  iterate_all_vm_name create_single_vm
 }
 
@@ -127,7 +127,7 @@ create_single_vm_from_img() {
 }
 
 create_all_vms_from_img() {
- create_resource_group $g_resource_group $g_location
+ #create_resource_group $g_resource_group $g_location
  iterate_all_vm_name create_single_vm_from_img 
 }
 
@@ -160,6 +160,27 @@ gen_ssh_access_endpoint_for_single_vm() {
 
 gen_ssh_access_endpoint_for_signalr_bench() {
  iterate_all_vm_name gen_ssh_access_endpoint_for_single_vm
+}
+
+gen_ssh_pubip_endpoint_for_single_vm() {
+ local index=$1
+ local name=$2
+ local hostname=`az vm list-ip-addresses -g $g_resource_group -n $name |jq ".[].virtualMachine.network.publicIpAddresses[0].ipAddress"|tr -d '"'`
+
+ if [ $index -ne 0 ]
+ then
+   echo -n "|"
+ fi
+ if [ `expr $index + 1` -eq $g_total_vms ]
+ then
+   echo "${hostname}:${g_ssh_port}:${g_ssh_user}"
+ else
+   echo -n "${hostname}:${g_ssh_port}:${g_ssh_user}"
+ fi
+}
+
+gen_ssh_pubip_endpoint_for_signalr_bench() {
+ iterate_all_vm_name gen_ssh_pubip_endpoint_for_single_vm
 }
 
 change_sshd_port_for_single_vm() {
@@ -240,6 +261,16 @@ delete_resource_group() {
   else
     echo "resource group '$rsg' has been removed"
   fi
+}
+
+# make sure the resource group does not exist
+# we do not check it because the check may trigger exit signal
+create_resource_group_on_img_location() {
+  local img_rsg=$1
+  local img_name=$2
+  local target_rsg=$3
+  local location=$(get_vm_img_location $img_rsg $img_name)
+  az group create --name $target_rsg --location $location
 }
 
 create_vms_instance_from_img() {
