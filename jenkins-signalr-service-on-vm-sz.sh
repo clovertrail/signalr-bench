@@ -4,7 +4,7 @@
 # EchoConnectionNumberList, EchoSendNumberList, EchoConcurrentConnectNumberList, EchoConnectionStepList
 # BroadcastConnectionNumberList, BroadcastSendNumberList, BroadcastConcurrentConnectNumberList, BroadcastConcurrentStepList
 # RedisConnectString, Duration, MaxTryList, GitBranch
-
+. ./utils.sh
 . ./func_env.sh
 . ./build_launch_signalr_service.sh
 
@@ -172,7 +172,7 @@ run_all() {
    else
      g_appsetting_file="servicetmpl/appsettings.json"
    fi
-   replace_appsettings $output_dir $service_host $appsetting_tmpl
+   replace_appsettings $output_dir $ServiceHost $g_appsetting_tmpl
    zip_signalr_service $output_dir
    ## generate configuration
    local echo_connection_number=$(array_get $EchoConnectionNumberList $i "|")
