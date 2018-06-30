@@ -281,6 +281,8 @@ create_vms_instance_from_img() {
 
   wait_for_all_vm_creation
 
+  sleep 60
+
   enable_nsg_ports_for_all
 
   sleep 120
