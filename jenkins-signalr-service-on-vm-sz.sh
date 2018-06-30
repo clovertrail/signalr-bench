@@ -1,8 +1,8 @@
 #!/bin/bash
 ## Required parameters:
 # ResourceGroup, VMSizeList, VMHostPrefixList,
-# EchoConnectionNumberList, EchoSendNumberList, EchoConcurrentConnectNumberList, EchoConnectionStepList
-# BroadcastConnectionNumberList, BroadcastSendNumberList, BroadcastConcurrentConnectNumberList, BroadcastConcurrentStepList
+# EchoConnectionNumberList, EchoSendNumberList, EchoConcurrentConnectNumberList, EchoStepList
+# BroadcastConnectionNumberList, BroadcastSendNumberList, BroadcastConcurrentConnectNumberList, BroadcastStepList
 # RedisConnectString, Duration, MaxTryList, GitBranch
 . ./utils.sh
 . ./func_env.sh
@@ -36,6 +36,7 @@ g_broadcast_connection_step=$BroadcastConnectionStep
 g_duration=$Duration
 
 function multiple_try_run() {
+  local servicebin_dir=$1
   local service_host=$g_service_host
   local duration=$g_duration
   local max_try=$g_max_try
@@ -56,7 +57,8 @@ function multiple_try_run() {
   local tag
   while [ $i -lt $max_try ]
   do
-    tag="${g_vmsize}-${echoconnection_number}-${broadcastconnection_number}"
+    local normal_vmsize=`echo "${g_vmsize}"|sed -e 's/_//g'` # remove '_'
+    tag="${normal_vmsize}e${echo_connection_number}b${broadcast_connection_number}"
 cat << EOF > jenkins_env.sh
 sigbench_run_duration=$duration
 echoconnection_number=$echo_connection_number
@@ -146,10 +148,12 @@ create_target_single_service_vm() {
 
 run_all() {
  local output_dir=ASRSBin
- local git_build=$(git_clone_and_build $output_dir $GitBranch)
- if [ $git_build != 0 ]
+ git_clone_and_build $output_dir $GitBranch
+ local status=$(check_build_status $output_dir)
+ if [ "$status" != "0" ]
  then
    echo "Fail to build SignalR Service!!!"
+   return
  fi
 
  local vm_size vm_host_prefix
@@ -172,7 +176,7 @@ run_all() {
    else
      g_appsetting_file="servicetmpl/appsettings.json"
    fi
-   replace_appsettings $output_dir $ServiceHost $g_appsetting_tmpl
+   replace_appsettings $output_dir $ServiceHost $g_appsetting_file
    zip_signalr_service $output_dir
    ## generate configuration
    local echo_connection_number=$(array_get $EchoConnectionNumberList $i "|")
@@ -195,7 +199,7 @@ run_all() {
    g_broadcast_connection_step=$broadcast_step
    g_duration=$Duration
    g_vmsize=$vm_size
-   multiple_try_run
+   multiple_try_run $output_dir
    i=$(($i + 1))
  done
 }
