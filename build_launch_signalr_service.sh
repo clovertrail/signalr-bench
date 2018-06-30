@@ -1,10 +1,11 @@
 #!/bin/bash
+g_service_runtime=Microsoft.Azure.SignalR.ServiceRuntime
 
 function build_signalr_service() {
   local SignalRRootInDir=$1
   local OutDir=$2
   local commit_hash_file="$3"
-  cd $SignalRRootInDir/src/Microsoft.Azure.SignalR.ServiceRuntime
+  cd $SignalRRootInDir/src/${g_service_runtime}
   pwd
   git log -n 1 --pretty=format:"%H" > "$commit_hash_file"
 
@@ -31,7 +32,7 @@ function gen_connection_string_from_host() {
 
 function check_build_status() {
   local dir=$1
-  if [ -e $dir/Microsoft.Azure.SignalR.ServiceRuntime ]
+  if [ -e $dir/${g_service_runtime} ]
   then
     echo 0
   else
@@ -51,6 +52,21 @@ function check_service_launch_status() {
   fi
 }
 
+build_ASRS_package() {
+ local dir=`pwd`
+ local outdir=$1
+ local hostname=$2
+ local appsetting=$3
+ local src_root_dir=$4
+ local commit_hash_file="$5"
+
+ build_signalr_service $src_root_dir "$dir"/$outdir "$commit_hash_file"
+
+ replace_appsettings $outdir $hostname $appsetting
+
+ zip_signalr_service $outdir
+}
+
 function build_and_launch() {
  local dir=`pwd`
  local outdir=$1
@@ -62,11 +78,7 @@ function build_and_launch() {
  local src_root_dir=$7
  local commit_hash_file="$8"
 
- build_signalr_service $src_root_dir "$dir"/$outdir "$commit_hash_file"
-
- replace_appsettings $outdir $hostname $appsetting
-
- zip_signalr_service $outdir
+ build_ASRS_package $outdir $hostname $appsetting $src_root_dir $commit_hash_file
 
  local status=$(check_build_status $outdir)
  if [ $status == 0 ]
@@ -90,9 +102,9 @@ function launch_service() {
 cat << EOF > $auto_launch_script
 #!/bin/bash
 #automatic generated script
-ssh -p $port ${user}@${hostname} "killall Microsoft.Azure.SignalR.ServiceRuntime"
+ssh -p $port ${user}@${hostname} "killall ${g_service_runtime}"
 sleep 2 # wait for the exit of previous running
-ssh -p $port ${user}@${hostname} "cd $outdir; ./Microsoft.Azure.SignalR.ServiceRuntime"
+ssh -p $port ${user}@${hostname} "cd $outdir; ./${g_service_runtime}"
 EOF
 
  nohup sh $auto_launch_script > ${output_log} 2>&1 &

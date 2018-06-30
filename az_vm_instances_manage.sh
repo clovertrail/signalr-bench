@@ -257,6 +257,11 @@ create_vms_instance_from_img() {
   verify_ssh_connection_for_all_vms $g_ssh_private_file
 }
 
+g_get_vm_hostname() {
+  local index=$1
+  echo ${g_dns_prefix}${index}.${g_location}.cloudapp.azure.com
+}
+
 g_create_vms_instance_from_img() {
   local myimg_name=$1
   local myimg_rsg_name=$2
