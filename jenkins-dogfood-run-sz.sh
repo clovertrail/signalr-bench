@@ -131,6 +131,11 @@ use_https=1
 EOF
        mkdir $result_root/$bench_type_tag
        sh jenkins-run-websocket.sh
+       if [ -e $result_root/$error_mark_file ]
+       then
+         echo "!!!Stop trying ($i) since error occurs"
+         break
+       fi
        echo_connection_number=$((echo_connection_number + $echostep))
        echo_send_number=$((echo_send_number + $echostep))
        broadcast_connection_number=$((broadcast_connection_number + $broadcaststep))
