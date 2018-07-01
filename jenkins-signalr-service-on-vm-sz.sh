@@ -1,22 +1,17 @@
 #!/bin/bash
 ## Required parameters:
 # ResourceGroup, VMSizeList, VMHostPrefixList,
-# EchoConnectionNumberList, EchoSendNumberList, EchoConcurrentConnectNumberList, EchoStepList
-# BroadcastConnectionNumberList, BroadcastSendNumberList, BroadcastConcurrentConnectNumberList, BroadcastStepList
+# SendSizeList, SendIntervalList
+# EchoConnectionNumberList_XXX_XXX, EchoSendNumberList_XXX_XXX, EchoConcurrentConnectNumberList_XXX_XXX, EchoStepList_XXX_XXX
+# BroadcastConnectionNumberList_XXX_XXX, BroadcastSendNumberList_XXX_XXX, BroadcastConcurrentConnectNumberList_XXX_XXX, BroadcastStepList_XXX_XXX
 # RedisConnectString, Duration, MaxTryList, GitBranch
 . ./utils.sh
 . ./func_env.sh
 . ./build_launch_signalr_service.sh
 
 echo "-------Your Jenkins Inputs------"
-echo "[EchoConnectionNumberList]: $EchoConnectionNumberList"
-echo "[EchoSendNumberList]: $EchoSendNumberList"
-echo "[EchoConcurrentConnectNumberList]: $EchoConcurrentConnectNumberList"
-echo "[EchoConnectionStepList]: $EchoStepList"
-echo "[BroadcastConnectionNumberList]: $BroadcastConnectionNumberList"
-echo "[BroadcastSendNumberList]: $BroadcastSendNumberList"
-echo "[BroadcastConcurrentConnectNumberList]: $BroadcastConcurrentConnectNumberList"
-echo "[BroadcastConnectionStepList]: $BroadcastStepList"
+echo "[SendSizeList]: $SendSizeList"
+echo "[SendIntervalList]: $SendIntervalList"
 echo "[Duration]: $Duration"
 echo "[MaxTryList]: $MaxTryList"
 echo "[VMSizeList]: $VMSizeList"
@@ -26,7 +21,7 @@ echo "[RedisConnectString]: $RedisConnectString"
 echo "[ResourceGroup]: $ResourceGroup"
 
 function multiple_try_run() {
-  local servicebin_dir=$1
+  local servicebin_dir=$g_output_dir
   local service_host=$g_service_host
   local duration=$g_duration
   local max_try=$g_max_try
@@ -50,10 +45,13 @@ function multiple_try_run() {
     local normal_vmsize=`echo "${g_vmsize}"|sed -e 's/_//g'` # remove '_'
     tag="${normal_vmsize}_e${echo_connection_number}b${broadcast_connection_number}"
 cat << EOF > jenkins_env.sh
+bench_send_size=$g_send_size
 sigbench_run_duration=$duration
+echosend_interval=$g_send_interval
 echoconnection_number=$echo_connection_number
 echoconnection_concurrent=$echo_concurrent_connection_number
 echosend_number=$echo_send_number
+broadcastsend_interval=$g_send_interval
 broadcastconnection_number=$broadcast_connection_number
 broadcastconnection_concurrent=$broadcast_concurrent_connection_number
 broadcastsend_number=$broadcast_send_number
@@ -136,6 +134,88 @@ create_target_single_service_vm() {
   exit_if_fail_to_ssh_all_vms
 }
 
+iterate_on_configuration() {
+ local callback=$1
+ local vm_size=$2
+ local ServiceHost=$3
+ local output_dir=$4
+ local SendSizeLen=$(array_len "$SendSizeList" "|")
+ local SendIntervalLen=$(array_len "$SendIntervalList" "|")
+ local EchoConnectionLen EchoSendLen EchoConcurrentLen EchoStepLen
+ local BroadcastConnectionLen BroadcastSendLen BroadcastConcurrentLen BroadcastStepLen
+ local echo_connection_number_prefix="EchoConnectionNumberList"
+ local echo_send_number_prefix="EchoSendNumberList"
+ local echo_concurrent_number_prefix="EchoConcurrentConnectNumberList"
+ local echo_step_prefix="EchoStepList"
+ 
+ local broadcast_connection_number_prefix="BroadcastConnectionNumberList"
+ local broadcast_send_number_prefix="BroadcastSendNumberList"
+ local broadcast_concurrent_number_prefix="BroadcastConcurrentConnectNumberList"
+ local broadcast_step_prefix="BroadcastStepList"
+
+ local i=1 j k
+ local item
+ while [ $i -le $SendSizeLen ]
+ do
+   g_send_size=$(array_get $SendSize $i "|")
+   #echo $g_send_size
+   j=1
+   while [ $j -le $SendIntervalLen ]
+   do
+     g_send_interval=$(array_get $SendInterval $j "|")
+     #echo $g_send_interval
+     EchoConnectionNumberList=$(derefer_3vars "$echo_connection_number_prefix" "_"$g_send_size "_"$g_send_interval)
+     EchoSendNumberList=$(derefer_3vars "$echo_send_number_prefix" "_"$g_send_size "_"$g_send_interval)
+     EchoConcurrentConnectNumberList=$(derefer_3vars "$echo_concurrent_number_prefix" "_"$g_send_size "_"$g_send_interval)
+     EchoStepList=$(derefer_3vars "$echo_step_prefix" "_"$g_send_size "_"$g_send_interval)
+
+     BroadcastConnectionNumberList=$(derefer_3vars "$broadcast_connection_number_prefix" "_"$g_send_size "_"$g_send_interval)
+     BroadcastSendNumberList=$(derefer_3vars "$broadcast_send_number_prefix" "_"$g_send_size "_"$g_send_interval)
+     BroadcastConcurrentConnectNumberList=$(derefer_3vars "$broadcast_concurrent_number_prefix" "_"$g_send_size "_"$g_send_interval)
+     BroadcastStepList=$(derefer_3vars "$broadcast_step_prefix" "_"$g_send_size "_"$g_send_interval)
+     #echo "$echo_connection_number_list"
+     EchoConnectionLen=$(array_len "$EchoConnectionNumberList" "|")
+     EchoSendLen=$(array_len "$EchoSendNumberList" "|")
+     EchoConcurrentLen=$(array_len "$EchoConcurrentConnectNumberList" "|")
+     EchoStepLen=$(array_len "$EchoStepList" "|")
+     #if [ "$EchoConnectionLen" != "$EchoSendLen" ] || [ "$EchoConnectionLen" != "$EchoConcurrentConnectNumberList" ]
+
+     k=1
+     while [ $k -le $EchoConnectionLen ]
+     do
+       local echo_connection_number=$(array_get $EchoConnectionNumberList $k "|")
+       local echo_send_number=$(array_get $EchoSendNumberList $k "|")
+       local echo_concurrent_number=$(array_get $EchoConcurrentConnectNumberList $k "|")
+       local echo_step=$(array_get $EchoStepList $k "|")
+       local broadcast_connection_number=$(array_get $BroadcastConnectionNumberList $k "|")
+       local broadcast_send_number=$(array_get $BroadcastSendNumberList $k "|")
+       local broadcast_concurrent_number=$(array_get $BroadcastConcurrentConnectNumberList $k "|")
+       local broadcast_step=$(array_get $BroadcastStepList $k "|")
+
+       g_max_try=$(array_get $MaxTryList $k "|")
+       g_service_host=$ServiceHost
+       g_echo_connection_number=$echo_connection_number
+       g_echo_send_number=$echo_send_number
+       g_echo_concurrent_connection_number=$echo_concurrent_number
+       g_echo_connection_step=$echo_step
+       g_echo_send_interval=$g_send_interval
+       g_broadcast_connection_number=$broadcast_connection_number
+       g_broadcast_send_number=$broadcast_send_number
+       g_broadcast_concurrent_connection_number=$broadcast_concurrent_number
+       g_broadcast_connection_step=$broadcast_step
+       g_broadcast_send_interval=$g_send_interval
+       g_duration=$Duration
+       g_vmsize=$vm_size
+       g_output_dir=$output_dir
+       $callback
+       k=$((k+1))
+     done
+     j=$((j+1))
+   done
+   i=$((i+1))
+ done
+}
+
 run_all() {
  local output_dir=ASRSBin
  git_clone_and_build $output_dir $GitBranch
@@ -169,27 +249,7 @@ run_all() {
    replace_appsettings $output_dir $ServiceHost $g_appsetting_file
    zip_signalr_service $output_dir
    ## generate configuration
-   local echo_connection_number=$(array_get $EchoConnectionNumberList $i "|")
-   local echo_send_number=$(array_get $EchoSendNumberList $i "|")
-   local echo_concurrent_number=$(array_get $EchoConcurrentConnectNumberList $i "|")
-   local echo_step=$(array_get $EchoStepList $i "|")
-   local broadcast_connection_number=$(array_get $BroadcastConnectionNumberList $i "|")
-   local broadcast_send_number=$(array_get $BroadcastSendNumberList $i "|")
-   local broadcast_concurrent_number=$(array_get $BroadcastConcurrentConnectNumberList $i "|")
-   local broadcast_step=$(array_get $BroadcastStepList $i "|")
-
-   g_service_host=$ServiceHost
-   g_echo_connection_number=$echo_connection_number
-   g_echo_send_number=$echo_send_number
-   g_echo_concurrent_connection_number=$echo_concurrent_number
-   g_echo_connection_step=$echo_step
-   g_broadcast_connection_number=$broadcast_connection_number
-   g_broadcast_send_number=$broadcast_send_number
-   g_broadcast_concurrent_connection_number=$broadcast_concurrent_number
-   g_broadcast_connection_step=$broadcast_step
-   g_duration=$Duration
-   g_vmsize=$vm_size
-   multiple_try_run $output_dir
+   iterate_on_configuration multiple_try_run $vm_size $ServiceHost $output_dir
    i=$(($i + 1))
  done
 }

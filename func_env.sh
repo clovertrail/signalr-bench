@@ -230,7 +230,7 @@ function gen_single_cmd_file() {
 	. $sigbench_config_dir/${cmd_prefix}_${bench_codec}_${bench_name}_${bench_type}
 cat << EOF > ${cmd_file_prefix}_${bench_codec}_${bench_name}_${bench_type}
 c $connection $connection_concurrent
-s $send
+s $send $send_interval
 wr
 w $sigbench_run_duration
 EOF
@@ -248,10 +248,12 @@ function update_jenkins_command_configs()
 	local customized_connection=$(derefer_2vars $bench_name "connection_number")
 	local customized_concurrent=$(derefer_2vars $bench_name "connection_concurrent")
 	local customized_send=$(derefer_2vars $bench_name "send_number")
+	local customized_send_interval=$(derefer_2vars $bench_name "send_interval")
 
 	local connection_num=$connection_number
 	local concurrent_num=$connection_concurrent
 	local send_num=$send_number
+	local send_interval=1000 # 1000 ms
 
 	if [ "$customized_connection" != "" ]
 	then
@@ -265,10 +267,15 @@ function update_jenkins_command_configs()
 	then
 		send_num=$customized_send
 	fi
+	if [ "$customized_send_interval" != "" ]
+	then
+		send_interval=$customized_send_interval
+	fi
 cat << EOF > $sigbench_config_dir/${cmd_prefix}_${bench_codec}_${bench_name}_${bench_type}
 connection=$connection_num
 connection_concurrent=$concurrent_num
 send=$send_num
+send_interval=$send_interval
 EOF
 }
 
