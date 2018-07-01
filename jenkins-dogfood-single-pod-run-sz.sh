@@ -29,7 +29,6 @@ echo "[BroadcastSendNumberList]: '$BroadcastSendNumberList'"
 echo "[BroadcastConcurrentConnectNumberList]: '$BroadcastConcurrentConnectNumberList'"
 echo "[EchoStepList]: '$EchoStepList'"
 echo "[BroadcastStepList]: '$BroadcastStepList'"
-echo "[MaxRetry]: '$MaxRetry'"
 echo "[DurationList]: $DurationList"
 echo "[MaxTryList]: $MaxTryList"
 
@@ -81,6 +80,7 @@ function run_signalr_service() {
       return
     fi
   fi
+  g_connection_string=$ConnectionString
   g_echo_connection_number=$(array_get $EchoConnectionNumberList $unit "|")
   g_echo_send_number=$(array_get $EchoSendNumberList $unit "|")
   g_echo_concurrent_number=$(array_get $EchoConcurrentConnectNumberList $unit "|")
@@ -117,7 +117,7 @@ function multiple_try_run() {
   local unit=$g_unit
   local i=0
   local use_https
-  if [[ $connection_string = *"https://"* ]]
+  if [[ $g_connection_string = *"https://"* ]]
   then
      use_https=1
   else
@@ -126,8 +126,9 @@ function multiple_try_run() {
 
   while [ $i -lt $max_try ]
   do
-    local tag="cpu${core}_e${echo_connection_number}b${broadcastconnection_number}"
+    local tag="cpu${core}_e${echo_connection_number}b${broadcast_connection_number}"
 cat << EOF > jenkins_env.sh
+connection_string=$g_connection_string
 bench_send_size=$g_send_size
 sigbench_run_duration=$duration
 echoconnection_number=$echo_connection_number
