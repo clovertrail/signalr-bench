@@ -80,7 +80,7 @@ then
    nohup sh collect_connections.sh $service_name $k8s_result_dir &
    collect_conn_pid=$!
 else
-   echo "no service name is found"
+   echo "It seems you are running a self-host SignalR service because the service name is not standard"
 fi
 
 sh run_websocket.sh
