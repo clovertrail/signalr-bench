@@ -246,7 +246,7 @@ function patch_connection_throttling_env() {
   fi
 
   local pods=$(k8s_get_pod_number $config_file $resName)
-  update_k8s_deploy_env_connections $result "${connect_limit}" $config_file
+  update_k8s_deploy_env_connections $result "${connection_limit}" $config_file
 
   wait_deploy_ready $result $config_file
 
@@ -267,7 +267,7 @@ function patch_replicas_env() {
   fi
   #echo "$result"
   update_k8s_deploy_replicas $result $replicas $config_file
-  update_k8s_deploy_env_connections $result "${connect_limit}" $config_file
+  update_k8s_deploy_env_connections $result "${connection_limit}" $config_file
 
   wait_deploy_ready $result $config_file
 }
