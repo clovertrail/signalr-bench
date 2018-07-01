@@ -157,12 +157,12 @@ iterate_on_configuration() {
  local item
  while [ $i -le $SendSizeLen ]
  do
-   g_send_size=$(array_get $SendSize $i "|")
+   g_send_size=$(array_get $SendSizeList $i "|")
    #echo $g_send_size
    j=1
    while [ $j -le $SendIntervalLen ]
    do
-     g_send_interval=$(array_get $SendInterval $j "|")
+     g_send_interval=$(array_get $SendIntervalList $j "|")
      #echo $g_send_interval
      EchoConnectionNumberList=$(derefer_3vars "$echo_connection_number_prefix" "_"$g_send_size "_"$g_send_interval)
      EchoSendNumberList=$(derefer_3vars "$echo_send_number_prefix" "_"$g_send_size "_"$g_send_interval)
