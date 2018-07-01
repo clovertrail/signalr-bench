@@ -44,6 +44,14 @@ derefer_2vars() {
   eval echo \$${v}
 }
 
+derefer_3vars() {
+  local head=$1
+  local body=$2
+  local tail=$3
+  local v=${head}${body}${tail}
+  eval echo \$${v}
+}
+
 function create_root_folder() {
   export result_root=`date +%Y%m%d%H%M%S`
   mkdir $result_root
