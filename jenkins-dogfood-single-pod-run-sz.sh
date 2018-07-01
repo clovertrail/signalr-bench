@@ -126,9 +126,9 @@ function multiple_try_run() {
 
   while [ $i -lt $max_try ]
   do
-    local tag="cpu${core}_e${echo_connection_number}b${broadcast_connection_number}"
+    local tag="cpu${unit}_e${echo_connection_number}b${broadcast_connection_number}"
 cat << EOF > jenkins_env.sh
-connection_string=$g_connection_string
+connection_string="$g_connection_string"
 bench_send_size=$g_send_size
 sigbench_run_duration=$duration
 echoconnection_number=$echo_connection_number
