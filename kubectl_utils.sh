@@ -134,6 +134,13 @@ function update_k8s_deploy_memory_limits() {
   kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/resources/limits/memory', 'value': '$memory_limit'}]" --kubeconfig=$config_file
 }
 
+function update_k8s_deploy_liveprobe_timeout() {
+  local deploy_name=$1
+  local timeout=$2
+  local config_file=$3
+  kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/livenessProbe/timeoutSeconds', 'value': '$timeout'}]" --kubeconfig=$config_file
+}
+
 function install_nettools() {
   local pod_name=$1
   local config_file=$2
@@ -232,6 +239,24 @@ function wait_deploy_ready() {
     fi
     sleep 1
   done
+}
+
+function patch_liveprobe_timeout() {
+  local resName=$1
+  local timeout=$2 # second
+  local config_file=kvsignalrdevseasia.config
+  local result=$(get_k8s_deploy_name $resName $config_file)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(get_k8s_deploy_name $resName $config_file)
+  fi
+
+  local pods=$(k8s_get_pod_number $config_file $resName)
+  update_k8s_deploy_liveprobe_timeout $result "$timeout" $config_file
+  wait_deploy_ready $result $config_file
+
+  wait_replica_ready $config_file $resName $pods
 }
 
 function patch_connection_throttling_env() {
