@@ -139,6 +139,7 @@ iterate_on_configuration() {
  local vm_size=$2
  local ServiceHost=$3
  local output_dir=$4
+ local unit=$5
  local SendSizeLen=$(array_len "$SendSizeList" "|")
  local SendIntervalLen=$(array_len "$SendIntervalList" "|")
  local EchoConnectionLen EchoSendLen EchoConcurrentLen EchoStepLen
@@ -180,36 +181,32 @@ iterate_on_configuration() {
      EchoStepLen=$(array_len "$EchoStepList" "|")
      #if [ "$EchoConnectionLen" != "$EchoSendLen" ] || [ "$EchoConnectionLen" != "$EchoConcurrentConnectNumberList" ]
 
-     k=1
-     while [ $k -le $EchoConnectionLen ]
-     do
-       local echo_connection_number=$(array_get $EchoConnectionNumberList $k "|")
-       local echo_send_number=$(array_get $EchoSendNumberList $k "|")
-       local echo_concurrent_number=$(array_get $EchoConcurrentConnectNumberList $k "|")
-       local echo_step=$(array_get $EchoStepList $k "|")
-       local broadcast_connection_number=$(array_get $BroadcastConnectionNumberList $k "|")
-       local broadcast_send_number=$(array_get $BroadcastSendNumberList $k "|")
-       local broadcast_concurrent_number=$(array_get $BroadcastConcurrentConnectNumberList $k "|")
-       local broadcast_step=$(array_get $BroadcastStepList $k "|")
+     k=$unit
+     local echo_connection_number=$(array_get $EchoConnectionNumberList $k "|")
+     local echo_send_number=$(array_get $EchoSendNumberList $k "|")
+     local echo_concurrent_number=$(array_get $EchoConcurrentConnectNumberList $k "|")
+     local echo_step=$(array_get $EchoStepList $k "|")
+     local broadcast_connection_number=$(array_get $BroadcastConnectionNumberList $k "|")
+     local broadcast_send_number=$(array_get $BroadcastSendNumberList $k "|")
+     local broadcast_concurrent_number=$(array_get $BroadcastConcurrentConnectNumberList $k "|")
+     local broadcast_step=$(array_get $BroadcastStepList $k "|")
 
-       g_max_try=$(array_get $MaxTryList $k "|")
-       g_service_host=$ServiceHost
-       g_echo_connection_number=$echo_connection_number
-       g_echo_send_number=$echo_send_number
-       g_echo_concurrent_connection_number=$echo_concurrent_number
-       g_echo_connection_step=$echo_step
-       g_echo_send_interval=$g_send_interval
-       g_broadcast_connection_number=$broadcast_connection_number
-       g_broadcast_send_number=$broadcast_send_number
-       g_broadcast_concurrent_connection_number=$broadcast_concurrent_number
-       g_broadcast_connection_step=$broadcast_step
-       g_broadcast_send_interval=$g_send_interval
-       g_duration=$Duration
-       g_vmsize=$vm_size
-       g_output_dir=$output_dir
-       $callback
-       k=$((k+1))
-     done
+     g_max_try=$(array_get $MaxTryList $k "|")
+     g_service_host=$ServiceHost
+     g_echo_connection_number=$echo_connection_number
+     g_echo_send_number=$echo_send_number
+     g_echo_concurrent_connection_number=$echo_concurrent_number
+     g_echo_connection_step=$echo_step
+     g_echo_send_interval=$g_send_interval
+     g_broadcast_connection_number=$broadcast_connection_number
+     g_broadcast_send_number=$broadcast_send_number
+     g_broadcast_concurrent_connection_number=$broadcast_concurrent_number
+     g_broadcast_connection_step=$broadcast_step
+     g_broadcast_send_interval=$g_send_interval
+     g_duration=$Duration
+     g_vmsize=$vm_size
+     g_output_dir=$output_dir
+     $callback
      j=$((j+1))
    done
    i=$((i+1))
@@ -249,7 +246,7 @@ run_all() {
    replace_appsettings $output_dir $ServiceHost $g_appsetting_file
    zip_signalr_service $output_dir
    ## generate configuration
-   iterate_on_configuration multiple_try_run $vm_size $ServiceHost $output_dir
+   iterate_on_configuration multiple_try_run $vm_size $ServiceHost $output_dir $i
    i=$(($i + 1))
  done
 }
