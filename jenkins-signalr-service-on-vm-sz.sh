@@ -72,9 +72,10 @@ EOF
     then
       echo "Launch failed!"
       return
-    else 
-      sh jenkins-run-websocket.sh
     fi
+
+    sh jenkins-run-websocket.sh
+
     if [ -e $result_root/$error_mark_file ]
     then
        echo "!!!Stop trying since error occurs"
