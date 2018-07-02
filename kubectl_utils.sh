@@ -138,7 +138,7 @@ function update_k8s_deploy_liveprobe_timeout() {
   local deploy_name=$1
   local timeout=$2
   local config_file=$3
-  kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/livenessProbe/timeoutSeconds', 'value': '$timeout'}]" --kubeconfig=$config_file
+  kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/livenessProbe/timeoutSeconds', 'value': $timeout}]" --kubeconfig=$config_file
 }
 
 function install_nettools() {
