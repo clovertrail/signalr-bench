@@ -77,8 +77,9 @@ EOF
     fi
     if [ -e $result_root/$error_mark_file ]
     then
-       echo "!!!Stop trying since error occurs"
-       return
+       echo "!!Continue to run even though there is error occurs!!"
+       #echo "!!!Stop trying since error occurs"
+       #return
     fi
     echo_connection_number=$((echo_connection_number + $echo_step))
     echo_send_number=$((echo_send_number + $echo_step))
