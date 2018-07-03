@@ -98,7 +98,12 @@ git_clone_and_build() {
   fi
   mkdir $servicebin_dir
 
-  local src_root_dir=/tmp/ASRS-`date +%Y%m%d%H%M%S`
+  local src_dir=/tmp
+  local src_prefix="ASRS-"
+  # clear the dir older than 5 days
+  find $src_dir -mtime +5 -name "${src_prefix}*" 2>/dev/null|grep "${src_prefix}"|xargs rm -rf
+
+  local src_root_dir=$src_dir/${src_prefix}`date +%Y%m%d%H%M%S`
   local service_launch_log=$result_root/service_launch.log
   local cur_dir=`pwd`
   local commit_hash_file="$cur_dir"/$result_root/commit_hash.txt
