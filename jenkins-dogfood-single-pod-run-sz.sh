@@ -11,10 +11,6 @@
 
 . ./kubectl_utils.sh
 
-g_CPU_requests="1|2|3|4"
-g_CPU_limits="1|2|3|4"
-g_Memory_limits="4000|4000|4000|4000"
-
 target_grp="honzhanautopod"`date +%M%S`
 sku="Basic_DS2"
 
@@ -31,17 +27,6 @@ echo "[EchoStepList]: '$EchoStepList'"
 echo "[BroadcastStepList]: '$BroadcastStepList'"
 echo "[DurationList]: $DurationList"
 echo "[MaxTryList]: $MaxTryList"
-
-function patch_and_wait() {
-  local name=$1
-  local rsg=$2
-  local index=$3
-  local replica=$4
-  local cpu_req=$(array_get $g_CPU_requests $index "|")
-  local cpu_limit=$(array_get $g_CPU_limits $index "|")
-  local mem_limit=$(array_get $g_Memory_limits $index "|")
-  patch ${name} $replica $cpu_limit $cpu_req $mem_limit 500000
-}
 
 function run_signalr_service() {
   local rsg=$1

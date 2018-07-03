@@ -1,3 +1,8 @@
+
+g_CPU_requests="1|2|3|4"
+g_CPU_limits="1|2|3|4"
+g_Memory_limits="4000|4000|4000|4000"
+
 function get_k8s_deploy_name() {
   local resName=$1
   local config_file=$2
@@ -342,4 +347,16 @@ function patch() {
   wait_deploy_ready $result $config_file
 
   wait_replica_ready $config_file $resName $replicas
+}
+
+function patch_and_wait() {
+  local name=$1
+  local rsg=$2
+  local index=$3
+  local replica=$4
+  local cpu_req=$(array_get $g_CPU_requests $index "|")
+  local cpu_limit=$(array_get $g_CPU_limits $index "|")
+  local mem_limit=$(array_get $g_Memory_limits $index "|")
+  patch ${name} $replica $cpu_limit $cpu_req $mem_limit 500000
+  patch_liveprobe_timeout ${name} 2
 }
