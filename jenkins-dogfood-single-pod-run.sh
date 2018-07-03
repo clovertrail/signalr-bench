@@ -5,17 +5,6 @@
 
 . ./kubectl_utils.sh
 
-function patch_and_wait() {
-  local name=$1
-  local rsg=$2
-  local index=$3
-  local replica=$4
-  local cpu_req=$(array_get $g_CPU_requests $index "|")
-  local cpu_limit=$(array_get $g_CPU_limits $index "|")
-  local mem_limit=$(array_get $g_Memory_limits $index "|")
-  patch ${name} $replica $cpu_limit $cpu_req $mem_limit 500000
-}
-
 function run_signalr_service() {
   local rsg=$1
   local name=$2
