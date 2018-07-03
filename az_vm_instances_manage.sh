@@ -88,8 +88,8 @@ verify_ssh_connection_for_single_vm() {
  local index=$1
  local name=$2
  local hostname=${name}.${g_location}".cloudapp.azure.com"
-
- local end=$((SECONDS + 60))
+ local timeout=60
+ local end=$((SECONDS + $timeout))
  while [ $SECONDS -lt $end ]
  do
    ssh -i $t_private_key_file -p $g_ssh_port -q -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 ${g_ssh_user}@${hostname} exit
@@ -107,6 +107,28 @@ verify_ssh_connection_for_all_vms() {
  t_private_key_file=$1
  echo "" > ~/.ssh/known_hosts # clean the known_hosts to avoid key conflict
  iterate_all_vm_name verify_ssh_connection_for_single_vm
+}
+
+verify_websocketbench_port_for_single_vm() {
+ local index=$1
+ local name=$2
+ local hostname=${name}.${g_location}".cloudapp.azure.com"
+ local timeout=60
+ local end=$((SECONDS + $timeout))
+ while [ $SECONDS -lt $end ]
+ do
+   nc -z -w5 $hostname 7000
+   if [ $? -eq 0 ]
+   then
+     return
+   fi
+   sleep 1
+ done
+ echo "Fail to connect $hostname after $timeout by 'nc -z -w5 $hostname 7000'"
+}
+
+verify_websocketbench_port_for_all_vms() {
+ iterate_all_vm_name verify_websocketbench_port_for_single_vm
 }
 
 create_single_vm() {
@@ -288,6 +310,8 @@ create_vms_instance_from_img() {
   sleep 120
 
   verify_ssh_connection_for_all_vms $g_ssh_private_file
+
+  verify_websocketbench_port_for_all_vms
 }
 
 g_get_vm_hostname() {
