@@ -241,9 +241,11 @@ run_all() {
    create_target_single_service_vm $ResourceGroup $vm_host_prefix $vm_size
    ServiceHost=$(g_get_vm_hostname 0)
    ## pass to global service server where CPU usage will be collected
-   export bench_service_pub_server=$ServiceHost
-   export bench_service_pub_port=$global_ssh_port
-   export bench_service_user=$global_ssh_user
+cat << EOF >> servers_env.sh
+bench_service_pub_server=$ServiceHost
+bench_service_pub_port=$global_ssh_port
+bench_service_user=$global_ssh_user
+EOF
    ## Configure Service
    local uuid=`cat /proc/sys/kernel/random/uuid`
    g_appsetting_file="$result_root/appsetting_tmpl.json"
