@@ -63,6 +63,7 @@ function run_unit_benchmark() {
   if [ "$DisableThrottling" == "true" ]
   then
     patch_connection_throttling_env $name 5000000
+    patch_liveprobe_timeout $name 2
   fi
 
   local ConnectionString=$(query_connection_string $name $rsg)
