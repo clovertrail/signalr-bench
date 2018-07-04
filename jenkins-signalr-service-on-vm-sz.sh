@@ -142,6 +142,9 @@ create_target_single_service_vm() {
                                $vm_size \
                                1
   exit_if_fail_to_ssh_all_vms
+
+  update_to_accelerated_network $rsg ${name_prefix}0
+
 }
 
 iterate_on_configuration() {
@@ -152,8 +155,6 @@ iterate_on_configuration() {
  local unit=$5
  local SendSizeLen=$(array_len "$SendSizeList" "|")
  local SendIntervalLen=$(array_len "$SendIntervalList" "|")
- local EchoConnectionLen EchoSendLen EchoConcurrentLen EchoStepLen
- local BroadcastConnectionLen BroadcastSendLen BroadcastConcurrentLen BroadcastStepLen
  local echo_connection_number_prefix="EchoConnectionNumberList"
  local echo_send_number_prefix="EchoSendNumberList"
  local echo_concurrent_number_prefix="EchoConcurrentConnectNumberList"
@@ -185,11 +186,6 @@ iterate_on_configuration() {
      BroadcastConcurrentConnectNumberList=$(derefer_3vars "$broadcast_concurrent_number_prefix" "_"$g_send_size "_"$g_send_interval)
      BroadcastStepList=$(derefer_3vars "$broadcast_step_prefix" "_"$g_send_size "_"$g_send_interval)
      #echo "$echo_connection_number_list"
-     EchoConnectionLen=$(array_len "$EchoConnectionNumberList" "|")
-     EchoSendLen=$(array_len "$EchoSendNumberList" "|")
-     EchoConcurrentLen=$(array_len "$EchoConcurrentConnectNumberList" "|")
-     EchoStepLen=$(array_len "$EchoStepList" "|")
-     #if [ "$EchoConnectionLen" != "$EchoSendLen" ] || [ "$EchoConnectionLen" != "$EchoConcurrentConnectNumberList" ]
 
      k=$unit
      local echo_connection_number=$(array_get $EchoConnectionNumberList $k "|")
