@@ -109,10 +109,6 @@ function run_all_pods() {
   gen_final_report
 }
 
-g_CPU_requests="1|2|3|4"
-g_CPU_limits="1|2|3|4"
-g_Memory_limits="4000|4000|4000|4000"
-
 target_grp="honzhanautopod"`date +%M%S`
 sku="Basic_DS2"
 location=$Location

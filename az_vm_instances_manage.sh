@@ -333,7 +333,7 @@ create_vms_instance_from_img() {
 
   verify_ssh_connection_for_all_vms $g_ssh_private_file
 
-  #verify_websocketbench_port_for_all_vms
+  sleep 60 # wait for 7000 port ready
 }
 
 g_get_vm_hostname() {
