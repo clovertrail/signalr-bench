@@ -117,7 +117,7 @@ verify_websocketbench_port_for_single_vm() {
  local end=$((SECONDS + $timeout))
  while [ $SECONDS -lt $end ]
  do
-   nc -z -w5 $hostname 7000
+   nc -z -w5 $hostname 7000 ## trigger exit signal
    if [ $? -eq 0 ]
    then
      return
@@ -295,6 +295,28 @@ create_resource_group_on_img_location() {
   az group create --name $target_rsg --location $location
 }
 
+check_accelerated_network() {
+  local vmname=$1
+  local output_file=$2
+  
+  ssh -p ${g_ssh_port} ${g_ssh_user}@${vmname}.${g_location}.cloudapp.azure.com "lspci" > $output_file
+  ssh -p ${g_ssh_port} ${g_ssh_user}@${vmname}.${g_location}.cloudapp.azure.com "ethtool -S eth0 | grep vf_" >> $output_file
+}
+
+update_to_accelerated_network() {
+  local rsg=$1
+  local vmname=$2
+
+  local nicname=`az vm show -g $rsg -n $vmname|jq ".networkProfile.networkInterfaces[0].id"|tr -d '"'|awk -F / '{print $NF}'`
+
+  az vm deallocate --resource-group $rsg --name $vmname
+
+  az network nic update --name $vmname -n $nicname --resource-group $rsg --accelerated-networking true
+
+  az vm start --resource-group $rsg --name $vmname
+
+}
+
 create_vms_instance_from_img() {
   g_location=$(get_vm_img_location $g_myimg_rsg_name $g_myimg_name)
   g_myimg_resouce_id=$(get_vm_img_resource_id $g_myimg_rsg_name $g_myimg_name)
@@ -311,7 +333,7 @@ create_vms_instance_from_img() {
 
   verify_ssh_connection_for_all_vms $g_ssh_private_file
 
-  verify_websocketbench_port_for_all_vms
+  #verify_websocketbench_port_for_all_vms
 }
 
 g_get_vm_hostname() {
