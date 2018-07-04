@@ -87,6 +87,13 @@ function build_and_launch() {
  fi
 }
 
+function stop_service() {
+ local hostname=$1
+ local user=$2
+ local port=$3
+ ssh -o StrictHostKeyChecking=no -p $port ${user}@${hostname} "killall ${g_service_runtime}"
+}
+
 function launch_service() {
  local outdir=$1
  local hostname=$2
@@ -95,16 +102,16 @@ function launch_service() {
  local output_log=$5
  local auto_launch_script=auto_local_launch_service.sh
 
- scp -P $port ${outdir}.tgz ${user}@${hostname}:~/
+ scp -o StrictHostKeyChecking=no -P $port ${outdir}.tgz ${user}@${hostname}:~/
 
- ssh -p $port ${user}@${hostname} "tar zxvf ${outdir}.tgz"
+ ssh -o StrictHostKeyChecking=no -p $port ${user}@${hostname} "tar zxvf ${outdir}.tgz"
 
 cat << EOF > $auto_launch_script
 #!/bin/bash
 #automatic generated script
-ssh -p $port ${user}@${hostname} "killall ${g_service_runtime}"
+ssh -o StrictHostKeyChecking=no -p $port ${user}@${hostname} "killall ${g_service_runtime}"
 sleep 2 # wait for the exit of previous running
-ssh -p $port ${user}@${hostname} "cd $outdir; ./${g_service_runtime}"
+ssh -o StrictHostKeyChecking=no -p $port ${user}@${hostname} "cd $outdir; ./${g_service_runtime}"
 EOF
 
  nohup sh $auto_launch_script > ${output_log} 2>&1 &
