@@ -9,6 +9,9 @@
 . ./func_env.sh
 . ./build_launch_signalr_service.sh
 
+global_ssh_user="honzhan"
+global_ssh_port=22222
+
 echo "-------Your Jenkins Inputs------"
 echo "[SendSizeList]: $SendSizeList"
 echo "[SendIntervalList]: $SendIntervalList"
@@ -134,8 +137,8 @@ create_target_single_service_vm() {
                                "honzhanperfsea" \
                                $rsg \
                                $name_prefix \
-                               "honzhan" \
-                               22222 \
+                               $global_ssh_user \
+                               $global_ssh_port \
                                $vm_size \
                                1
   exit_if_fail_to_ssh_all_vms
@@ -241,6 +244,10 @@ run_all() {
    ## create VM
    create_target_single_service_vm $ResourceGroup $vm_host_prefix $vm_size
    ServiceHost=$(g_get_vm_hostname 0)
+   ## pass to global service server where CPU usage will be collected
+   bench_service_pub_server=$ServiceHost
+   bench_service_pub_port=$global_ssh_port
+   bench_service_user=$global_ssh_user
    ## Configure Service
    local uuid=`cat /proc/sys/kernel/random/uuid`
    g_appsetting_file="$result_root/appsetting_tmpl.json"

@@ -388,6 +388,27 @@ function clear_error_mark() {
 	fi
 }
 
+collect_service_vm_basic_info_if_possible() {
+	local output=$1
+	if [ "$bench_service_pub_server" != "" ] && [ "$bench_service_pub_port" != "" ] && [ "$bench_service_user" != "" ]
+	then
+		echo "=====================Accelerated Networking Check=======================" > $output
+		ssh -o StrictHostKeyChecking=no -p${bench_service_pub_port} ${bench_service_user}@${bench_service_pub_server} "lspci" >> $output
+		ssh -o StrictHostKeyChecking=no -p${bench_service_pub_port} ${bench_service_user}@${bench_service_pub_server} "ethtool -S eth0 | grep vf_" >> $output
+		echo "=====================CPU Info=======================" >> $output
+		ssh -o StrictHostKeyChecking=no -p${bench_service_pub_port} ${bench_service_user}@${bench_service_pub_server} "lscpu" >> $output
+	fi
+}
+
+collect_service_cpu_usage_if_possible() {
+	local output=$1
+        if [ "$bench_service_pub_server" != "" ] && [ "$bench_service_pub_port" != "" ] && [ "$bench_service_user" != "" ]
+        then
+		nohup sh collect_top.sh $bench_service_pub_server $bench_service_pub_port $bench_service_user $output &
+		pid_to_collect_top=$!
+	fi
+}
+
 function run_single_master_script_and_check() {
 	local bench_type=$1
 	local bench_codec=$2
@@ -395,17 +416,29 @@ function run_single_master_script_and_check() {
 	
 	local result_name=${bench_type}_${bench_codec}_${bench_name}
 	local flag_file="master_status.tmp"
-
+	local service_vm_info_file="cpuinfo.txt"
 	local servers server port user
 	# master node
 	servers=$(array_get $bench_server_list 1 $bench_server_sep)
 	server=$(array_get $servers 1 $bench_server_inter_sep)
 	port=$(array_get $servers 2 $bench_server_inter_sep)
 	user=$(array_get $servers 3 $bench_server_inter_sep)
+	
+	if [ ! -e ${result_dir}/$result_name ]
+	then
+		mkdir ${result_dir}/$result_name
+	fi
 
+	collect_service_vm_basic_info_if_possible ${result_dir}/$result_name/$service_vm_info_file
+	collect_service_cpu_usage_if_possible ${result_dir}/$result_name/$service_vm_info_file
+ 
 	launch_websocket_master ${websocket_script_prefix}_${result_name}.sh $server $port $user $flag_file
 
 	check_and_wait $flag_file
+	if [ "$pid_to_collect_top" != "" ]
+	then
+		kill $pid_to_collect_top
+	fi
 	# fetch result
 	scp -o StrictHostKeyChecking=no -r -P $port ${user}@${server}:~/$sigbench_home/$result_name ${result_dir}/
 }
