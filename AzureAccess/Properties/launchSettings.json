@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "VMAccess": {
+      "commandName": "Project",
+      "commandLineArgs": "-a E:\\home\\Work\\secrets\\azureauth.properties -i honzhanperfsea -n hzbenchclientimg"
+    }
+  }
+}
