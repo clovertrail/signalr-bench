@@ -1,11 +1,3 @@
-1. build 10 vm from image:
-dotnet run -- -a ../signalr_dev.auth -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0705 -p hzautovm0705 -S Standard_DS1_v2 -H $HOME/.ssh/id_rsa.pub -c 10 -u honzhan -o benchclient.txt -O vmhost.txt
-
-2. create vm with accelerated network enabled:
-dotnet run -- -a ../signalr_dev.auth -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0705 -p hzautovm0705 -S Standard_DS2_v2 -H $HOME/.ssh/id_rsa.pub -c 10 -u honzhan -o benchclient.txt -O vmhost.txt -A True
-
-Note: the VMSize must be one of:
-
 Standard_D3_v2
 Standard_D12_v2
 Standard_D3_v2_Promo

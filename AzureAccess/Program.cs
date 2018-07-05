@@ -302,7 +302,7 @@ namespace VMAccess
                     }
                     builder.Append(agentConfig.Prefix).Append(i).Append(".")
                            .Append(region.Name).Append(".cloudapp.azure.com")
-                           .Append('|').Append(agentConfig.SshPort).Append('|').Append(agentConfig.Username);
+                           .Append(':').Append(agentConfig.SshPort).Append(':').Append(agentConfig.Username);
                 }
                 System.IO.File.WriteAllText(agentConfig.BenchClientListFile, builder.ToString());
             }
@@ -332,7 +332,6 @@ namespace VMAccess
             var credentials = SdkContext.AzureCredentialsFactory
                 .FromFile(agentConfig.AuthFile);
 
-            //var credentials = SdkContext.AzureCredentialsFactory.FromServicePrincipal(clientId:, clientSecret:, tenantId:, environment:AzureEnvironment.AzureGlobalCloud)
             var azure = Azure
                 .Configure()
                 .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)

@@ -132,19 +132,19 @@ create_target_single_service_vm() {
   local name_prefix=$2
   local vm_size=$3
 
-  az_login_signalr_dev_sub
-  g_create_vms_instance_from_img "hzbenchclientimg" \
-                               "honzhanperfsea" \
-                               $rsg \
-                               $name_prefix \
-                               $global_ssh_user \
-                               $global_ssh_port \
-                               $vm_size \
-                               1
-  exit_if_fail_to_ssh_all_vms
+  cd AzureAccess
+  dotnet run -- -a ../signalr_dev.auth \
+              -i honzhanperfsea \
+              -n hzbenchclientimg -s $rsg \
+              -p ${name_prefix} -S ${vm_size} \
+              -H $HOME/.ssh/id_rsa.pub -c 1 \
+              -u honzhan -O vmhost.txt -A True
 
-  update_to_accelerated_network $rsg ${name_prefix}0
-
+  local hostname=`cat vmhost.txt`
+  cd -
+  echo "========before enabling accelerated networking========="
+  ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${hostname} "lspci"
+  ssh -o StrictHostKeyChecking=no  -p ${g_ssh_port} ${g_ssh_user}@${hostname} "ethtool -S eth0 | grep vf_"
 }
 
 iterate_on_configuration() {
