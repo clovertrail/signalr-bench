@@ -10,6 +10,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core.ResourceActions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -202,11 +203,16 @@ namespace VMAccess
 
             var nicTaskList = new List<Task<INetworkInterface>>();
             Util.Log("Creating network interface...");
+            var allowAcceleratedNet = false;
+            if (agentConfig.CandidateOfAcceleratedNetVM != null)
+            {
+                allowAcceleratedNet = CheckValidVMForAcceleratedNet(agentConfig.CandidateOfAcceleratedNetVM, agentConfig.VmSize);
+            }
             for (var i = 0; i < agentConfig.VmCount; i++)
             {
                 var nicName = agentConfig.Prefix + Convert.ToString(i) + "NIC";
                 Task<INetworkInterface> networkInterface = null;
-                if (agentConfig.AcceleratedNetwork)
+                if (allowAcceleratedNet && agentConfig.AcceleratedNetwork)
                 {
                     networkInterface = azure.NetworkInterfaces.Define(nicName)
                         .WithRegion(region)
@@ -218,9 +224,11 @@ namespace VMAccess
                         .WithExistingNetworkSecurityGroup(nsgTaskList[i].Result)
                         .WithAcceleratedNetworking()
                         .CreateAsync();
+                    Util.Log("Accelerated Network is enabled!");
                 }
                 else
                 {
+                    Util.Log("Accelerated Network is disabled!");
                     networkInterface = azure.NetworkInterfaces.Define(nicName)
                         .WithRegion(region)
                         .WithExistingResourceGroup(resourceGroupName)
@@ -306,6 +314,22 @@ namespace VMAccess
                 }
                 System.IO.File.WriteAllText(agentConfig.BenchClientListFile, builder.ToString());
             }
+        }
+
+        static bool CheckValidVMForAcceleratedNet(string accelVMSizeFile, string vmSize)
+        {
+            bool found = false;
+            IEnumerable<string> lines = File.ReadLines(accelVMSizeFile);
+            var enumerator = lines.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current.Equals(vmSize))
+                {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
         }
 
         static void CheckVMPorts(string[] args)

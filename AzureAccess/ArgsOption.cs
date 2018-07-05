@@ -31,6 +31,9 @@ namespace VMAccess
         [Option('a', "app", Required = true, HelpText = "Specify Auth File")]
         public string AuthFile { get; set; }
 
+        [Option('m', "accelerated-network VM size file", Required = true, HelpText = "Specify VM Size File")]
+        public string CandidateOfAcceleratedNetVM { get; set; }
+
         [Option('H', "sshpubkey-file", Required = false, HelpText = "Specify Ssh Pub Key File")]
         public string SshPubKeyFile { get; set; }
 
