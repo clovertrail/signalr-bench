@@ -31,7 +31,7 @@ namespace VMAccess
         [Option('a', "app", Required = true, HelpText = "Specify Auth File")]
         public string AuthFile { get; set; }
 
-        [Option('m', "accelerated-network VM size file", Required = true, HelpText = "Specify VM Size File")]
+        [Option('m', "accelerated-network VM size file", Required = true, HelpText = "Specify valid accelerated networking VM Size File")]
         public string CandidateOfAcceleratedNetVM { get; set; }
 
         [Option('H', "sshpubkey-file", Required = false, HelpText = "Specify Ssh Pub Key File")]
@@ -52,7 +52,7 @@ namespace VMAccess
         [Option('O', "vm-host-file", Required = false, HelpText = "Specify the file to save 'client_host1|client_host2' content")]
         public string VMHostFile { get; set; }
 
-        [Option('h', "help", Required = false, HelpText = "dotnet run -- -a E:/home/Work/secrets/azureauth.properties -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0705 -p hzautovm0705 -S Standard_DS1_v2 -H E:/home/PuttyKeys/azure_ssh_pub -c 10 -u honzhan -o benchclient.txt -O vmhost.txt")]
+        [Option('h', "help", Required = false, HelpText = "dotnet run -- -a E:/home/Work/secrets/azureauth.properties -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0705 -p hzautovm0705 -S Standard_DS1_v2 -H E:/home/PuttyKeys/azure_ssh_pub -c 10 -u honzhan -o benchclient.txt -O vmhost.txt -A true -m accelerated_network_vmsize.txt")]
         public int Help { get; set; }
     }
 }

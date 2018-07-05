@@ -138,13 +138,15 @@ create_target_single_service_vm() {
               -n hzbenchclientimg -s $rsg \
               -p ${name_prefix} -S ${vm_size} \
               -H $HOME/.ssh/id_rsa.pub -c 1 \
-              -u honzhan -O vmhost.txt -A True
+              -u honzhan -O vmhost.txt \
+              -A True -m accelerated_network_vmsize.txt
+  cd -
 
   local hostname=`cat vmhost.txt`
   cd -
-  echo "========before enabling accelerated networking========="
+  echo "========check accelerated networking========="
   ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${hostname} "lspci"
-  ssh -o StrictHostKeyChecking=no  -p ${g_ssh_port} ${g_ssh_user}@${hostname} "ethtool -S eth0 | grep vf_"
+  ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${hostname} "ethtool -S eth0 | grep vf_"
 }
 
 iterate_on_configuration() {
