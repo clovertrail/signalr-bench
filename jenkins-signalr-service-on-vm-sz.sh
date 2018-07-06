@@ -127,7 +127,6 @@ git_clone_and_build() {
 }
 
 create_target_single_service_vm() {
-. ./az_vm_instances_manage.sh
   local rsg=$1
   local name_prefix=$2
   local vm_size=$3
@@ -140,9 +139,8 @@ create_target_single_service_vm() {
               -H $HOME/.ssh/id_rsa.pub -c 1 \
               -u honzhan -O vmhost.txt \
               -A True -m accelerated_network_vmsize.txt
-  cd -
-
   local hostname=`cat vmhost.txt`
+  g_ServiceHost=$hostname
   cd -
   echo "========check accelerated networking========="
   ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${hostname} "lspci"
@@ -240,11 +238,11 @@ run_all() {
    vm_host_prefix=$(array_get $VMHostPrefixList $i "|")
    g_max_try=$(array_get $MaxTryList $i "|")
    ## create VM
+   g_ServiceHost=""
    create_target_single_service_vm $ResourceGroup $vm_host_prefix $vm_size
-   ServiceHost=$(g_get_vm_hostname 0)
    ## pass to global service server where CPU usage will be collected
 cat << EOF >> servers_env.sh
-bench_service_pub_server=$ServiceHost
+bench_service_pub_server=$g_ServiceHost
 bench_service_pub_port=$global_ssh_port
 bench_service_user=$global_ssh_user
 EOF
@@ -257,10 +255,10 @@ EOF
    else
      g_appsetting_file="servicetmpl/appsettings.json"
    fi
-   replace_appsettings $output_dir $ServiceHost $g_appsetting_file
+   replace_appsettings $output_dir $g_ServiceHost $g_appsetting_file
    zip_signalr_service $output_dir
    ## generate configuration
-   iterate_on_configuration multiple_try_run $vm_size $ServiceHost $output_dir $i
+   iterate_on_configuration multiple_try_run $vm_size $g_ServiceHost $output_dir $i
    i=$(($i + 1))
  done
 }

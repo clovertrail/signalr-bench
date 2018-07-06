@@ -299,8 +299,8 @@ check_accelerated_network() {
   local vmname=$1
   local output_file=$2
   
-  ssh -p ${g_ssh_port} ${g_ssh_user}@${vmname}.${g_location}.cloudapp.azure.com "lspci" > $output_file
-  ssh -p ${g_ssh_port} ${g_ssh_user}@${vmname}.${g_location}.cloudapp.azure.com "ethtool -S eth0 | grep vf_" >> $output_file
+  ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${vmname}.${g_location}.cloudapp.azure.com "lspci" > $output_file
+  ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${vmname}.${g_location}.cloudapp.azure.com "ethtool -S eth0 | grep vf_" >> $output_file
 }
 
 update_to_accelerated_network() {
