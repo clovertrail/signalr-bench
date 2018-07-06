@@ -109,7 +109,7 @@ function launch_service() {
 cat << EOF > $auto_launch_script
 #!/bin/bash
 #automatic generated script
-ssh -o StrictHostKeyChecking=no -p $port ${user}@${hostname} "killall ${g_service_runtime}"
+ssh -o StrictHostKeyChecking=no -p $port ${user}@${hostname} "killall -9 ${g_service_runtime}"
 sleep 2 # wait for the exit of previous running
 ssh -o StrictHostKeyChecking=no -p $port ${user}@${hostname} "cd $outdir; ./${g_service_runtime}"
 EOF

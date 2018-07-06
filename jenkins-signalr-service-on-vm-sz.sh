@@ -241,8 +241,6 @@ run_all() {
    ## pass to global service server where CPU usage will be collected
 cat << EOF >> servers_env.sh
 bench_service_pub_server=$g_ServiceHost
-bench_service_pub_port=$global_ssh_port
-bench_service_user=$global_ssh_user
 EOF
    ## Configure Service
    local uuid=`cat /proc/sys/kernel/random/uuid`
