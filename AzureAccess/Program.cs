@@ -91,7 +91,6 @@ namespace VMAccess
             var credentials = SdkContext.AzureCredentialsFactory
                 .FromFile(agentConfig.AuthFile);
 
-            //var credentials = SdkContext.AzureCredentialsFactory.FromServicePrincipal(clientId:, clientSecret:, tenantId:, environment:AzureEnvironment.AzureGlobalCloud)
             var azure = Azure
                 .Configure()
                 .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
@@ -150,10 +149,7 @@ namespace VMAccess
             Util.Log("Finish creating public IP address...");
 
             Util.Log($"Creating network security group...");
-            var nsgTaskList = new List<Task<INetworkSecurityGroup>>();
-            for (var i = 0; i < agentConfig.VmCount; i++)
-            {
-                var nsg = azure.NetworkSecurityGroups.Define(agentConfig.Prefix + Convert.ToString(i) + "NSG")
+            var nsg = azure.NetworkSecurityGroups.Define(agentConfig.Prefix + "NSG")
                     .WithRegion(region)
                     .WithExistingResourceGroup(resourceGroupName)
                     .DefineRule("New-SSH-Port")
@@ -196,9 +192,7 @@ namespace VMAccess
                         .WithPriority(904)
                         .WithDescription("Chat Sample Port")
                         .Attach()
-                    .CreateAsync();
-                nsgTaskList.Add(nsg);
-            }
+                    .Create();
             Util.Log($"Finish creating network security group...");
 
             var nicTaskList = new List<Task<INetworkInterface>>();
@@ -221,7 +215,7 @@ namespace VMAccess
                         .WithSubnet(subNetName)
                         .WithPrimaryPrivateIPAddressDynamic()
                         .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
-                        .WithExistingNetworkSecurityGroup(nsgTaskList[i].Result)
+                        .WithExistingNetworkSecurityGroup(nsg)
                         .WithAcceleratedNetworking()
                         .CreateAsync();
                     Util.Log("Accelerated Network is enabled!");
@@ -236,7 +230,7 @@ namespace VMAccess
                         .WithSubnet(subNetName)
                         .WithPrimaryPrivateIPAddressDynamic()
                         .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
-                        .WithExistingNetworkSecurityGroup(nsgTaskList[i].Result)
+                        .WithExistingNetworkSecurityGroup(nsg)
                         .CreateAsync();
                 }
                 nicTaskList.Add(networkInterface);
