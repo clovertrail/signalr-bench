@@ -9,9 +9,6 @@
 . ./func_env.sh
 . ./build_launch_signalr_service.sh
 
-global_ssh_user="honzhan"
-global_ssh_port=22222
-
 echo "-------Your Jenkins Inputs------"
 echo "[SendSizeList]: $SendSizeList"
 echo "[SendIntervalList]: $SendIntervalList"
@@ -133,18 +130,19 @@ create_target_single_service_vm() {
 
   cd AzureAccess
   dotnet run -- -a ../signalr_dev.auth \
-              -i honzhanperfsea \
-              -n hzbenchclientimg -s $rsg \
+              -i ${bench_image_resource_group} \
+              -n ${bench_image_name} -s $rsg \
               -p ${name_prefix} -S ${vm_size} \
               -H $HOME/.ssh/id_rsa.pub -c 1 \
-              -u honzhan -O vmhost.txt \
-              -A True -m accelerated_network_vmsize.txt
+              -u ${bench_vm_user} -O vmhost.txt \
+              -A True -m accelerated_network_vmsize.txt \
+              -z ${bench_vm_ssh_port}
   local hostname=`cat vmhost.txt`
   g_ServiceHost=$hostname
   cd -
   echo "========check accelerated networking========="
-  ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${hostname} "lspci"
-  ssh -o StrictHostKeyChecking=no -p ${g_ssh_port} ${g_ssh_user}@${hostname} "ethtool -S eth0 | grep vf_"
+  ssh -o StrictHostKeyChecking=no -p ${bench_vm_ssh_port} ${bench_vm_user}@${hostname} "lspci"
+  ssh -o StrictHostKeyChecking=no -p ${bench_vm_ssh_port} ${bench_vm_user}@${hostname} "ethtool -S eth0 | grep vf_"
 }
 
 iterate_on_configuration() {
