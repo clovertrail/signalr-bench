@@ -82,7 +82,8 @@ function check_signalr_service_dns()
   local name=$2
   local nslookupData
   local externalIp=`az signalr show -n $name -g $rsg -o=json|jq ".externalIp"|tr -d '"'`
-  local hostname=`az signalr list --query [*].hostName --output table|grep "$name"`
+  #local hostname=`az signalr list --query [*].hostName --output table|grep "$name"`
+  local hostname=${name}.servicedev.signalr.net
   local end=$((SECONDS + 120))
   while [ $SECONDS -lt $end ]
   do
