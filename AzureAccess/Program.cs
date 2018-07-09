@@ -105,11 +105,12 @@ namespace VMAccess
         {
             var publicIpTaskList = new List<Task<IPublicIPAddress>>();
             var j = 0;
+            var i = 0;
             while (j < maxTry)
             {
                 try
                 {
-                    for (var i = 0; i < count; i++)
+                    for (i = 0; i < count; i++)
                     {
                         // create public ip
                         var publicIPAddress = azure.PublicIPAddresses.Define(prefix + Convert.ToString(i) + "PubIP")
@@ -136,11 +137,11 @@ namespace VMAccess
                     azure.PublicIPAddresses.DeleteByIdsAsync(ids).Wait();
                     if (j + 1 < maxTry)
                     {
-                        Util.Log($"Fail to create public IP for {e.Message} and will retry");
+                        Util.Log($"Fail to create {i}th public IP for {e.Message} and will retry");
                     }
                     else
                     {
-                        Util.Log($"Fail to create public IP for {e.Message} and retry has reached max limit, will return with failure");
+                        Util.Log($"Fail to create {i}th public IP for {e.Message} and retry has reached max limit, will return with failure");
                     }
                 }
                 j++;
