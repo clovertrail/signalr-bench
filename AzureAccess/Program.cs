@@ -21,7 +21,6 @@ namespace VMAccess
     {
         static void Main(string[] args)
         {
-            CheckInputArgs(args);
             CreateVM(args);
         }
 
