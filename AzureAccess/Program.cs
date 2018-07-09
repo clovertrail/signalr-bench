@@ -70,9 +70,8 @@ namespace VMAccess
 
         static INetwork CreateVirtualNetworkWithRetry(IAzure azure,
             string subNetName, string resourceGroupName,
-            string virtualNetName, Region region)
+            string virtualNetName, Region region, int maxRetry=3)
         {
-            var maxRetry = 3;
             var i = 0;
             while (i < maxRetry)
             {
@@ -103,11 +102,10 @@ namespace VMAccess
             return null;
         }
 
-        static List<Task<IPublicIPAddress>> CreatePublicIPAddrList(IAzure azure,
-            int count, string prefix, string resourceGroupName, Region region)
+        static List<Task<IPublicIPAddress>> CreatePublicIPAddrListWithRetry(IAzure azure,
+            int count, string prefix, string resourceGroupName, Region region, int maxTry=3)
         {
             var publicIpTaskList = new List<Task<IPublicIPAddress>>();
-            var maxTry = 3;
             var j = 0;
             while (j < maxTry)
             {
@@ -206,14 +204,6 @@ namespace VMAccess
             // create virtual net
             Util.Log("Creating virtual network...");
             var subNetName = agentConfig.Prefix + "Subnet";
-            /*
-            var network = azure.Networks.Define(agentConfig.Prefix + "VNet")
-                .WithRegion(region)
-                .WithExistingResourceGroup(resourceGroupName)
-                .WithAddressSpace("10.0.0.0/16")
-                .WithSubnet(subNetName, "10.0.0.0/24")
-                .Create();
-            */
             var network = CreateVirtualNetworkWithRetry(azure, subNetName, resourceGroupName, agentConfig.Prefix + "VNet", region);
             if (network == null)
             {
@@ -224,7 +214,7 @@ namespace VMAccess
 
             // create vms
             Util.Log("Creating public IP address...");
-            var publicIpTaskList = CreatePublicIPAddrList(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region);
+            var publicIpTaskList = CreatePublicIPAddrListWithRetry(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region);
             if (publicIpTaskList == null)
             {
                 throw new Exception("Fail to create Public IP Address");
