@@ -208,6 +208,7 @@ namespace VMAccess
             {
                 throw new Exception("Fail to create virtual network");
             }
+            Util.Log("Finish creating virtual network");
             // Prepare a batch of Creatable Virtual Machines definitions
             var creatableVirtualMachines = new List<ICreatable<IVirtualMachine>>();
 
