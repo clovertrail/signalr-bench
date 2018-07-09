@@ -84,16 +84,15 @@ namespace VMAccess
                         .Create();
                     return network;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    //var net = azure.Networks.GetByResourceGroup(resourceGroupName, virtualNetName);
                     if (i + 1 < maxRetry)
                     {
-                        Util.Log($"Fail to create virtual network and will retry");
+                        Util.Log($"Fail to create virtual network for {e.Message} and will retry");
                     }
                     else
                     {
-                        Util.Log($"Fail to create virtual network and retry has reached max limit, will return with failure");
+                        Util.Log($"Fail to create virtual network for {e.Message} and retry has reached max limit, will return with failure");
                     }
                 }
                 i++;
@@ -124,7 +123,7 @@ namespace VMAccess
                     Task.WaitAll(publicIpTaskList.ToArray());
                     return publicIpTaskList;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     var allPubIPs = azure.PublicIPAddresses.ListByResourceGroupAsync(resourceGroupName);
                     allPubIPs.Wait();
@@ -137,11 +136,11 @@ namespace VMAccess
                     azure.PublicIPAddresses.DeleteByIdsAsync(ids).Wait();
                     if (j + 1 < maxTry)
                     {
-                        Util.Log($"Fail to create public IP and will retry");
+                        Util.Log($"Fail to create public IP for {e.Message} and will retry");
                     }
                     else
                     {
-                        Util.Log($"Fail to create public IP and retry has reached max limit, will return with failure");
+                        Util.Log($"Fail to create public IP for {e.Message} and retry has reached max limit, will return with failure");
                     }
                 }
                 j++;
