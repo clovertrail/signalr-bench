@@ -1,5 +1,6 @@
 1. build 10 vm from image:
 dotnet run -- -a ../signalr_dev.auth -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0705 -p hzautovm0705 -S Standard_DS1_v2 -H $HOME/.ssh/id_rsa.pub -c 10 -u honzhan -o benchclient.txt -O vmhost.txt
+dotnet run -- -a C:\home\Work\DevDiv\Azure\azureauth.properties -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0709 -p hzautovm0709 -S Standard_DS1_v2 -H C:\home\Work\DevDiv\signalr-bench\pubkey\azure_ssh_pub -c 1 -u honzhan -o benchclient.txt -O vmhost.txt -m C:\home\Work\DevDiv\signalr-bench\AzureAccess\accelerated_network_vmsize.txt
 
 2. create vm with accelerated network enabled:
 dotnet run -- -a ../signalr_dev.auth -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0705 -p hzautovm0705 -S Standard_DS2_v2 -H $HOME/.ssh/id_rsa.pub -c 10 -u honzhan -o benchclient.txt -O vmhost.txt -A True

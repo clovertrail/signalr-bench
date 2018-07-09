@@ -21,6 +21,7 @@ namespace VMAccess
     {
         static void Main(string[] args)
         {
+            CheckInputArgs(args);
             CreateVM(args);
         }
 
@@ -65,6 +66,88 @@ namespace VMAccess
             var sshPubKey = System.IO.File.ReadAllText(agentConfig.SshPubKeyFile);
             Util.Log($"SSH public key: {sshPubKey}");
             Util.Log($"Accelerated Network: {agentConfig.AcceleratedNetwork}");
+        }
+
+        static INetwork CreateVirtualNetworkWithRetry(IAzure azure,
+            string subNetName, string resourceGroupName,
+            string virtualNetName, Region region, int maxRetry=3)
+        {
+            var i = 0;
+            while (i < maxRetry)
+            {
+                try
+                {
+                    var network = azure.Networks.Define(virtualNetName)
+                        .WithRegion(region)
+                        .WithExistingResourceGroup(resourceGroupName)
+                        .WithAddressSpace("10.0.0.0/16")
+                        .WithSubnet(subNetName, "10.0.0.0/24")
+                        .Create();
+                    return network;
+                }
+                catch (Exception)
+                {
+                    //var net = azure.Networks.GetByResourceGroup(resourceGroupName, virtualNetName);
+                    if (i + 1 < maxRetry)
+                    {
+                        Util.Log($"Fail to create virtual network and will retry");
+                    }
+                    else
+                    {
+                        Util.Log($"Fail to create virtual network and retry has reached max limit, will return with failure");
+                    }
+                }
+                i++;
+            }
+            return null;
+        }
+
+        static List<Task<IPublicIPAddress>> CreatePublicIPAddrListWithRetry(IAzure azure,
+            int count, string prefix, string resourceGroupName, Region region, int maxTry=3)
+        {
+            var publicIpTaskList = new List<Task<IPublicIPAddress>>();
+            var j = 0;
+            while (j < maxTry)
+            {
+                try
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        // create public ip
+                        var publicIPAddress = azure.PublicIPAddresses.Define(prefix + Convert.ToString(i) + "PubIP")
+                            .WithRegion(region)
+                            .WithExistingResourceGroup(resourceGroupName)
+                            .WithLeafDomainLabel(prefix + Convert.ToString(i))
+                            .WithDynamicIP()
+                            .CreateAsync();
+                        publicIpTaskList.Add(publicIPAddress);
+                    }
+                    Task.WaitAll(publicIpTaskList.ToArray());
+                    return publicIpTaskList;
+                }
+                catch (Exception)
+                {
+                    var allPubIPs = azure.PublicIPAddresses.ListByResourceGroupAsync(resourceGroupName);
+                    allPubIPs.Wait();
+                    var ids = new List<string>();
+                    var enumerator = allPubIPs.Result.GetEnumerator();
+                    while (enumerator.MoveNext())
+                    {
+                        ids.Add(enumerator.Current.Id);
+                    }
+                    azure.PublicIPAddresses.DeleteByIdsAsync(ids).Wait();
+                    if (j + 1 < maxTry)
+                    {
+                        Util.Log($"Fail to create public IP and will retry");
+                    }
+                    else
+                    {
+                        Util.Log($"Fail to create public IP and retry has reached max limit, will return with failure");
+                    }
+                }
+                j++;
+            }
+            return null;
         }
 
         static void CreateVM(string[] args)
@@ -121,31 +204,21 @@ namespace VMAccess
             // create virtual net
             Util.Log("Creating virtual network...");
             var subNetName = agentConfig.Prefix + "Subnet";
-            var network = azure.Networks.Define(agentConfig.Prefix + "VNet")
-                .WithRegion(region)
-                .WithExistingResourceGroup(resourceGroupName)
-                .WithAddressSpace("10.0.0.0/16")
-                .WithSubnet(subNetName, "10.0.0.0/24")
-                .Create();
-
+            var network = CreateVirtualNetworkWithRetry(azure, subNetName, resourceGroupName, agentConfig.Prefix + "VNet", region);
+            if (network == null)
+            {
+                throw new Exception("Fail to create virtual network");
+            }
             // Prepare a batch of Creatable Virtual Machines definitions
             var creatableVirtualMachines = new List<ICreatable<IVirtualMachine>>();
 
             // create vms
-            var publicIpTaskList = new List<Task<IPublicIPAddress>>();
             Util.Log("Creating public IP address...");
-            for (var i = 0; i < agentConfig.VmCount; i++)
+            var publicIpTaskList = CreatePublicIPAddrListWithRetry(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region);
+            if (publicIpTaskList == null)
             {
-                // create public ip
-                var publicIPAddress = azure.PublicIPAddresses.Define(agentConfig.Prefix + Convert.ToString(i) + "PubIP")
-                    .WithRegion(region)
-                    .WithExistingResourceGroup(resourceGroupName)
-                    .WithLeafDomainLabel(agentConfig.Prefix + Convert.ToString(i))
-                    .WithDynamicIP()
-                    .CreateAsync();
-                publicIpTaskList.Add(publicIPAddress);
+                throw new Exception("Fail to create Public IP Address");
             }
-            Task.WaitAll(publicIpTaskList.ToArray());
             Util.Log("Finish creating public IP address...");
 
             Util.Log($"Creating network security group...");

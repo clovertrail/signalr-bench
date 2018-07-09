@@ -17,9 +17,9 @@ namespace VMAccess
         public static void ColorWriteLine(string text, ConsoleColor color = ConsoleColor.DarkYellow)
         {
             ConsoleColor originalColor = Console.BackgroundColor;
-            Console.BackgroundColor = color;
+            //Console.BackgroundColor = color;
             Console.WriteLine(text);
-            Console.BackgroundColor = originalColor;
+            //Console.BackgroundColor = originalColor;
         }
 
         public static long Timestamp()
