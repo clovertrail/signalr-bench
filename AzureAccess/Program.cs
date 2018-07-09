@@ -121,7 +121,7 @@ namespace VMAccess
                             .CreateAsync();
                         publicIpTaskList.Add(publicIPAddress);
                     }
-                    Task.WaitAll(publicIpTaskList.ToArray());
+                    Task.WhenAll(publicIpTaskList.ToArray()).Wait();
                     return publicIpTaskList;
                 }
                 catch (Exception e)
