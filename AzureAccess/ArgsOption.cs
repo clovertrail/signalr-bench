@@ -22,6 +22,9 @@ namespace VMAccess
         [Option('u', "username", Default = "honzhan", Required = false, HelpText = "Specify the ssh login username. Default is honzhan")]
         public string Username { get; set; }
 
+        [Option('r', "max-retry", Default = 5, Required = false, HelpText = "Specify max retry for failure. Default is 5")]
+        public int MaxRetry { get; set; }
+
         [Option('A', "accelerated-network", Default = false, Required = false, HelpText = "Whether enable accelerated-network or not, default is disabled")]
         public bool AcceleratedNetwork { get; set; }
 

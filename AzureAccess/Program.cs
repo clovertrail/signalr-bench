@@ -202,7 +202,7 @@ namespace VMAccess
             // create virtual net
             Util.Log("Creating virtual network...");
             var subNetName = agentConfig.Prefix + "Subnet";
-            var network = CreateVirtualNetworkWithRetry(azure, subNetName, resourceGroupName, agentConfig.Prefix + "VNet", region);
+            var network = CreateVirtualNetworkWithRetry(azure, subNetName, resourceGroupName, agentConfig.Prefix + "VNet", region, agentConfig.MaxRetry);
             if (network == null)
             {
                 throw new Exception("Fail to create virtual network");
@@ -213,7 +213,7 @@ namespace VMAccess
 
             // create vms
             Util.Log("Creating public IP address...");
-            var publicIpTaskList = CreatePublicIPAddrListWithRetry(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region);
+            var publicIpTaskList = CreatePublicIPAddrListWithRetry(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region, agentConfig.MaxRetry);
             if (publicIpTaskList == null)
             {
                 throw new Exception("Fail to create Public IP Address");
