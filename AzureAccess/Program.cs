@@ -94,6 +94,77 @@ namespace VMAccess
             return img;
         }
 
+        static INetworkSecurityGroup CreateNetworkSecurityGroupWithRetry(IAzure azure,
+            string resourceGroupName, string name, ArgsOption agentConfig, Region region, int maxRetry)
+        {
+            INetworkSecurityGroup rtn = null;
+            var i = 0;
+            while (i < maxRetry)
+            {
+                try
+                {
+                    rtn = azure.NetworkSecurityGroups.Define(agentConfig.Prefix + "NSG")
+                    .WithRegion(region)
+                    .WithExistingResourceGroup(resourceGroupName)
+                    .DefineRule("New-SSH-Port")
+                        .AllowInbound()
+                        .FromAnyAddress()
+                        .FromAnyPort()
+                        .ToAnyAddress()
+                        .ToPort(agentConfig.SshPort)
+                        .WithProtocol(SecurityRuleProtocol.Tcp)
+                        .WithPriority(900)
+                        .WithDescription("New SSH Port")
+                        .Attach()
+                    .DefineRule("Benchmark-Port")
+                        .AllowInbound()
+                        .FromAnyAddress()
+                        .FromAnyPort()
+                        .ToAnyAddress()
+                        .ToPort(agentConfig.OtherPort)
+                        .WithProtocol(SecurityRuleProtocol.Tcp)
+                        .WithPriority(901)
+                        .WithDescription("Benchmark Port")
+                        .Attach()
+                    .DefineRule("Service-Ports")
+                        .AllowInbound()
+                        .FromAnyAddress()
+                        .FromAnyPort()
+                        .ToAnyAddress()
+                        .ToPortRange(5001, 5003)
+                        .WithProtocol(SecurityRuleProtocol.Tcp)
+                        .WithPriority(903)
+                        .WithDescription("Service Port")
+                        .Attach()
+                    .DefineRule("Chat-Sample-Ports")
+                        .AllowInbound()
+                        .FromAnyAddress()
+                        .FromAnyPort()
+                        .ToAnyAddress()
+                        .ToPort(agentConfig.ChatSamplePort)
+                        .WithProtocol(SecurityRuleProtocol.Tcp)
+                        .WithPriority(904)
+                        .WithDescription("Chat Sample Port")
+                        .Attach()
+                    .Create();
+                }
+                catch (Exception e)
+                {
+                    Util.Log(e.ToString());
+                    if (i + 1 < maxRetry)
+                    {
+                        Util.Log($"Fail to create security network group for {e.Message} and will retry");
+                    }
+                    else
+                    {
+                        Util.Log($"Fail to create security network group for {e.Message} and retry has reached max limit, will return with failure");
+                    }
+                }
+                i++;
+            }
+            return rtn;
+        }
+
         static INetwork CreateVirtualNetworkWithRetry(IAzure azure,
             string subNetName, string resourceGroupName,
             string virtualNetName, Region region, int maxRetry=3)
@@ -257,50 +328,11 @@ namespace VMAccess
             Util.Log("Finish creating public IP address...");
 
             Util.Log($"Creating network security group...");
-            var nsg = azure.NetworkSecurityGroups.Define(agentConfig.Prefix + "NSG")
-                    .WithRegion(region)
-                    .WithExistingResourceGroup(resourceGroupName)
-                    .DefineRule("New-SSH-Port")
-                        .AllowInbound()
-                        .FromAnyAddress()
-                        .FromAnyPort()
-                        .ToAnyAddress()
-                        .ToPort(agentConfig.SshPort)
-                        .WithProtocol(SecurityRuleProtocol.Tcp)
-                        .WithPriority(900)
-                        .WithDescription("New SSH Port")
-                        .Attach()
-                    .DefineRule("Benchmark-Port")
-                        .AllowInbound()
-                        .FromAnyAddress()
-                        .FromAnyPort()
-                        .ToAnyAddress()
-                        .ToPort(agentConfig.OtherPort)
-                        .WithProtocol(SecurityRuleProtocol.Tcp)
-                        .WithPriority(901)
-                        .WithDescription("Benchmark Port")
-                        .Attach()
-                    .DefineRule("Service-Ports")
-                        .AllowInbound()
-                        .FromAnyAddress()
-                        .FromAnyPort()
-                        .ToAnyAddress()
-                        .ToPortRange(5001, 5003)
-                        .WithProtocol(SecurityRuleProtocol.Tcp)
-                        .WithPriority(903)
-                        .WithDescription("Service Port")
-                        .Attach()
-                    .DefineRule("Chat-Sample-Ports")
-                        .AllowInbound()
-                        .FromAnyAddress()
-                        .FromAnyPort()
-                        .ToAnyAddress()
-                        .ToPort(agentConfig.ChatSamplePort)
-                        .WithProtocol(SecurityRuleProtocol.Tcp)
-                        .WithPriority(904)
-                        .WithDescription("Chat Sample Port")
-                        .Attach()
-                    .Create();
+            var nsg = CreateNetworkSecurityGroupWithRetry(azure, resourceGroupName, agentConfig.Prefix + "NSG", agentConfig, region, agentConfig.MaxRetry);
+            if (nsg == null)
+            {
+                throw new Exception("Fail to create network security group");
+            }
             Util.Log($"Finish creating network security group...");
 
             var nicTaskList = new List<Task<INetworkInterface>>();
