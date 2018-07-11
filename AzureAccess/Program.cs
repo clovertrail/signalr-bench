@@ -155,22 +155,24 @@ namespace VMAccess
                 catch (Exception e)
                 {
                     Util.Log(e.ToString());
+                    publicIpTaskList.Clear();
+
                     var allPubIPs = azure.PublicIPAddresses.ListByResourceGroupAsync(resourceGroupName);
-                    allPubIPs.Wait();
+                    await allPubIPs;
                     var ids = new List<string>();
                     var enumerator = allPubIPs.Result.GetEnumerator();
                     while (enumerator.MoveNext())
                     {
                         ids.Add(enumerator.Current.Id);
                     }
-                    azure.PublicIPAddresses.DeleteByIdsAsync(ids).Wait();
+                    await azure.PublicIPAddresses.DeleteByIdsAsync(ids);
                     if (j + 1 < maxTry)
                     {
-                        Util.Log($"Fail to create {i}th public IP for {e.Message} and will retry");
+                        Util.Log($"Fail to create public IP for {e.Message} and will retry");
                     }
                     else
                     {
-                        Util.Log($"Fail to create {i}th public IP for {e.Message} and retry has reached max limit, will return with failure");
+                        Util.Log($"Fail to create public IP for {e.Message} and retry has reached max limit, will return with failure");
                     }
                 }
                 j++;
