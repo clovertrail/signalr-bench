@@ -67,6 +67,33 @@ namespace VMAccess
             Util.Log($"Accelerated Network: {agentConfig.AcceleratedNetwork}");
         }
 
+        static IVirtualMachineCustomImage GetVMImageWithRetry(IAzure azure, string resourceGroupName, string imageName, int maxRetry = 3)
+        {
+            var i = 0;
+            IVirtualMachineCustomImage img = null;
+            while (i < maxRetry)
+            {
+                try
+                {
+                    img = azure.VirtualMachineCustomImages.GetByResourceGroup(resourceGroupName, imageName);
+                }
+                catch (Exception e)
+                {
+                    Util.Log(e.ToString());
+                    if (i + 1 < maxRetry)
+                    {
+                        Util.Log($"Fail to get VM image for {e.Message} and will retry");
+                    }
+                    else
+                    {
+                        Util.Log($"Fail to get VM image for {e.Message} and retry has reached max limit, will return with failure");
+                    }
+                }
+                i++;
+            }
+            return img;
+        }
+
         static INetwork CreateVirtualNetworkWithRetry(IAzure azure,
             string subNetName, string resourceGroupName,
             string virtualNetName, Region region, int maxRetry=3)
@@ -86,6 +113,7 @@ namespace VMAccess
                 }
                 catch (Exception e)
                 {
+                    Util.Log(e.ToString());
                     if (i + 1 < maxRetry)
                     {
                         Util.Log($"Fail to create virtual network for {e.Message} and will retry");
@@ -100,7 +128,7 @@ namespace VMAccess
             return null;
         }
 
-        static List<Task<IPublicIPAddress>> CreatePublicIPAddrListWithRetry(IAzure azure,
+        static async Task<List<Task<IPublicIPAddress>>> CreatePublicIPAddrListWithRetry(IAzure azure,
             int count, string prefix, string resourceGroupName, Region region, int maxTry=3)
         {
             var publicIpTaskList = new List<Task<IPublicIPAddress>>();
@@ -121,11 +149,12 @@ namespace VMAccess
                             .CreateAsync();
                         publicIpTaskList.Add(publicIPAddress);
                     }
-                    Task.WhenAll(publicIpTaskList.ToArray()).Wait();
+                    await Task.WhenAll(publicIpTaskList.ToArray());
                     return publicIpTaskList;
                 }
                 catch (Exception e)
                 {
+                    Util.Log(e.ToString());
                     var allPubIPs = azure.PublicIPAddresses.ListByResourceGroupAsync(resourceGroupName);
                     allPubIPs.Wait();
                     var ids = new List<string>();
@@ -178,7 +207,11 @@ namespace VMAccess
                 .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
                 .Authenticate(credentials)
                 .WithDefaultSubscription();
-            var img = azure.VirtualMachineCustomImages.GetByResourceGroup(agentConfig.ImgResourceGroup, agentConfig.ImgName);
+            var img = GetVMImageWithRetry(azure, agentConfig.ImgResourceGroup, agentConfig.ImgName, agentConfig.MaxRetry);
+            if (img == null)
+            {
+                throw new Exception("Fail to get custom image");
+            }
             Util.Log($"Customized image id: {img.Id}");
 
             var region = img.Region;
@@ -287,7 +320,7 @@ namespace VMAccess
                         .WithExistingPrimaryNetwork(network)
                         .WithSubnet(subNetName)
                         .WithPrimaryPrivateIPAddressDynamic()
-                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
+                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList.Result[i].Result)
                         .WithExistingNetworkSecurityGroup(nsg)
                         .WithAcceleratedNetworking()
                         .CreateAsync();
@@ -302,7 +335,7 @@ namespace VMAccess
                         .WithExistingPrimaryNetwork(network)
                         .WithSubnet(subNetName)
                         .WithPrimaryPrivateIPAddressDynamic()
-                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
+                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList.Result[i].Result)
                         .WithExistingNetworkSecurityGroup(nsg)
                         .CreateAsync();
                 }
