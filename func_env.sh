@@ -338,7 +338,8 @@ function check_single_agent() {
 	local port=$2
 	local user=$3
 	local idx=$4
-	local agent_log=${result_dir}/${idx}_${sigbench_agent_output}
+	local rand=`date +%H%M%S`
+	local agent_log=${result_dir}/${idx}_${rand}_${sigbench_agent_output}
 
 	if [ "$fail_flag_g" != "" ]
 	then
@@ -349,6 +350,7 @@ function check_single_agent() {
 	fail_flag_g=`egrep -i "fail|error" ${agent_log}`
 	if [ "$fail_flag_g" != "" ]
 	then
+		echo "agent error: '$fail_flag_g'"
 		echo "Error occurs, so break the benchmark, please check ${agent_log}"
 		mark_error ${agent_log}
 	fi
