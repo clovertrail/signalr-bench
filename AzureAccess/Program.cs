@@ -21,7 +21,7 @@ namespace VMAccess
     {
         static void Main(string[] args)
         {
-            CreateVM(args);
+            CreateVM(args).Wait();
         }
 
         static void CheckInputArgs(string[] args)
@@ -248,10 +248,10 @@ namespace VMAccess
                 }
                 j++;
             }
-            return null;
+            return await Task.FromResult<List<Task<IPublicIPAddress>>>(null);
         }
 
-        static void CreateVM(string[] args)
+        static async Task CreateVM(string[] args)
         {
             bool invalidOptions = false;
             // parse args
@@ -320,7 +320,7 @@ namespace VMAccess
 
             // create vms
             Util.Log("Creating public IP address...");
-            var publicIpTaskList = CreatePublicIPAddrListWithRetry(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region, agentConfig.MaxRetry);
+            var publicIpTaskList = await CreatePublicIPAddrListWithRetry(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region, agentConfig.MaxRetry);
             if (publicIpTaskList == null)
             {
                 throw new Exception("Fail to create Public IP Address");
@@ -354,7 +354,7 @@ namespace VMAccess
                         .WithExistingPrimaryNetwork(network)
                         .WithSubnet(subNetName)
                         .WithPrimaryPrivateIPAddressDynamic()
-                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList.Result[i].Result)
+                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
                         .WithExistingNetworkSecurityGroup(nsg)
                         .WithAcceleratedNetworking()
                         .CreateAsync();
@@ -369,7 +369,7 @@ namespace VMAccess
                         .WithExistingPrimaryNetwork(network)
                         .WithSubnet(subNetName)
                         .WithPrimaryPrivateIPAddressDynamic()
-                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList.Result[i].Result)
+                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
                         .WithExistingNetworkSecurityGroup(nsg)
                         .CreateAsync();
                 }
@@ -431,7 +431,7 @@ namespace VMAccess
                     builder.Append(agentConfig.Prefix).Append(i).Append(".")
                            .Append(region.Name).Append(".cloudapp.azure.com");
                 }
-                System.IO.File.WriteAllText(agentConfig.VMHostFile, builder.ToString());
+                File.WriteAllText(agentConfig.VMHostFile, builder.ToString());
             }
             if (agentConfig.BenchClientListFile != null)
             {
@@ -446,7 +446,7 @@ namespace VMAccess
                            .Append(region.Name).Append(".cloudapp.azure.com")
                            .Append(':').Append(agentConfig.SshPort).Append(':').Append(agentConfig.Username);
                 }
-                System.IO.File.WriteAllText(agentConfig.BenchClientListFile, builder.ToString());
+                File.WriteAllText(agentConfig.BenchClientListFile, builder.ToString());
             }
         }
 
