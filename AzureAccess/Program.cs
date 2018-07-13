@@ -21,7 +21,7 @@ namespace VMAccess
     {
         static void Main(string[] args)
         {
-            Task.WhenAll(CreateVM(args));
+            CreateVM(args).Wait();
         }
 
         static void CheckInputArgs(string[] args)
@@ -264,7 +264,7 @@ namespace VMAccess
 
         static async Task<List<Task<INetworkInterface>>> CreateNICWithRetry(IAzure azure, string resourceGroupName,
             ArgsOption agentConfig, INetwork network, List<Task<IPublicIPAddress>> publicIpTaskList,
-            INetworkSecurityGroup nsg, Region region)
+            string subNetName, INetworkSecurityGroup nsg, Region region)
         {
             var j = 0;
             var i = 0;
@@ -289,7 +289,7 @@ namespace VMAccess
                                 .WithRegion(region)
                                 .WithExistingResourceGroup(resourceGroupName)
                                 .WithExistingPrimaryNetwork(network)
-                                .WithSubnet(network.Name)
+                                .WithSubnet(subNetName)
                                 .WithPrimaryPrivateIPAddressDynamic()
                                 .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
                                 .WithExistingNetworkSecurityGroup(nsg)
@@ -304,7 +304,7 @@ namespace VMAccess
                                 .WithRegion(region)
                                 .WithExistingResourceGroup(resourceGroupName)
                                 .WithExistingPrimaryNetwork(network)
-                                .WithSubnet(network.Name)
+                                .WithSubnet(subNetName)
                                 .WithPrimaryPrivateIPAddressDynamic()
                                 .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
                                 .WithExistingNetworkSecurityGroup(nsg)
@@ -313,6 +313,7 @@ namespace VMAccess
                         nicTaskList.Add(networkInterface);
                     }
                     await Task.WhenAll(nicTaskList.ToArray());
+                    return nicTaskList;
                 }
                 catch (Exception e)
                 {
@@ -442,7 +443,7 @@ namespace VMAccess
             Util.Log($"Finish creating network security group...");
 
             Util.Log("Creating network interface...");
-            var nicTaskList = await CreateNICWithRetry(azure, resourceGroupName, agentConfig, network, publicIpTaskList, nsg, region);
+            var nicTaskList = await CreateNICWithRetry(azure, resourceGroupName, agentConfig, network, publicIpTaskList, subNetName, nsg, region);
             if (nicTaskList == null)
             {
                 throw new Exception("Fail to create NIC task list");
