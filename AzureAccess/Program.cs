@@ -95,10 +95,11 @@ namespace VMAccess
         }
 
         static INetworkSecurityGroup CreateNetworkSecurityGroupWithRetry(IAzure azure,
-            string resourceGroupName, string name, ArgsOption agentConfig, Region region, int maxRetry)
+            string resourceGroupName, string name, ArgsOption agentConfig, Region region)
         {
             INetworkSecurityGroup rtn = null;
             var i = 0;
+            var maxRetry = agentConfig.MaxRetry;
             while (i < maxRetry)
             {
                 try
@@ -145,6 +146,16 @@ namespace VMAccess
                         .WithProtocol(SecurityRuleProtocol.Tcp)
                         .WithPriority(904)
                         .WithDescription("Chat Sample Port")
+                        .Attach()
+                    .DefineRule("RDP-Port")
+                        .AllowInbound()
+                        .FromAnyAddress()
+                        .FromAnyPort()
+                        .ToAnyAddress()
+                        .ToPort(agentConfig.RDPPort)
+                        .WithProtocol(SecurityRuleProtocol.Tcp)
+                        .WithPriority(905)
+                        .WithDescription("Windows RDP Port")
                         .Attach()
                     .Create();
                 }
@@ -248,7 +259,88 @@ namespace VMAccess
                 }
                 j++;
             }
-            return await Task.FromResult<List<Task<IPublicIPAddress>>>(null);
+            return null;
+        }
+
+        static async Task<List<Task<INetworkInterface>>> CreateNICWithRetry(IAzure azure, string resourceGroupName,
+            ArgsOption agentConfig, INetwork network, List<Task<IPublicIPAddress>> publicIpTaskList,
+            string subNetName, INetworkSecurityGroup nsg, Region region)
+        {
+            var j = 0;
+            var i = 0;
+            var maxTry = agentConfig.MaxRetry;
+            var nicTaskList = new List<Task<INetworkInterface>>();
+            while (j < maxTry)
+            {
+                try
+                {
+                    var allowAcceleratedNet = false;
+                    if (agentConfig.CandidateOfAcceleratedNetVM != null)
+                    {
+                        allowAcceleratedNet = CheckValidVMForAcceleratedNet(agentConfig.CandidateOfAcceleratedNetVM, agentConfig.VmSize);
+                    }
+                    for (i = 0; i < agentConfig.VmCount; i++)
+                    {
+                        var nicName = agentConfig.Prefix + Convert.ToString(i) + "NIC";
+                        Task<INetworkInterface> networkInterface = null;
+                        if (allowAcceleratedNet && agentConfig.AcceleratedNetwork)
+                        {
+                            networkInterface = azure.NetworkInterfaces.Define(nicName)
+                                .WithRegion(region)
+                                .WithExistingResourceGroup(resourceGroupName)
+                                .WithExistingPrimaryNetwork(network)
+                                .WithSubnet(subNetName)
+                                .WithPrimaryPrivateIPAddressDynamic()
+                                .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
+                                .WithExistingNetworkSecurityGroup(nsg)
+                                .WithAcceleratedNetworking()
+                                .CreateAsync();
+                            Util.Log("Accelerated Network is enabled!");
+                        }
+                        else
+                        {
+                            Util.Log("Accelerated Network is disabled!");
+                            networkInterface = azure.NetworkInterfaces.Define(nicName)
+                                .WithRegion(region)
+                                .WithExistingResourceGroup(resourceGroupName)
+                                .WithExistingPrimaryNetwork(network)
+                                .WithSubnet(subNetName)
+                                .WithPrimaryPrivateIPAddressDynamic()
+                                .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
+                                .WithExistingNetworkSecurityGroup(nsg)
+                                .CreateAsync();
+                        }
+                        nicTaskList.Add(networkInterface);
+                    }
+                    await Task.WhenAll(nicTaskList.ToArray());
+                    return nicTaskList;
+                }
+                catch (Exception e)
+                {
+                    Util.Log(e.ToString());
+                    nicTaskList.Clear();
+
+                    var allNICs = azure.NetworkInterfaces.ListByResourceGroupAsync(resourceGroupName);
+                    await allNICs;
+                    var ids = new List<string>();
+                    var enumerator = allNICs.Result.GetEnumerator();
+                    while (enumerator.MoveNext())
+                    {
+                        ids.Add(enumerator.Current.Id);
+                    }
+                    await azure.NetworkInterfaces.DeleteByIdsAsync(ids);
+                    if (j + 1 < maxTry)
+                    {
+                        Util.Log($"Fail to create NIC for {e.Message} and will retry");
+                    }
+                    else
+                    {
+                        Util.Log($"Fail to create NIC for {e.Message} and retry has reached max limit, will return with failure");
+                    }
+                }
+                j++;
+            }
+            return null;
         }
 
         static async Task CreateVM(string[] args)
@@ -259,11 +351,12 @@ namespace VMAccess
             var result = Parser.Default.ParseArguments<ArgsOption>(args)
                 .WithParsed(options => agentConfig = options)
                 .WithNotParsed(error => {
-                    Console.WriteLine($"Fail to parse the options: {error}");
+                    Util.Log($"Fail to parse the options: {error}");
                     invalidOptions = true;
                 });
             if (invalidOptions)
             {
+                Util.Log("Invalid options");
                 return;
             }
 
@@ -293,10 +386,24 @@ namespace VMAccess
             var VmSize = VirtualMachineSizeTypes.Parse(agentConfig.VmSize);
             Util.Log($"VM size: {VmSize}");
 
-            var sshPubKey = System.IO.File.ReadAllText(agentConfig.SshPubKeyFile);
-            Util.Log($"SSH public key: {sshPubKey}");
-            Util.Log($"Accelerated Network: {agentConfig.AcceleratedNetwork}");
+            string sshPubKey = null;
+            if (agentConfig.SshPubKeyFile == null && agentConfig.VmType == 1)
+            {
+                Util.Log("SSH public key is not set for Linux VM");
+                throw new Exception("SSH public key is not specified!");
+            }
+            else
+            {
+                sshPubKey = File.ReadAllText(agentConfig.SshPubKeyFile);
+                Util.Log($"SSH public key: {sshPubKey}");
+                Util.Log($"Accelerated Network: {agentConfig.AcceleratedNetwork}");
+            }
 
+            if (agentConfig.VmType == 2 && agentConfig.Password == null)
+            {
+                Util.Log($"You must specify password for windows VM by -p XXXX");
+                return;
+            }
             var resourceGroupName = agentConfig.ResourceGroup;
             IResourceGroup resourceGroup = null;
             if (!azure.ResourceGroups.Contain(resourceGroupName))
@@ -328,70 +435,55 @@ namespace VMAccess
             Util.Log("Finish creating public IP address...");
 
             Util.Log($"Creating network security group...");
-            var nsg = CreateNetworkSecurityGroupWithRetry(azure, resourceGroupName, agentConfig.Prefix + "NSG", agentConfig, region, agentConfig.MaxRetry);
+            var nsg = CreateNetworkSecurityGroupWithRetry(azure, resourceGroupName, agentConfig.Prefix + "NSG", agentConfig, region);
             if (nsg == null)
             {
                 throw new Exception("Fail to create network security group");
             }
             Util.Log($"Finish creating network security group...");
 
-            var nicTaskList = new List<Task<INetworkInterface>>();
             Util.Log("Creating network interface...");
-            var allowAcceleratedNet = false;
-            if (agentConfig.CandidateOfAcceleratedNetVM != null)
+            var nicTaskList = await CreateNICWithRetry(azure, resourceGroupName, agentConfig, network, publicIpTaskList, subNetName, nsg, region);
+            if (nicTaskList == null)
             {
-                allowAcceleratedNet = CheckValidVMForAcceleratedNet(agentConfig.CandidateOfAcceleratedNetVM, agentConfig.VmSize);
-            }
-            for (var i = 0; i < agentConfig.VmCount; i++)
-            {
-                var nicName = agentConfig.Prefix + Convert.ToString(i) + "NIC";
-                Task<INetworkInterface> networkInterface = null;
-                if (allowAcceleratedNet && agentConfig.AcceleratedNetwork)
-                {
-                    networkInterface = azure.NetworkInterfaces.Define(nicName)
-                        .WithRegion(region)
-                        .WithExistingResourceGroup(resourceGroupName)
-                        .WithExistingPrimaryNetwork(network)
-                        .WithSubnet(subNetName)
-                        .WithPrimaryPrivateIPAddressDynamic()
-                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
-                        .WithExistingNetworkSecurityGroup(nsg)
-                        .WithAcceleratedNetworking()
-                        .CreateAsync();
-                    Util.Log("Accelerated Network is enabled!");
-                }
-                else
-                {
-                    Util.Log("Accelerated Network is disabled!");
-                    networkInterface = azure.NetworkInterfaces.Define(nicName)
-                        .WithRegion(region)
-                        .WithExistingResourceGroup(resourceGroupName)
-                        .WithExistingPrimaryNetwork(network)
-                        .WithSubnet(subNetName)
-                        .WithPrimaryPrivateIPAddressDynamic()
-                        .WithExistingPrimaryPublicIPAddress(publicIpTaskList[i].Result)
-                        .WithExistingNetworkSecurityGroup(nsg)
-                        .CreateAsync();
-                }
-                nicTaskList.Add(networkInterface);
+                throw new Exception("Fail to create NIC task list");
             }
             Util.Log("Finish creating network interface...");
 
-            for (var i = 0; i < agentConfig.VmCount; i++)
+            if (agentConfig.VmType == 1)
             {
-                var vm = azure.VirtualMachines.Define(agentConfig.Prefix + Convert.ToString(i))
-                    .WithRegion(region)
-                    .WithExistingResourceGroup(resourceGroupName)
-                    .WithExistingPrimaryNetworkInterface(nicTaskList[i].Result)
-                    .WithLinuxCustomImage(img.Id)
-                    .WithRootUsername(agentConfig.Username)
-                    .WithSsh(sshPubKey)
-                    .WithComputerName(agentConfig.Prefix + Convert.ToString(i))
-                    .WithSize(VmSize);
-                creatableVirtualMachines.Add(vm);
+                for (var i = 0; i < agentConfig.VmCount; i++)
+                {
+                    var vm = azure.VirtualMachines.Define(agentConfig.Prefix + Convert.ToString(i))
+                        .WithRegion(region)
+                        .WithExistingResourceGroup(resourceGroupName)
+                        .WithExistingPrimaryNetworkInterface(nicTaskList[i].Result)
+                        .WithLinuxCustomImage(img.Id)
+                        .WithRootUsername(agentConfig.Username)
+                        .WithSsh(sshPubKey)
+                        .WithComputerName(agentConfig.Prefix + Convert.ToString(i))
+                        .WithSize(VmSize);
+                    creatableVirtualMachines.Add(vm);
+                }
             }
-            Util.Log("Ready to create virtual machine...");
+            else if (agentConfig.VmType == 2)
+            {
+                for (var i = 0; i < agentConfig.VmCount; i++)
+                {
+                    var vm = azure.VirtualMachines.Define(agentConfig.Prefix + Convert.ToString(i))
+                        .WithRegion(region)
+                        .WithExistingResourceGroup(resourceGroupName)
+                        .WithExistingPrimaryNetworkInterface(nicTaskList[i].Result)
+                        .WithWindowsCustomImage(img.Id)
+                        .WithAdminUsername(agentConfig.Username)
+                        .WithAdminPassword(agentConfig.Password)
+                        .WithComputerName(agentConfig.Prefix + Convert.ToString(i))
+                        .WithSize(VmSize);
+                    creatableVirtualMachines.Add(vm);
+                }
+            }
             
+            Util.Log("Ready to create virtual machine...");
             sw.Stop();
             Util.Log($"prepare for creating vms elapsed time: {sw.Elapsed.TotalMinutes} min");
 

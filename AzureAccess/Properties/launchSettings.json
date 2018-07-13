@@ -2,7 +2,8 @@
   "profiles": {
     "VMAccess": {
       "commandName": "Project",
-      "commandLineArgs": "-a E:\\home\\Work\\secrets\\azureauth.properties -i honzhanperfsea -n hzbenchclientimg"
+      "commandLineArgs": "-a ..\\..\\azureauth.properties -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0713 -p hzautovm0713 -S Standard_DS1_v2 -H ..\\pubkey\\azure_ssh_pub -c 1 -u honzhan -o benchclient.txt -O vmhost.txt -m accelerated_network_vmsize.txt",
+      "workingDirectory": "C:\\home\\Work\\DevDiv\\signalr-bench\\AzureAccess"
     }
   }
 }
