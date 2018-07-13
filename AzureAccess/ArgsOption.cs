@@ -31,6 +31,12 @@ namespace VMAccess
         [Option('c', "vmcount", Default = 1, Required = false, HelpText = "Specify VM Count, Default is 1")]
         public int VmCount { get; set; }
 
+        [Option('t', "vmtype", Default = 1, Required = false, HelpText = "Specify VM OS: 1 for Linux, 2 for Windows, Default is 1")]
+        public int VmType { get; set; }
+
+        [Option('P', "password", Required = false, HelpText = "Specify the login password.")]
+        public string Password { get; set; }
+
         [Option('a', "app", Required = true, HelpText = "Specify Auth File")]
         public string AuthFile { get; set; }
 
@@ -42,6 +48,9 @@ namespace VMAccess
 
         [Option('z', "sshport", Default = 22222, Required = false, HelpText = "Specify Ssh Port, default is 22222")]
         public int SshPort { get; set; }
+
+        [Option('R', "RDP-port", Default = 33899, Required = false, HelpText = "Specify RDP Port, default is 33899")]
+        public int RDPPort { get; set; }
 
         [Option('b', "benchmark-port", Default = 7000, Required = false, HelpText = "Specify Benchmark Port, default is 7000")]
         public int OtherPort { get; set; }
