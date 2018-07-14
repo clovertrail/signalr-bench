@@ -492,12 +492,24 @@ namespace VMAccess
             var virtualMachines = azure.VirtualMachines.Create(creatableVirtualMachines.ToArray());
             Util.Log($"Finish creating vms");
 
-            Util.Log("Check SSH port");
             var portCheckTaskList = new List<Task>();
-            for (var i = 0; i < agentConfig.VmCount; i++)
+            if (agentConfig.VmType == 1)
             {
-                var publicIPAddress = azure.PublicIPAddresses.GetByResourceGroup(resourceGroupName, agentConfig.Prefix + Convert.ToString(i) + "PubIP");
-                portCheckTaskList.Add(Task.Run(() => WaitPortOpen(publicIPAddress.IPAddress, 22222)));
+                Util.Log("Check SSH port available or not");
+                for (var i = 0; i < agentConfig.VmCount; i++)
+                {
+                    var publicIPAddress = azure.PublicIPAddresses.GetByResourceGroup(resourceGroupName, agentConfig.Prefix + Convert.ToString(i) + "PubIP");
+                    portCheckTaskList.Add(Task.Run(() => WaitPortOpen(publicIPAddress.IPAddress, agentConfig.SshPort)));
+                }
+            }
+            else if (agentConfig.VmType == 2)
+            {
+                Util.Log("Check RDP port available or not");
+                for (var i = 0; i < agentConfig.VmCount; i++)
+                {
+                    var publicIPAddress = azure.PublicIPAddresses.GetByResourceGroup(resourceGroupName, agentConfig.Prefix + Convert.ToString(i) + "PubIP");
+                    portCheckTaskList.Add(Task.Run(() => WaitPortOpen(publicIPAddress.IPAddress, agentConfig.RDPPort)));
+                }
             }
             
             if (Task.WaitAll(portCheckTaskList.ToArray(), TimeSpan.FromSeconds(120)))
@@ -511,6 +523,20 @@ namespace VMAccess
 
             sw.Stop();
             Util.Log($"creating vms elapsed time: {sw.Elapsed.TotalMinutes} min");
+            DumpVMInfo(agentConfig, region.Name);
+        }
+
+        static void DumpVMInfo(ArgsOption agentConfig, string regionName)
+        {
+            int port;
+            if (agentConfig.VmType == 1)
+            {
+                port = agentConfig.SshPort;
+            }
+            else
+            {
+                port = agentConfig.RDPPort;
+            }
             if (agentConfig.VMHostFile != null)
             {
                 var builder = new StringBuilder();
@@ -521,7 +547,8 @@ namespace VMAccess
                         builder.Append('|');
                     }
                     builder.Append(agentConfig.Prefix).Append(i).Append(".")
-                           .Append(region.Name).Append(".cloudapp.azure.com");
+                            .Append(regionName).Append(".cloudapp.azure.com")
+                            .Append(':').Append(port);
                 }
                 File.WriteAllText(agentConfig.VMHostFile, builder.ToString());
             }
@@ -535,13 +562,12 @@ namespace VMAccess
                         builder.Append('|');
                     }
                     builder.Append(agentConfig.Prefix).Append(i).Append(".")
-                           .Append(region.Name).Append(".cloudapp.azure.com")
-                           .Append(':').Append(agentConfig.SshPort).Append(':').Append(agentConfig.Username);
+                            .Append(regionName).Append(".cloudapp.azure.com")
+                            .Append(':').Append(port).Append(':').Append(agentConfig.Username);
                 }
                 File.WriteAllText(agentConfig.BenchClientListFile, builder.ToString());
             }
         }
-
         static bool CheckValidVMForAcceleratedNet(string accelVMSizeFile, string vmSize)
         {
             bool found = false;
