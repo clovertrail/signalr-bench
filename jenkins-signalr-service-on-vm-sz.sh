@@ -78,6 +78,7 @@ EOF
     stop_service $service_host $bench_service_user $bench_service_pub_port
     cd $result_root/$tag/
     tar zcvf service_launch.log.tgz service_launch.log
+    rm service_launch.log
     cd -
     if [ -e $result_root/$error_mark_file ]
     then
