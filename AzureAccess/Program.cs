@@ -62,8 +62,11 @@ namespace VMAccess
             Util.Log($"target region: {region.Name}");
             var VmSize = VirtualMachineSizeTypes.Parse(agentConfig.VmSize);
             Util.Log($"VM size: {VmSize}");
-            var sshPubKey = System.IO.File.ReadAllText(agentConfig.SshPubKeyFile);
-            Util.Log($"SSH public key: {sshPubKey}");
+            if (agentConfig.SshPubKeyFile != null)
+            {
+                var sshPubKey = System.IO.File.ReadAllText(agentConfig.SshPubKeyFile);
+                Util.Log($"SSH public key: {sshPubKey}");
+            }
             Util.Log($"Accelerated Network: {agentConfig.AcceleratedNetwork}");
         }
 
@@ -392,7 +395,7 @@ namespace VMAccess
                 Util.Log("SSH public key is not set for Linux VM");
                 throw new Exception("SSH public key is not specified!");
             }
-            else
+            else if (agentConfig.SshPubKeyFile != null && agentConfig.VmType == 1)
             {
                 sshPubKey = File.ReadAllText(agentConfig.SshPubKeyFile);
                 Util.Log($"SSH public key: {sshPubKey}");

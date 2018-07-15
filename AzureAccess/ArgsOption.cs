@@ -43,7 +43,7 @@ namespace VMAccess
         [Option('m', "accelerated-network VM size file", Required = true, HelpText = "Specify valid accelerated networking VM Size File")]
         public string CandidateOfAcceleratedNetVM { get; set; }
 
-        [Option('H', "sshpubkey-file", Required = false, HelpText = "Specify Ssh Pub Key File")]
+        [Option('H', "sshpubkey-file", Default = null, Required = false, HelpText = "Specify Ssh Pub Key File")]
         public string SshPubKeyFile { get; set; }
 
         [Option('z', "sshport", Default = 22222, Required = false, HelpText = "Specify Ssh Port, default is 22222")]
