@@ -115,7 +115,7 @@ EOF
        then
           name_list=${name_list}"_${sendsize}"
        fi
-       bench_type_tag="unit${unit}_${name_list}
+       bench_type_tag="unit${unit}_${name_list}"
 
 cat << EOF > jenkins_env.sh
 connection_number=$echo_connection_number
