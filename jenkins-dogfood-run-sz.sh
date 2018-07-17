@@ -70,13 +70,6 @@ function run_unit_benchmark() {
   echo "Connection string: '$ConnectionString'"
 
   local bench_type_tag
-
-  if [ $sendsize != "0" ]
-  then
-    bench_type_tag="unit${unit}_${sendsize}"
-  else
-    bench_type_tag="unit${unit}"
-  fi
   local echo_connection_number=$(array_get $EchoConnectionNumberList $unit "|")
   local echo_send_number=$(array_get $EchoSendNumberList $unit "|")
   local echo_concurrent_number=$(array_get $EchoConcurrentConnectNumberList $unit "|")
@@ -107,12 +100,22 @@ EOF
     local broadcaststep=$(array_get $BroadcastStepList $unit "|")
     while [ $i -lt $MaxRetry ]
     do
+       local name_list=""
+       local existing=`echo "$bench_name_list"|grep "echo"`
+       if [ "$existing" != "" ]
+       then
+          name_list=${name_list}"e${echo_connection_number}"
+       fi
+       existing=`echo "$bench_name_list"|grep "broadcast"`
+       if [ "$existing" != "" ]
+       then
+          name_list=${name_list}"b${broadcast_connection_number}"
+       fi
        if [ $sendsize != "0" ]
        then
-           bench_type_tag="unit${unit}_echo${echo_send_number}_bd${broadcast_send_number}_${sendsize}"
-       else
-           bench_type_tag="unit${unit}_echo${echo_send_number}_bd${broadcast_send_number}"
+          name_list=${name_list}"_${sendsize}"
        fi
+       bench_type_tag="unit${unit}_${name_list}
 
 cat << EOF > jenkins_env.sh
 connection_number=$echo_connection_number

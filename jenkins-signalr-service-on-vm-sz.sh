@@ -43,7 +43,19 @@ function multiple_try_run() {
   while [ $i -lt $max_try ]
   do
     local normal_vmsize=`echo "${g_vmsize}"|sed -e 's/_//g'` # remove '_'
-    tag="${normal_vmsize}_e${echo_connection_number}b${broadcast_connection_number}"
+    local name_list=""
+    local existing=`echo "$bench_name_list"|grep "echo"`
+    if [ "$existing" != "" ]
+    then
+       name_list=${name_list}"e${echo_connection_number}"
+    fi
+    existing=`echo "$bench_name_list"|grep "broadcast"`
+    if [ "$existing" != "" ]
+    then
+       name_list=${name_list}"b${broadcast_connection_number}"
+    fi
+
+    tag="${normal_vmsize}_${name_list}"
 cat << EOF > jenkins_env.sh
 bench_send_size=$g_send_size
 sigbench_run_duration=$duration
