@@ -114,7 +114,6 @@ entry_copy_cli_scripts_to_master()
         port=$(array_get $servers 2 $bench_server_inter_sep)
         user=$(array_get $servers 3 $bench_server_inter_sep)
         scp -o StrictHostKeyChecking=no -P $port ${cli_script_prefix}_*.sh ${user}@${server}:~/${bench_master_folder}/
-        scp -o StrictHostKeyChecking=no -P $port ${cmd_file_prefix}* ${user}@${server}:~/${bench_master_folder}/
 }
 
 do_single_cli_bench()
