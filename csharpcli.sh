@@ -63,6 +63,11 @@ gen_cli_master_single_bench()
                 send_interval=$customized_send_interval
         fi
 
+	local codec=$bench_codec
+	if [ $bench_codec == "msgpack" ]
+	then
+		codec="messagepack"
+	fi
 cat << EOF > ${cli_script_prefix}_${result_name}.sh
 #!/bin/bash
 if [ -e ${result_name} ]
@@ -84,7 +89,7 @@ fi
 	--connections $connection_num --interval 1 \
 	--serverUrl "$server_endpoint" \
 	--pipeLine 'createConn;startConn;scenario;stopConn;disposeConn' \
-	-v $bench_type -t ${bench_transport} -p ${bench_codec} -s ${bench_name} \
+	-v $bench_type -t ${bench_transport} -p ${codec} -s ${bench_name} \
 	--slaveList "${cli_agents_g}" \
 	-o ${result_name}/counters.txt \
 	--pidFile /tmp/master.pid \
@@ -206,6 +211,7 @@ ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_master_fo
 echo "1" > $status_file # flag indicates finished
 _EOF
         nohup sh $remote_run &
+	g_master_cli_pid=$!
 }
 
 entry_launch_master_cli_script()
@@ -246,6 +252,10 @@ launch_single_master_cli_script()
                 kill $pid_to_collect_top
         fi
 	scp -o StrictHostKeyChecking=no -r -P $port ${user}@${server}:${bench_master_folder}/$result_name ${result_dir}/
+	if [ "$g_master_cli_pid" != "" ]
+	then
+		kill $g_master_cli_pid
+	fi
 }
 
 start_cli_bench_server()
