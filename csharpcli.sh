@@ -25,8 +25,6 @@ cat << EOF > $stop_file
 pid=\`cat /tmp/agent.pid\`
 kill -9 \$pid
 EOF
-echo "$stop_file"
-cat $stop_file
 }
 
 gen_cli_master_single_bench()
@@ -72,17 +70,22 @@ then
         rm -rf ${result_name}
 fi
 
+mkdir ${result_name}
 if [ -e /tmp/master.pid ]
 then
         pid=\`cat /tmp/master.pid\`
         kill -9 \$pid
 fi
+if [ -e jobResult.txt ]
+then
+	rm jobResult.txt
+fi
 /home/${bench_app_user}/.dotnet/dotnet run -- --rpcPort 7000 --duration $sigbench_run_duration \
 	--connections $connection_num --interval 1 \
-	--serverUrl \"$server_endpoint\" \
+	--serverUrl "$server_endpoint" \
 	--pipeLine 'createConn;startConn;scenario;stopConn;disposeConn' \
 	-v $bench_type -t ${bench_transport} -p ${bench_codec} -s ${bench_name} \
-	--slaveList \"${cli_agents_g}\" \
+	--slaveList "${cli_agents_g}" \
 	-o ${result_name}/counters.txt \
 	--pidFile /tmp/master.pid \
 	--concurrentConnection ${concurrent_num}
@@ -157,7 +160,6 @@ entry_copy_stop_cli_bench()
 entry_gen_all_cli_scripts()
 {
 	gen_cli_master_bench
-	echo "gen_cli_agent_bench '$cli_bench_start_script' '$cli_bench_stop_script' '$cli_bench_agent_output'"
 	gen_cli_agent_bench $cli_bench_start_script $cli_bench_stop_script $cli_bench_agent_output
 }
 
@@ -174,7 +176,7 @@ check_cli_master_and_wait()
                 # check whether master finished
                 finish=`cat $flag_file`
                 # check master output
-		fail_flag_g=`egrep -i "fail|error|exception" ${output_log}`
+		fail_flag_g=`egrep -i "fail|errors|exception" ${output_log}`
                 if [ "$fail_flag_g" != "" ]
                 then
 			cp ${output_log} $master_log
@@ -203,7 +205,6 @@ echo "0" > $status_file # flag indicates not finish
 ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_master_folder}; sh $script_name" 2>&1|tee -a ${result_dir}/${script_name}.log
 echo "1" > $status_file # flag indicates finished
 _EOF
-        echo "nohup sh $remote_run &"
         nohup sh $remote_run &
 }
 
@@ -239,11 +240,12 @@ launch_single_master_cli_script()
 
         launch_master_cli ${cli_script_prefix}_${result_name}.sh $server $port $user $flag_file
 
-        check_cli_master_and_wait $flag_file ${result_dir}/${script_name}.log
+        check_cli_master_and_wait $flag_file ${result_dir}/${cli_script_prefix}_${result_name}.sh.log
         if [ "$pid_to_collect_top" != "" ]
         then
                 kill $pid_to_collect_top
         fi
+	scp -o StrictHostKeyChecking=no -r -P $port ${user}@${server}:${bench_master_folder}/$result_name ${result_dir}/
 }
 
 start_cli_bench_server()

@@ -83,6 +83,7 @@ fi
 
 sh run_csharp_cli.sh
 
+echo "Stop app server"
 stop_cli_bench_server
 
 if [ "$service_name" != "" ]
