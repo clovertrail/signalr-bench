@@ -5,7 +5,7 @@ bench_slave_folder=/home/${bench_app_user}/signalr_auto_test_framework/signalr_b
 bench_master_folder=/home/${bench_app_user}/signalr_auto_test_framework/signalr_bench/Rpc/Bench.Client
 bench_server_folder=/home/${bench_app_user}/signalr_auto_test_framework/signalr_bench/AppServer
 cli_bench_start_script=autorun_start_cli_agent.sh
-cli_bench_stop_scsript=autorun_stop_cli_agent.sh
+cli_bench_stop_script=autorun_stop_cli_agent.sh
 cli_bench_agent_output=cli_agent_out.txt
 
 gen_cli_agent_bench()
@@ -18,13 +18,15 @@ cat << EOF > $start_file
 pid=\`cat /tmp/agent.pid\`
 kill -9 \$pid
 
-nohup /home/${bench_app_user}/.dotnet/dotnet run -- --rpcPort 7000 --pidFile /tmp/agent.pid $output_file 2>&1 &
+/home/${bench_app_user}/.dotnet/dotnet run --rpcPort 7000 --pidFile /tmp/agent.pid $output_file
 EOF
 
 cat << EOF > $stop_file
 pid=\`cat /tmp/agent.pid\`
 kill -9 \$pid
 EOF
+echo "$stop_file"
+cat $stop_file
 }
 
 gen_cli_master_single_bench()
@@ -34,12 +36,17 @@ gen_cli_master_single_bench()
         local bench_name=$3
 
         local result_name=${bench_type}_${bench_codec}_${bench_name}
-        local server_endpoint=${bench_app_pub_server}:${bench_app_port}/${bench_config_hub}
+        local server_endpoint="http://${bench_app_pub_server}:${bench_app_port}/${bench_config_hub}"
 
         local customized_connection=$(derefer_2vars $bench_name "connection_number")
         local customized_concurrent=$(derefer_2vars $bench_name "connection_concurrent")
         local customized_send=$(derefer_2vars $bench_name "send_number")
 	local customized_send_interval=$(derefer_2vars $bench_name "send_interval")
+
+	local connection_num=$connection_number
+	local concurrent_num=$connection_concurrent
+	local send_num=$send_number
+	local send_interval=1000 # 1000 ms
 
         if [ "$customized_connection" != "" ]
         then
@@ -70,12 +77,12 @@ then
         pid=\`cat /tmp/master.pid\`
         kill -9 \$pid
 fi
-dotnet run -- --rpcPort 7000 --duration $sigbench_run_duration \
+/home/${bench_app_user}/.dotnet/dotnet run -- --rpcPort 7000 --duration $sigbench_run_duration \
 	--connections $connection_num --interval 1 \
-	--serverUrl $server_endpoint \
-	--pipeLine 'createConn;startConn;scenario;stopConn;disposeConn'
+	--serverUrl \"$server_endpoint\" \
+	--pipeLine 'createConn;startConn;scenario;stopConn;disposeConn' \
 	-v $bench_type -t ${bench_transport} -p ${bench_codec} -s ${bench_name} \
-	--slaveList ${cli_agents_g} \
+	--slaveList \"${cli_agents_g}\" \
 	-o ${result_name}/counters.txt \
 	--pidFile /tmp/master.pid \
 	--concurrentConnection ${concurrent_num}
@@ -113,7 +120,7 @@ entry_copy_cli_scripts_to_master()
         server=$(array_get $servers 1 $bench_server_inter_sep)
         port=$(array_get $servers 2 $bench_server_inter_sep)
         user=$(array_get $servers 3 $bench_server_inter_sep)
-        scp -o StrictHostKeyChecking=no -P $port ${cli_script_prefix}_*.sh ${user}@${server}:~/${bench_master_folder}/
+        scp -o StrictHostKeyChecking=no -P $port ${cli_script_prefix}_*.sh ${user}@${server}:${bench_master_folder}/
 }
 
 do_single_cli_bench()
@@ -124,7 +131,7 @@ do_single_cli_bench()
         local script=$4
         scp -o StrictHostKeyChecking=no -P $port $script ${user}@${server}:${bench_slave_folder}
         ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_slave_folder}; chmod +x ./$script"
-        ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_slave_folder}; ./$script"
+        nohup ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_slave_folder}; ./$script" &
 }
 
 start_single_cli_bench()
@@ -150,45 +157,30 @@ entry_copy_stop_cli_bench()
 entry_gen_all_cli_scripts()
 {
 	gen_cli_master_bench
+	echo "gen_cli_agent_bench '$cli_bench_start_script' '$cli_bench_stop_script' '$cli_bench_agent_output'"
 	gen_cli_agent_bench $cli_bench_start_script $cli_bench_stop_script $cli_bench_agent_output
 }
 
-check_single_cli_agent() {
-        local server=$1
-        local port=$2
-        local user=$3
-        local idx=$4
-        local rand=`date +%H%M%S`
-        local agent_log=${result_dir}/${idx}_${rand}_${sigbench_agent_output}
-
-        if [ "$fail_flag_g" != "" ]
-        then
-                # already encounter error
-                return
-        fi
-        scp -o StrictHostKeyChecking=no -P $port ${user}@${server}:${bench_slave_folder}/${cli_bench_agent_output} ${agent_log} > /dev/null 2>&1
-        fail_flag_g=`egrep -i "fail|error" ${agent_log}`
-        if [ "$fail_flag_g" != "" ]
-        then
-                echo "agent error: '$fail_flag_g'"
-                echo "Error occurs, so break the benchmark, please check ${agent_log}"
-                mark_error ${agent_log}
-        fi
-}
-
-check_cli_agent_and_wait()
+check_cli_master_and_wait()
 {
         local flag_file=$1
+	local output_log=$2
+        local rand=`date +%H%M%S`
         local end=$((SECONDS + $sigbench_run_duration + 60))
         local finish=0
-        while [ $SECONDS -lt $end ] || [ "$finish" == "0" ]
+	local master_log=${output_log}_${rand}.txt
+        while [ $SECONDS -lt $end ] && [ "$finish" == "0" ]
         do
                 # check whether master finished
                 finish=`cat $flag_file`
-                # check all agents output
-                iterate_all_bench_server check_single_cli_agent
+                # check master output
+		fail_flag_g=`egrep -i "fail|error|exception" ${output_log}`
                 if [ "$fail_flag_g" != "" ]
                 then
+			cp ${output_log} $master_log
+			echo "master error: '$master_log'"
+			echo "Error occurs, please check $master_log"
+			mark_error ${master_log}
                         break;
                 fi
                 #echo "wait benchmark to complete ('$finish')..."
@@ -211,10 +203,17 @@ echo "0" > $status_file # flag indicates not finish
 ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_master_folder}; sh $script_name" 2>&1|tee -a ${result_dir}/${script_name}.log
 echo "1" > $status_file # flag indicates finished
 _EOF
+        echo "nohup sh $remote_run &"
         nohup sh $remote_run &
 }
 
 entry_launch_master_cli_script()
+{
+	clear_error_mark
+	iterate_all_scenarios launch_single_master_cli_script
+}
+
+launch_single_master_cli_script()
 {
         local bench_type=$1
         local bench_codec=$2
@@ -240,12 +239,11 @@ entry_launch_master_cli_script()
 
         launch_master_cli ${cli_script_prefix}_${result_name}.sh $server $port $user $flag_file
 
-        check_cli_agent_and_wait $flag_file
+        check_cli_master_and_wait $flag_file ${result_dir}/${script_name}.log
         if [ "$pid_to_collect_top" != "" ]
         then
                 kill $pid_to_collect_top
         fi
-
 }
 
 start_cli_bench_server()

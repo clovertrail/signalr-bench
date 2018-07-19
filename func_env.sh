@@ -149,7 +149,10 @@ function gen_summary() {
 
 function prepare
 {
-	mkdir -p $result_dir
+	if [ ! -e $result_dir ]
+	then
+		mkdir -p $result_dir
+	fi
 }
 
 function do_single_sigbench() {
