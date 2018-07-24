@@ -550,6 +550,7 @@ cat << _EOF > $remote_run_script
 #automatic generated script
 killall dotnet
 cd /home/${bench_app_user}/signalr-bench/AzureSignalRChatSample/ChatSample
+git pull
 export Azure__SignalR__ConnectionString="$connection_str"
 /home/${bench_app_user}/.dotnet/dotnet restore --no-cache # never use cache library
 /home/${bench_app_user}/.dotnet/dotnet run
