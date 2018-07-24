@@ -115,7 +115,7 @@ EOF
        then
           name_list=${name_list}"_${sendsize}"
        fi
-       bench_type_tag="unit${unit}_${name_list}
+       bench_type_tag="unit${unit}_${name_list}"
 
 cat << EOF > jenkins_env.sh
 connection_number=$echo_connection_number
@@ -137,8 +137,8 @@ EOF
        sh jenkins-run-websocket.sh
        if [ -e $result_root/$error_mark_file ]
        then
-         echo "!!!Stop trying ($i) since error occurs"
-         break
+         echo "!!!Continue trying ($i) even though error occurs"
+         #break
        fi
        echo_connection_number=$((echo_connection_number + $echostep))
        echo_send_number=$((echo_send_number + $echostep))
