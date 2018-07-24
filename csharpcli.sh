@@ -18,7 +18,7 @@ cat << EOF > $start_file
 pid=\`cat /tmp/agent.pid\`
 kill -9 \$pid
 
-/home/${bench_app_user}/.dotnet/dotnet run --rpcPort 7000 --pidFile /tmp/agent.pid $output_file
+/home/${bench_app_user}/.dotnet/dotnet run --rpcPort 7000 --pidFile /tmp/agent.pid |tee $output_file
 EOF
 
 cat << EOF > $stop_file
@@ -85,15 +85,12 @@ if [ -e jobResult.txt ]
 then
 	rm jobResult.txt
 fi
-/home/${bench_app_user}/.dotnet/dotnet run -- --rpcPort 7000 --duration $sigbench_run_duration \
-	--connections $connection_num --interval 1 \
-	--serverUrl "$server_endpoint" \
-	--pipeLine 'createConn;startConn;scenario;stopConn;disposeConn' \
-	-v $bench_type -t ${bench_transport} -p ${codec} -s ${bench_name} \
-	--slaveList "${cli_agents_g}" \
-	-o ${result_name}/counters.txt \
-	--pidFile /tmp/master.pid \
-	--concurrentConnection ${concurrent_num}
+transport=${bench_transport}
+server=$server_endpoint
+pipeline="createConn;startConn;scenario;stopConn;disposeConn"
+slaveList="${cli_agents_g}"
+
+/home/${bench_app_user}/.dotnet/dotnet run -- --rpcPort 7000 --duration $sigbench_run_duration --connections $connection_num --interval 1 --serverUrl "\${server}" --pipeLine "\${pipeline}" -v $bench_type -t "\${transport}" -p ${codec} -s ${bench_name} --slaveList "\${slaveList}"	-o ${result_name}/counters.txt --pidFile /tmp/master.pid --concurrentConnection ${concurrent_num}
 EOF
 }
 
@@ -140,6 +137,19 @@ do_single_cli_bench()
         scp -o StrictHostKeyChecking=no -P $port $script ${user}@${server}:${bench_slave_folder}
         ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_slave_folder}; chmod +x ./$script"
         nohup ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_slave_folder}; ./$script" &
+	local end=$((SECONDS + 30))
+	while [ $SECONDS -lt $end ]
+	do
+		scp -o StrictHostKeyChecking=no -P $port ${user}@${server}:${bench_slave_folder}/${cli_bench_agent_output} .
+		local check=`grep "started" ${cli_bench_agent_output}`
+		if [ "$check" != "" ]
+		then
+			break
+		else
+			echo "waiting for agent started.."
+		fi
+		sleep 1
+	done
 }
 
 start_single_cli_bench()
