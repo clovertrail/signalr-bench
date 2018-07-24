@@ -137,8 +137,8 @@ EOF
        sh jenkins-run-websocket.sh
        if [ -e $result_root/$error_mark_file ]
        then
-         echo "!!!Stop trying ($i) since error occurs"
-         break
+         echo "!!!Continue trying ($i) even though error occurs"
+         #break
        fi
        echo_connection_number=$((echo_connection_number + $echostep))
        echo_send_number=$((echo_send_number + $echostep))
