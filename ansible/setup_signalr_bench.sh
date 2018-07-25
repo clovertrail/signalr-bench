@@ -1,5 +1,6 @@
 
 ansible-playbook -i signalr_hosts pam_limits.yaml
+ansible-playbook -i signalr_hosts sysctl.yaml
 ansible-playbook -i signalr_hosts install_config_go.yaml
 ansible-playbook -i signalr_hosts git_clone_websocket.yaml
 ansible-playbook -i signalr_hosts build_websocket.yaml
