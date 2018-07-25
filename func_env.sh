@@ -334,6 +334,7 @@ ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd $sigbench_home; s
 echo "1" > $status_file # flag indicates finished
 _EOF
 	nohup sh $remote_run &
+	g_web_master_pid=$!
 }
 
 function check_single_agent() {
@@ -443,6 +444,10 @@ function run_single_master_script_and_check() {
 	if [ "$pid_to_collect_top" != "" ]
 	then
 		kill $pid_to_collect_top
+	fi
+	if [ "$g_web_master_pid" != "" ]
+	then
+		kill $g_web_master_pid
 	fi
 	# fetch result
 	scp -o StrictHostKeyChecking=no -r -P $port ${user}@${server}:~/$sigbench_home/$result_name ${result_dir}/
