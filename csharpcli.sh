@@ -191,7 +191,7 @@ check_cli_master_and_wait()
                 # check whether master finished
                 finish=`cat $flag_file`
                 # check master output
-		fail_flag_g=`egrep -i "fail|errors|exception" ${output_log}`
+		fail_flag_g=`egrep -i "errors|exception" ${output_log}`
                 if [ "$fail_flag_g" != "" ]
                 then
 			cp ${output_log} $master_log
