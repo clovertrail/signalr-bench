@@ -8,7 +8,7 @@ function build_signalr_service() {
   cd $SignalRRootInDir/src/${g_service_runtime}
   pwd
   git log -n 1 --pretty=format:"%H" > "$commit_hash_file"
-
+  dotnet restore --no-cache
   dotnet publish -c Release -f netcoreapp2.1 -o "$OutDir" -r linux-x64 --self-contained
   cd -
 }
