@@ -358,5 +358,5 @@ function patch_and_wait() {
   local cpu_limit=$(array_get $g_CPU_limits $index "|")
   local mem_limit=$(array_get $g_Memory_limits $index "|")
   patch ${name} $replica $cpu_limit $cpu_req $mem_limit 500000
-  patch_liveprobe_timeout ${name} 2
+  #patch_liveprobe_timeout ${name} 2
 }
