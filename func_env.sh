@@ -334,6 +334,7 @@ ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd $sigbench_home; s
 echo "1" > $status_file # flag indicates finished
 _EOF
 	nohup sh $remote_run &
+	g_web_master_pid=$!
 }
 
 function check_single_agent() {
@@ -444,6 +445,10 @@ function run_single_master_script_and_check() {
 	then
 		kill $pid_to_collect_top
 	fi
+	if [ "$g_web_master_pid" != "" ]
+	then
+		kill $g_web_master_pid
+	fi
 	# fetch result
 	scp -o StrictHostKeyChecking=no -r -P $port ${user}@${server}:~/$sigbench_home/$result_name ${result_dir}/
 }
@@ -550,7 +555,6 @@ cat << _EOF > $remote_run_script
 #automatic generated script
 killall dotnet
 cd /home/${bench_app_user}/signalr-bench/AzureSignalRChatSample/ChatSample
-git pull
 export Azure__SignalR__ConnectionString="$connection_str"
 /home/${bench_app_user}/.dotnet/dotnet restore --no-cache # never use cache library
 /home/${bench_app_user}/.dotnet/dotnet run
