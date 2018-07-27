@@ -23,32 +23,47 @@ function update_k8s_deploy_replicas() {
   kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/replicas', 'value': $target_replicas}]" --kubeconfig=$config_file
 }
 
+function read_k8s_deploy_env() {
+  local env_name
+  local deploy_name=$1
+  local connections_limit=$2
+  local config_file=$3
+  local i=0
+  local env_len=`kubectl get deployment $deploy_name -o=json --kubeconfig=${config_file}|jq '.spec.template.spec.containers[0].env|length'`
+  while [ $i -lt $env_len ]
+  do
+    env_name=`kubectl get deployment $deploy_name -o=json --kubeconfig=${config_file}|jq ".spec.template.spec.containers[0].env[$i].name"|tr -d '"'`
+    echo $env_name
+    i=$(($i+1))
+  done
+}
+
 function update_k8s_deploy_env_connections() {
   local env_name
   local deploy_name=$1
   local connections_limit=$2
   local config_file=$3
+  local i=0
   local env_len=`kubectl get deployment $deploy_name -o=json --kubeconfig=${config_file}|jq '.spec.template.spec.containers[0].env|length'`
-  if [ $env_len -eq 18 ]
-  then
-    env_name=`kubectl get deployment $deploy_name -o=json --kubeconfig=${config_file}|jq '.spec.template.spec.containers[0].env[17].name'|tr -d '"'`
+  while [ $i -lt $env_len ]
+  do
+    env_name=`kubectl get deployment $deploy_name -o=json --kubeconfig=${config_file}|jq ".spec.template.spec.containers[0].env[$i].name"|tr -d '"'`
     if [ "$env_name" == "ConnectionCountLimit" ]
     then
-      kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/env/17/value', 'value': '$connections_limit'}]" --kubeconfig=$config_file
+      kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': "/spec/template/spec/containers/0/env/$i/value", 'value': '$connections_limit'}]" --kubeconfig=$config_file
     fi
 
-    env_name=`kubectl get deployment $deploy_name -o=json --kubeconfig=${config_file}|jq '.spec.template.spec.containers[0].env[16].name'|tr -d '"'`
     if [ "$env_name" == "MaxConcurrentUpgradedConnections" ]
     then
-      kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/env/16/value', 'value': '$connections_limit'}]" --kubeconfig=$config_file
+      kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': "/spec/template/spec/containers/0/env/$i/value", 'value': '$connections_limit'}]" --kubeconfig=$config_file
     fi
 
-    env_name=`kubectl get deployment $deploy_name -o=json --kubeconfig=${config_file}|jq '.spec.template.spec.containers[0].env[15].name'|tr -d '"'`
     if [ "$env_name" == "MaxConcurrentConnections" ]
     then
-      kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': '/spec/template/spec/containers/0/env/15/value', 'value': '$connections_limit'}]" --kubeconfig=$config_file
+      kubectl patch deployment $deploy_name --type=json -p="[{'op': 'replace', 'path': "/spec/template/spec/containers/0/env/$i/value", 'value': '$connections_limit'}]" --kubeconfig=$config_file
     fi
-  fi
+    i=$(($i+1))
+  done
 }
 
 function get_pod() {
@@ -281,6 +296,21 @@ function patch_connection_throttling_env() {
   wait_deploy_ready $result $config_file
 
   wait_replica_ready $config_file $resName $pods
+}
+
+function read_connection_throttling_env() {
+  local resName=$1
+  local connection_limit=$2
+  local config_file=kvsignalrdevseasia.config
+  local result=$(get_k8s_deploy_name $resName $config_file)
+  if [ "$result" == "" ]
+  then
+     config_file=srdevacsrpd.config
+     result=$(get_k8s_deploy_name $resName $config_file)
+  fi
+
+  local pods=$(k8s_get_pod_number $config_file $resName)
+  read_k8s_deploy_env $result "${connection_limit}" $config_file
 }
 
 function patch_replicas_env() {

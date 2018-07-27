@@ -142,3 +142,21 @@ create_vm_from_img_no_wait() {
                --no-wait
 }
 
+deallocate_vm() {
+  local rsg=$1
+  local vm=$2
+  az vm deallocate --resource-group $rsg --name $vm
+}
+
+generalize_vm() {
+  local rsg=$1
+  local vm=$2
+  az vm generalize --resource-group $rsg --name $vm
+}
+
+create_image() {
+  local rsg=$1
+  local vm=$2
+  local img=$3
+  az image create --resource-group $rsg --name $img --source $vm
+}
