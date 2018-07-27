@@ -68,6 +68,14 @@ gen_cli_master_single_bench()
 	then
 		codec="messagepack"
 	fi
+
+cat << EOF > $sigbench_config_dir/${cmd_prefix}_${bench_codec}_${bench_name}_${bench_type}
+connection=$connection_num
+connection_concurrent=$concurrent_num
+send=$send_num
+send_interval=$send_interval
+EOF
+
 cat << EOF > ${cli_script_prefix}_${result_name}.sh
 #!/bin/bash
 if [ -e ${result_name} ]
