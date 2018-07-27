@@ -137,13 +137,14 @@ do_single_cli_bench()
         scp -o StrictHostKeyChecking=no -P $port $script ${user}@${server}:${bench_slave_folder}
         ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_slave_folder}; chmod +x ./$script"
         nohup ssh -o StrictHostKeyChecking=no -p $port ${user}@${server} "cd ${bench_slave_folder}; ./$script" &
-	local end=$((SECONDS + 30))
+	local end=$((SECONDS + 120))
 	while [ $SECONDS -lt $end ]
 	do
 		scp -o StrictHostKeyChecking=no -P $port ${user}@${server}:${bench_slave_folder}/${cli_bench_agent_output} .
 		local check=`grep "started" ${cli_bench_agent_output}`
 		if [ "$check" != "" ]
 		then
+			echo "agent started!"
 			break
 		else
 			echo "waiting for agent started.."
@@ -253,7 +254,7 @@ launch_single_master_cli_script()
 
         collect_service_vm_basic_info_if_possible ${result_dir}/$result_name/$service_vm_info_file
         collect_service_cpu_usage_if_possible ${result_dir}/$result_name/$service_vm_info_file
-
+	echo "launch RPC master node"
         launch_master_cli ${cli_script_prefix}_${result_name}.sh $server $port $user $flag_file
 
         check_cli_master_and_wait $flag_file ${result_dir}/${cli_script_prefix}_${result_name}.sh.log
