@@ -73,7 +73,7 @@ function get_pod() {
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(get_k8s_deploy_name $resName $config_file)
   fi
   echo "$result"
@@ -88,7 +88,7 @@ function get_k8s_pod_status() {
   local len=`kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq '.items|length'`
   if [ $len == "0" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      kubeId=`kubectl get deploy -o=json --selector resourceName=$resName --kubeconfig=${config_file}|jq '.items[0].metadata.labels.resourceKubeId'|tr -d '"'`
      if [ "$kubeId" == "" ]
      then
@@ -175,7 +175,7 @@ function start_connection_tracking() {
   local result=$(k8s_query $config_file $resName)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(k8s_query $config_file $resName)
   fi
   echo "'$result'"
@@ -210,17 +210,17 @@ function copy_syslog() {
   local result=$(k8s_query $config_file $resName)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(k8s_query $config_file $resName)
   fi
   for i in $result
   do
-     kubectl cp default/${i}:/var/log/syslog $outdir/${i}_syslog.txt --kubeconfig=$config_file
-     if [ -e $outdir/${i}_syslog.txt ]
+     kubectl cp default/${i}:/var/log/ASRS/ASRS.log $outdir/${i}_ASRS.txt --kubeconfig=$config_file
+     if [ -e $outdir/${i}_ASRS.txt ]
      then
         cd $outdir
-        tar zcvf ${i}_syslog.tgz ${i}_syslog.txt
-        rm ${i}_syslog.txt
+        tar zcvf ${i}_ASRS.tgz ${i}_ASRS.txt
+        rm ${i}_ASRS.txt
         cd -
      fi
   done
@@ -267,7 +267,7 @@ function patch_liveprobe_timeout() {
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(get_k8s_deploy_name $resName $config_file)
   fi
 
@@ -285,7 +285,7 @@ function patch_connection_throttling_env() {
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(get_k8s_deploy_name $resName $config_file)
   fi
 
@@ -304,7 +304,7 @@ function read_connection_throttling_env() {
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(get_k8s_deploy_name $resName $config_file)
   fi
 
@@ -321,7 +321,7 @@ function patch_replicas_env() {
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(get_k8s_deploy_name $resName $config_file)
   fi
   #echo "$result"
@@ -338,7 +338,7 @@ function patch_replicas() {
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(get_k8s_deploy_name $resName $config_file)
   fi
   #echo "$result"
@@ -359,7 +359,7 @@ function patch() {
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
-     config_file=srdevacsrpd.config
+     config_file=srdevacsrpe.config
      result=$(get_k8s_deploy_name $resName $config_file)
   fi
   #echo "$result"
