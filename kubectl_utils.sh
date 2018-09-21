@@ -69,7 +69,7 @@ function update_k8s_deploy_env_connections() {
 function get_pod() {
   local resName=$1
   local output=$2
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
@@ -83,7 +83,7 @@ function get_pod() {
 function get_k8s_pod_status() {
   local resName=$1
   local outdir=$2
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local kubeId=`kubectl get deploy -o=json --selector resourceName=$resName --kubeconfig=${config_file}|jq '.items[0].metadata.labels.resourceKubeId'|tr -d '"'`
   local len=`kubectl get pod -o=json --selector resourceKubeId=$kubeId --kubeconfig=${config_file}|jq '.items|length'`
   if [ $len == "0" ]
@@ -171,7 +171,7 @@ function start_connection_tracking() {
   local i
   local resName=$1
   local output_dir=$2
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(k8s_query $config_file $resName)
   if [ "$result" == "" ]
   then
@@ -206,7 +206,7 @@ function copy_syslog() {
   local i
   local resName=$1
   local outdir=$2
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(k8s_query $config_file $resName)
   if [ "$result" == "" ]
   then
@@ -263,7 +263,7 @@ function wait_deploy_ready() {
 function patch_liveprobe_timeout() {
   local resName=$1
   local timeout=$2 # second
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
@@ -281,7 +281,7 @@ function patch_liveprobe_timeout() {
 function patch_connection_throttling_env() {
   local resName=$1
   local connection_limit=$2
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
@@ -300,7 +300,7 @@ function patch_connection_throttling_env() {
 function read_connection_throttling_env() {
   local resName=$1
   local connection_limit=$2
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
@@ -317,7 +317,7 @@ function patch_replicas_env() {
   local replicas=$2
   local connection_limit=$3
 
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
@@ -334,7 +334,7 @@ function patch_replicas_env() {
 function patch_replicas() {
   local resName=$1
   local replicas=$2
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
@@ -355,7 +355,7 @@ function patch() {
   local cpu_req=$4
   local mem_limit=$5
   local connect_limit=$6
-  local config_file=kvsignalrdevseasia.config
+  local config_file=kubeconfig_srdevacsseasiac.json
   local result=$(get_k8s_deploy_name $resName $config_file)
   if [ "$result" == "" ]
   then
