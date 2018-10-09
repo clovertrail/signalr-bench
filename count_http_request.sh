@@ -1,5 +1,4 @@
 #!/bin/bash
-
 function count_http_request_log()
 {
    local req_log=$1
