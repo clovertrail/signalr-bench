@@ -10,13 +10,12 @@ fi
 
 function query() {
   local resName=$1
-  local config_file=kubeconfig_srdevacsseasiac.json
-  local result=$(k8s_query $config_file $resName)
-  if [ "$result" == "" ]
-  then
-     config_file=srdevacsrpe.config
-     result=$(k8s_query $config_file $resName)
-  fi
+  local output_dir=$2
+  g_config=""
+  g_result=""
+  find_target_by_iterate_all_k8slist $resName k8s_query
+  local config_file=$g_config
+  local result=$g_result
   echo "$result"
 }
 

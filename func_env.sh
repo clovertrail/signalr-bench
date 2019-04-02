@@ -35,6 +35,24 @@ array_len() {
 }'
 }
 
+verify_accel_network() {
+  local host_list="$1"
+  local ssh_user="$2"
+  local ssh_port="$3"
+  local host
+  local len=$(array_len $host_list "|")
+  local i
+  i=1
+  while [ $i -le $len ]
+  do
+    host=$(array_get "$host_list" $i "|")
+    echo "ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${host}"
+    ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${host} "lspci"
+    ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${host} "ethtool -S eth0 | grep vf_"
+    i=$(($i+1))
+  done
+}
+
 ## given "echo" and "connection_number"
 ## return the value of $echoconnection_number
 derefer_2vars() {
@@ -597,7 +615,8 @@ function stop_sdk_server()
 function extract_servicename_from_connectionstring() {
 	local connectionString=$1
 	local is_dogfood=`echo "$connectionString"|grep "servicedev.signalr.net"`
-	if [ "$is_dogfood" != "" ]
+        local is_prod=`echo "$connectionString"|grep "service.signalr.net"`
+	if [ "$is_dogfood" != "" ] || [ "$is_prod" != "" ]
 	then
 		local serviceName=`echo "$connectionString"|awk -F = '{print $2}'|awk -F ";" '{print $1}'|awk -F '//' '{print $2}'|awk -F . '{print $1}'`
 		if [ "$serviceName" != "" ]
@@ -609,9 +628,170 @@ function extract_servicename_from_connectionstring() {
 	echo ""
 }
 
+function record_build_info() {
+  cat << EOF > /tmp/send_mail.txt
+Details: $BUILD_URL/console
+EOF
+}
+
 function gen_final_report() {
+  # if there are errors blocking generating report,
+  # the error can also be found
+  record_build_info
   sh gen_all_tabs.sh
   sh publish_report.sh
   sh gen_summary.sh # refresh summary.html in NginxRoot gen_summary
-  sh send_mail.sh $HOME/NginxRoot/$result_root/allunits.html
+  if [ -e ../Scripts/gen_asrs_warns.sh ] && [ -e ../Scripts/gen_asrs_health_stat.sh ] && [ -e ../Scripts/gen_appserver_exception.sh ] && [ -e ../Scripts/gen_nginx_error.sh ]
+  then
+    cd ../Scripts/
+    sh gen_asrs_warns.sh $nginx_root $result_root
+    sh gen_asrs_health_stat.sh $nginx_root $result_root
+    sh gen_appserver_exception.sh $nginx_root $result_root
+    sh gen_nginx_error.sh $nginx_root $result_root
+    cd -
+  fi
+  sh send_mail.sh $nginx_root/$result_root/allunits.html
+}
+
+iterate_all_vms() {
+  local vm_list="$1"
+  local user=$2
+  local port=$3
+  local callback=$4
+  local appendix=""
+  local i len vm_host
+  if [ $# -eq 5 ]
+  then
+     appendix="$5"
+  fi
+  len=$(array_len $vm_list "|")
+  i=1
+  while [ $i -le $len ]
+  do
+    vm_host=$(array_get "$vm_list" $i "|")
+    $callback $vm_host $user $port $appendix
+    i=$(($i+1))
+  done
+}
+
+function stop_collect_top_on_single_vm() {
+  local output_dir=$1
+  for i in `ls $output_dir/top_nohup_pid_*`
+  do
+    local pid=`cat $i`
+    kill -9 $pid
+  done
+}
+
+function collect_top_on_single_vm() {
+  local vm_host=$1
+  local ssh_user=$2
+  local ssh_port=$3
+  local output_folder=$4
+  local random=`tr -cd '[:alnum:]' < /dev/urandom | fold -w4 | head -n1`
+  local output_file="top_${random}_${vm_host}.txt"
+  local bg_pid_file="top_nohup_pid_${random}"
+  local script="/tmp/nohup_top_${random}.sh"
+cat << EOF > $script
+#!/bin/bash
+while [ 1 ]
+do
+  ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "top -b|head -n 10" >> $output_folder/$output_file
+  sleep 1
+done
+EOF
+  chmod +x $script
+  nohup $script &
+  echo $! > $output_folder/$bg_pid_file
+}
+
+function collect_top_on_all_vms() {
+  local vm_list="$1"
+  local user=$2
+  local port=$3
+  local output_folder=$4
+  iterate_all_vms "$vm_list" $user $port collect_top_on_single_vm $output_folder
+}
+
+function check_single_service_client_connection() {
+  local vm_host=$1
+  local ssh_user=$2
+  local ssh_port=$3
+  #local client_conn=`ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "curl http://localhost:5003/health/stat"`
+  local client_conn=`ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "netstat -an|grep :5001|grep EST|wc -l"`
+  echo "${vm_host}: ${client_conn}"
+}
+
+function check_all_service_client_connection() {
+  local vm_list="$1"
+  local user=$2
+  local port=$3
+  iterate_all_vms "$vm_list" $user $port check_single_service_client_connection
+}
+
+function check_single_vm_ssh() {
+  local vm_host=$1
+  local ssh_user=$2
+  local ssh_port=$3
+  #local client_conn=`ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "curl http://localhost:5003/health/stat"`
+  nc -z -w5 $vm_host $ssh_port
+  if [ $? -ne 0 ]
+  then
+    echo "SSH on $vm_host is not ready"
+  else
+    ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "exit"
+  fi
+  #local client_conn=`ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "netstat -an|grep :5001|grep EST|wc -l"`
+}
+
+function check_all_vm_ssh() {
+  local vm_list="$1"
+  local user=$2
+  local port=$3
+  iterate_all_vms "$vm_list" $user $port check_single_vm_ssh
+}
+
+function get_ntpq_stat_on_single_vm() {
+  local vm_host=$1
+  local ssh_user=$2
+  local ssh_port=$3
+  echo "=======================$vm_host================="
+  ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "ntpq -np"
+}
+
+function get_ntpq_stat_on_all_vm() {
+  local vm_list="$1"
+  local user=$2
+  local port=$3
+  iterate_all_vms "$vm_list" $user $port get_ntpq_stat_on_single_vm
+}
+
+function force_sync_time_on_single_vm() {
+  local vm_host=$1
+  local ssh_user=$2
+  local ssh_port=$3
+  echo "=======================$vm_host================="
+  ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "sudo service ntp stop;sudo ntpd -gq;sudo service ntp start;sudo ntpq -np"
+}
+
+function force_sync_time_on_all_vm() {
+  local vm_list="$1"
+  local user=$2
+  local port=$3
+  iterate_all_vms "$vm_list" $user $port force_sync_time_on_single_vm
+}
+
+
+function install_ntp_on_single_vm() {
+  local vm_host=$1
+  local ssh_user=$2
+  local ssh_port=$3
+  ssh -o StrictHostKeyChecking=no -p ${ssh_port} ${ssh_user}@${vm_host} "sudo apt-get install -y ntp ntpstat"
+}
+
+function install_ntp_on_all_vm() {
+  local vm_list="$1"
+  local user=$2
+  local port=$3
+  iterate_all_vms "$vm_list" $user $port install_ntp_on_single_vm
 }

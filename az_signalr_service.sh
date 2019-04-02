@@ -53,7 +53,7 @@ function create_group_if_not_exist() {
 
 function delete_group() {
   local rsg=$1
-  az group delete --name $rsg -y
+  az group delete --name $rsg -y --no-wait
 }
 
 function create_signalr_service()
@@ -64,7 +64,7 @@ function create_signalr_service()
   local unitCount=$4
   local signalrHostName
   # add extension
-  add_signalr_extension
+  #add_signalr_extension
 
   signalrHostName=$(az signalr create \
      --name $name                     \
@@ -76,14 +76,106 @@ function create_signalr_service()
   echo "$signalrHostName"
 }
 
+function create_signalr_service_with_specific_acs_and_redis()
+{
+  local rsg=$1
+  local name=$2
+  local sku=$3
+  local unitCount=$4
+  local redisRowKey=$5
+  local acsRowKey=$6
+  local signalrHostName
+  # add extension
+  #add_signalr_extension
+
+  signalrHostName=$(az signalr create \
+     --name $name                     \
+     --resource-group $rsg            \
+     --sku $sku                       \
+     --unit-count $unitCount          \
+     --query hostName                 \
+     --tags SIGNALR_REDIS_ROW_KEY=$redisRowKey SIGNALR_ACS_ROW_KEY=$acsRowKey \
+     -o tsv)
+  echo "$signalrHostName"
+}
+
+function create_signalr_service_with_specific_ingress_vmss()
+{
+  local rsg=$1
+  local name=$2
+  local sku=$3
+  local unitCount=$4
+  local acsRowKey=$5
+  local vmSet=$6
+  local signalrHostName
+  # add extension
+  #add_signalr_extension
+
+  signalrHostName=$(az signalr create \
+     --name $name                     \
+     --resource-group $rsg            \
+     --sku $sku                       \
+     --unit-count $unitCount          \
+     --query hostName                 \
+     --tags SIGNALR_INGRESS_VM_SET=$vmSet SIGNALR_ACS_ROW_KEY=$acsRowKey \
+     -o tsv)
+  echo "$signalrHostName"
+}
+
+function create_signalr_service_with_specific_acs_vmset_redis()
+{
+  local rsg=$1
+  local name=$2
+  local sku=$3
+  local unitCount=$4
+  local redisRowKey=$5
+  local acsRowKey=$6
+  local vmSet=$7
+  local signalrHostName
+  # add extension
+  #add_signalr_extension
+
+  signalrHostName=$(az signalr create \
+     --name $name                     \
+     --resource-group $rsg            \
+     --sku $sku                       \
+     --unit-count $unitCount          \
+     --query hostName                 \
+     --tags SIGNALR_REDIS_ROW_KEY=$redisRowKey SIGNALR_ACS_ROW_KEY=$acsRowKey SIGNALR_INGRESS_VM_SET=$vmSet \
+     -o tsv)
+  echo "$signalrHostName"
+}
+
+function create_signalr_service_with_specific_redis()
+{
+  local rsg=$1
+  local name=$2
+  local sku=$3
+  local unitCount=$4
+  local redisRow=$5
+  local signalrHostName
+  # add extension
+  #add_signalr_extension
+
+  signalrHostName=$(az signalr create \
+     --name $name                     \
+     --resource-group $rsg            \
+     --sku $sku                       \
+     --unit-count $unitCount          \
+     --query hostName                 \
+     --tags SIGNALR_REDIS_ROW_KEY=$redisRow \
+     -o tsv)
+  echo "$signalrHostName"
+}
+
 function check_signalr_service_dns()
 {
   local rsg=$1
   local name=$2
   local nslookupData
   local externalIp=`az signalr show -n $name -g $rsg -o=json|jq ".externalIp"|tr -d '"'`
-  #local hostname=`az signalr list --query [*].hostName --output table|grep "$name"`
-  local hostname=${name}.servicedev.signalr.net
+  local hostname=`az signalr list --query [*].hostName --output table|grep "$name"`
+  #local hostname=${name}.servicedev.signalr.net
   local end=$((SECONDS + 120))
   while [ $SECONDS -lt $end ]
   do
@@ -115,15 +207,16 @@ function query_connection_string()
 {
   local signarl_service_name=$1
   local rsg=$2
-  #local signalrHostName=`az signalr list --query [*].hostName --output table|grep "$signarl_service_name"`
-  #if [ "$signalrHostName" == "" ]
-  #then
-  #   echo ""
-  #   return
-  #fi
-  local signalrHostName=${signarl_service_name}.servicedev.signalr.net
-  local accessKey=`az signalr key list --name $signarl_service_name --resource-group $rsg --query primaryKey -o tsv`
-  echo "Endpoint=https://${signalrHostName};AccessKey=${accessKey}"
+  local signalrHostName=`az signalr list --query [*].hostName --output table|grep "$signarl_service_name"`
+  if [ "$signalrHostName" == "" ]
+  then
+     echo ""
+     return
+  fi
+  #local signalrHostName=${signarl_service_name}.servicedev.signalr.net
+  local connectionString=`az signalr key list --name $signarl_service_name --resource-group $rsg --query primaryConnectionString -o tsv`
+  echo "$connectionString"
+  #echo "Endpoint=https://${signalrHostName};AccessKey=${accessKey};Version=1.0"
 }
 
 function delete_signalr_service()
