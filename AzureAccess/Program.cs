@@ -100,6 +100,9 @@ namespace VMAccess
         static INetworkSecurityGroup CreateNetworkSecurityGroupWithRetry(IAzure azure,
             string resourceGroupName, string name, ArgsOption agentConfig, Region region)
         {
+            var azureRegionIP =
+                "167.220.148.0/23,131.107.147.0/24,131.107.159.0/24,131.107.160.0/24,131.107.174.0/24,167.220.24.0/24,167.220.26.0/24,167.220.238.0/27,167.220.238.128/27,167.220.238.192/27,167.220.238.64/27,167.220.232.0/23,167.220.255.0/25,167.220.242.0/27,167.220.242.128/27,167.220.242.192/27,167.220.242.64/27,94.245.87.0/24,167.220.196.0/23,194.69.104.0/25,191.234.97.0/26,167.220.0.0/23,167.220.2.0/24,207.68.190.32/27,13.106.78.32/27,10.254.32.0/20,10.97.136.0/22,13.106.174.32/27,13.106.4.96/27,168.61.37.236";
+            var allowedIpRange = azureRegionIP.Split(',');
             INetworkSecurityGroup rtn = null;
             var i = 0;
             var maxRetry = agentConfig.MaxRetry;
@@ -112,7 +115,7 @@ namespace VMAccess
                     .WithExistingResourceGroup(resourceGroupName)
                     .DefineRule("New-SSH-Port")
                         .AllowInbound()
-                        .FromAnyAddress()
+                        .FromAddresses(allowedIpRange)
                         .FromAnyPort()
                         .ToAnyAddress()
                         .ToPort(agentConfig.SshPort)
@@ -492,6 +495,7 @@ namespace VMAccess
 
             sw.Restart();
             Util.Log($"Creating vms");
+
             var virtualMachines = azure.VirtualMachines.Create(creatableVirtualMachines.ToArray());
             Util.Log($"Finish creating vms");
 
