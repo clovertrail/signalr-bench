@@ -26,12 +26,12 @@
           - "{{folder_stats.results}}"
     - name: Download golang tar
       get_url:
-         url: "https://dl.google.com/go/go1.9.4.linux-amd64.tar.gz"
+         url: "https://dl.google.com/go/go1.12.4.linux-amd64.tar.gz"
          dest: "{{tools_dir}}"
          mode: 0755
     - name: Extract the Go tarball
       unarchive:
-         src: "{{tools_dir}}/go1.9.4.linux-amd64.tar.gz"
+         src: "{{tools_dir}}/go1.12.4.linux-amd64.tar.gz"
          copy: no
          dest: "{{tools_dir}}"
     - name: Modify .bashrc
