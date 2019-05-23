@@ -7,7 +7,12 @@
   #sudo: yes
   tasks:
   - pam_limits:
-     domain: "{{ansible_ssh_user}}"
+     domain: "*"
      limit_type: soft
+     limit_item: nofile
+     value: 655350
+  - pam_limits:
+     domain: "*"
+     limit_type: hard
      limit_item: nofile
      value: 655350

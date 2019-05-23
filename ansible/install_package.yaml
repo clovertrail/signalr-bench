@@ -9,6 +9,8 @@
       - python-pip
       - unzip
       - libcurl4-openssl-dev
+      - sshpass
+      - jq
   - name: Install Python packages
     pip: name={{item}}
     with_items:
