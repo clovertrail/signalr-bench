@@ -2,7 +2,7 @@
 
 namespace VMAccess
 {
-    class ArgsOption
+    public class ArgsOption
     {
         [Option('i', "img-resource-group", Required = true, HelpText = "Specify the image resource group")]
         public string ImgResourceGroup { get; set; }
@@ -46,7 +46,7 @@ namespace VMAccess
         [Option('H', "sshpubkey-file", Default = null, Required = false, HelpText = "Specify Ssh Pub Key File")]
         public string SshPubKeyFile { get; set; }
 
-        [Option('z', "sshport", Default = 22222, Required = false, HelpText = "Specify Ssh Port, default is 22222")]
+        [Option('z', "sshport", Default = 22, Required = false, HelpText = "Specify Ssh Port, default is 22")]
         public int SshPort { get; set; }
 
         [Option('R', "RDP-port", Default = 33899, Required = false, HelpText = "Specify RDP Port, default is 33899")]
