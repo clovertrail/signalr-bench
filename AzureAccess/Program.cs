@@ -98,7 +98,10 @@ namespace VMAccess
                 .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
                 .Authenticate(credentials)
                 .WithDefaultSubscription();
-            var img = await Util.GetVMImageWithRetry(azure, agentConfig.ImgResourceGroup, agentConfig.ImgName, agentConfig.MaxRetry);
+            var img = await Util.GetVMImageWithRetry(azure,
+                                                     agentConfig.ImgResourceGroup,
+                                                     agentConfig.ImgName,
+                                                     agentConfig.MaxRetry);
             if (img == null)
             {
                 throw new Exception("Fail to get custom image");
@@ -138,7 +141,12 @@ namespace VMAccess
             // create virtual net
             Util.Log("Creating virtual network...");
             var subNetName = agentConfig.Prefix + "Subnet";
-            var network = await Util.CreateVirtualNetworkWithRetry(azure, subNetName, resourceGroupName, agentConfig.Prefix + "VNet", region, agentConfig.MaxRetry);
+            var network = await Util.CreateVirtualNetworkWithRetry(azure,
+                                                                   subNetName,
+                                                                   resourceGroupName,
+                                                                   agentConfig.Prefix + "VNet",
+                                                                   region,
+                                                                   agentConfig.MaxRetry);
             if (network == null)
             {
                 throw new Exception("Fail to create virtual network");
@@ -149,7 +157,12 @@ namespace VMAccess
 
             // create vms
             Util.Log("Creating public IP address...");
-            var publicIpTaskList = await Util.CreatePublicIPAddrListWithRetry(azure, agentConfig.VmCount, agentConfig.Prefix, resourceGroupName, region, agentConfig.MaxRetry);
+            var publicIpTaskList = await Util.CreatePublicIPAddrListWithRetry(azure,
+                                                                              agentConfig.VmCount,
+                                                                              agentConfig.Prefix,
+                                                                              resourceGroupName,
+                                                                              region,
+                                                                              agentConfig.MaxRetry);
             if (publicIpTaskList == null)
             {
                 throw new Exception("Fail to create Public IP Address");
@@ -157,7 +170,11 @@ namespace VMAccess
             Util.Log("Finish creating public IP address...");
 
             Util.Log($"Creating network security group...");
-            var nsg = await Util.CreateNetworkSecurityGroupWithRetry(azure, resourceGroupName, agentConfig.Prefix + "NSG", agentConfig, region);
+            var nsg = await Util.CreateNetworkSecurityGroupWithRetry(azure,
+                                                                     resourceGroupName,
+                                                                     agentConfig.Prefix + "NSG",
+                                                                     agentConfig,
+                                                                     region);
             if (nsg == null)
             {
                 throw new Exception("Fail to create network security group");
@@ -165,7 +182,14 @@ namespace VMAccess
             Util.Log($"Finish creating network security group...");
 
             Util.Log("Creating network interface...");
-            var nicTaskList = await Util.CreateNICWithRetry(azure, resourceGroupName, agentConfig, network, publicIpTaskList, subNetName, nsg, region);
+            var nicTaskList = await Util.CreateNICWithRetry(azure,
+                                                            resourceGroupName,
+                                                            agentConfig,
+                                                            network,
+                                                            publicIpTaskList,
+                                                            subNetName,
+                                                            nsg,
+                                                            region);
             if (nicTaskList == null)
             {
                 throw new Exception("Fail to create NIC task list");
@@ -176,7 +200,8 @@ namespace VMAccess
             {
                 for (var i = 0; i < agentConfig.VmCount; i++)
                 {
-                    var vm = azure.VirtualMachines.Define(agentConfig.Prefix + Convert.ToString(i))
+                    var vmName = agentConfig.VmCount == 1 ? agentConfig.Prefix : agentConfig.Prefix + Convert.ToString(i);
+                    var vm = azure.VirtualMachines.Define(vmName)
                         .WithRegion(region)
                         .WithExistingResourceGroup(resourceGroupName)
                         .WithExistingPrimaryNetworkInterface(nicTaskList[i].Result)
@@ -192,7 +217,8 @@ namespace VMAccess
             {
                 for (var i = 0; i < agentConfig.VmCount; i++)
                 {
-                    var vm = azure.VirtualMachines.Define(agentConfig.Prefix + Convert.ToString(i))
+                    var vmName = agentConfig.VmCount == 1 ? agentConfig.Prefix : agentConfig.Prefix + Convert.ToString(i);
+                    var vm = azure.VirtualMachines.Define(vmName)
                         .WithRegion(region)
                         .WithExistingResourceGroup(resourceGroupName)
                         .WithExistingPrimaryNetworkInterface(nicTaskList[i].Result)
@@ -222,7 +248,7 @@ namespace VMAccess
                 var publicIPAddress = azure.PublicIPAddresses
                                            .GetByResourceGroup(resourceGroupName,
                                                                agentConfig.Prefix + Convert.ToString(i) + "PubIP");
-                portCheckTaskList.Add(Task.Run(() => WaitPortOpen(publicIPAddress.IPAddress, agentConfig.SshPort)));
+                portCheckTaskList.Add(Task.Run(async () => await WaitPortOpen(publicIPAddress.IPAddress, agentConfig.SshPort)));
             }
             
             if (Task.WaitAll(portCheckTaskList.ToArray(), TimeSpan.FromSeconds(120)))
@@ -267,7 +293,7 @@ namespace VMAccess
             }
         }
 
-        static void WaitPortOpen(string ipAddr, int port)
+        static async Task WaitPortOpen(string ipAddr, int port)
         {
             using (var cts = new CancellationTokenSource())
             {
@@ -279,6 +305,7 @@ namespace VMAccess
                     {
                         break;
                     }
+                    await Task.Delay(TimeSpan.FromSeconds(1));
                 }
             }
         }
