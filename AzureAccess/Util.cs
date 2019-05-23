@@ -139,7 +139,7 @@ namespace VMAccess
                         .ToAnyAddress()
                         .ToPortRanges(new string[] { "8080", "8181", "8000" })
                         .WithProtocol(SecurityRuleProtocol.Tcp)
-                        .WithPriority(905)
+                        .WithPriority(906)
                         .WithDescription("Jenkins and Nginx ports")
                         .Attach()
                     .CreateAsync();
