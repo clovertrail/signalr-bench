@@ -64,6 +64,12 @@ namespace VMAccess
         [Option('O', "vm-host-file", Required = false, HelpText = "Specify the file to save 'client_host1|client_host2' content")]
         public string VMHostFile { get; set; }
 
+        [Option("virtual-network", Required = false, HelpText = "Specify the virtual network name")]
+        public string VirtualNetwork { get; set; }
+
+        [Option("subnet", Required = false, HelpText = "Specify the subnet name")]
+        public string Subnet { get; set; }
+
         [Option('h', "help", Required = false, HelpText = "dotnet run -- -a E:/home/Work/secrets/azureauth.properties -i honzhanperfsea -n hzbenchclientimg -s honzhanautovm0705 -p hzautovm0705 -S Standard_DS1_v2 -H E:/home/PuttyKeys/azure_ssh_pub -c 10 -u honzhan -o benchclient.txt -O vmhost.txt -A true -m accelerated_network_vmsize.txt")]
         public int Help { get; set; }
     }

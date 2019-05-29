@@ -2,6 +2,7 @@
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
+using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core.ResourceActions;
@@ -138,15 +139,55 @@ namespace VMAccess
                 await azure.ResourceGroups.Define(resourceGroupName).WithRegion(region).CreateAsync();
             }
 
-            // create virtual net
-            Util.Log("Creating virtual network...");
-            var subNetName = agentConfig.Prefix + "Subnet";
-            var network = await Util.CreateVirtualNetworkWithRetry(azure,
+            INetwork network = null;
+            string subNetName = null;
+            if (!string.IsNullOrEmpty(agentConfig.VirtualNetwork))
+            {
+                Util.Log("Query virtual network...");
+                network = await Util.GetVirtualNetworkAsync(azure, resourceGroupName, agentConfig.VirtualNetwork);
+                if (!string.IsNullOrEmpty(agentConfig.Subnet))
+                {
+                    var sub = agentConfig.Subnet;
+                    foreach (var k in network.Subnets.Keys)
+                    {
+                        if (k == sub)
+                        {
+                            subNetName = k;
+                            break;
+                        }
+                    }
+                    if (subNetName == null)
+                    {
+                        throw new Exception($"The input '{agentConfig.Subnet}' is invalid");
+                    }
+                }
+                else
+                {
+                    Util.Log("No subnet is specified, the system will select one");
+                    foreach (var k in network.Subnets.Keys)
+                    {
+                        subNetName = k;
+                        break;
+                    }
+                }
+                if (subNetName == null)
+                {
+                    throw new Exception($"No valid subnet is found");
+                }
+            }
+            else
+            {
+                // create virtual net
+                Util.Log("Creating virtual network...");
+                subNetName = agentConfig.Prefix + "Subnet";
+                network = await Util.CreateVirtualNetworkWithRetry(azure,
                                                                    subNetName,
                                                                    resourceGroupName,
                                                                    agentConfig.Prefix + "VNet",
                                                                    region,
                                                                    agentConfig.MaxRetry);
+            }
+
             if (network == null)
             {
                 throw new Exception("Fail to create virtual network");

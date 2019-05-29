@@ -161,6 +161,31 @@ namespace VMAccess
             return rtn;
         }
 
+        public static async Task<INetwork> GetVirtualNetworkAsync(
+            IAzure azure,
+            string resourceGroupName,
+            string virtualNetName,
+            int maxRetry = 3)
+        {
+            var i = 0;
+            while (i < maxRetry)
+            {
+                try
+                {
+                    return await azure.Networks.GetByResourceGroupAsync(resourceGroupName, virtualNetName);
+                }
+                catch (Exception e)
+                {
+                    if (i + 1 < maxRetry)
+                    {
+                        Util.Log($"Fail to create virtual network for {e} and will retry");
+                    }
+                }
+                i++;
+            }
+            return null;
+        }
+
         public static async Task<INetwork> CreateVirtualNetworkWithRetry(IAzure azure,
             string subNetName, string resourceGroupName,
             string virtualNetName, Region region, int maxRetry = 3)
@@ -247,9 +272,14 @@ namespace VMAccess
             return null;
         }
 
-        public static async Task<List<Task<INetworkInterface>>> CreateNICWithRetry(IAzure azure, string resourceGroupName,
-            ArgsOption agentConfig, INetwork network, List<Task<IPublicIPAddress>> publicIpTaskList,
-            string subNetName, INetworkSecurityGroup nsg, Region region)
+        public static async Task<List<Task<INetworkInterface>>> CreateNICWithRetry(
+            IAzure azure,
+            string resourceGroupName,
+            ArgsOption agentConfig,
+            INetwork network,
+            List<Task<IPublicIPAddress>> publicIpTaskList,
+            string subNetName,
+            INetworkSecurityGroup nsg, Region region)
         {
             var j = 0;
             var i = 0;
