@@ -11,7 +11,9 @@
       - libcurl4-openssl-dev
       - sshpass
       - jq
+      - daemonize
   - name: Install Python packages
     pip: name={{item}}
     with_items:
       - jinja2
+      - PyYaml
