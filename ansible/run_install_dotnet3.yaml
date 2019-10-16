@@ -1,0 +1,9 @@
+- hosts: linux
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Transfer the script
+      copy: src=install_dotnet3.sh dest=/home/{{ansible_ssh_user}}/install_dotnet3.sh mode=0777
+    - name: Execute the script
+      command: /bin/bash /home/{{ansible_ssh_user}}/install_dotnet3.sh
