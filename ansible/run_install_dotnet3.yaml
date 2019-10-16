@@ -4,6 +4,6 @@
   become_method: sudo
   tasks:
     - name: Transfer the script
-      copy: src=install_dotnet3.sh dest=/home/{{ansible_ssh_user}}/install_dotnet3.sh mode=0777
+      copy: src=install_dotnet3.sh dest=/home/{{ansible_ssh_user}}/install_dotnet3.sh
     - name: Execute the script
-      command: /bin/bash /home/{{ansible_ssh_user}}/install_dotnet3.sh
+      command: /bin/bash -c "/usr/bin/yes | /bin/sh /home/{{ansible_ssh_user}}/install_dotnet3.sh"

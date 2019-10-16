@@ -2,7 +2,7 @@
 
 . ./az_vm_manage.sh
 
-az_login_jenkins_sub
+az_login_signalr_dev_sub
 
 resource_group=honzhansea
 vm_tmpl=hzbenchtmpl
